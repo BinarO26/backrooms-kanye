@@ -29,7 +29,9 @@ canvas{
     display:block;
 }
 
-#menu,#pause,#death{
+#menu,
+#pause,
+#death{
     position:fixed;
     inset:0;
     z-index:50;
@@ -38,7 +40,7 @@ canvas{
 #menu{
     display:block;
     overflow:hidden;
-    background:#111;
+    background:#080807;
 }
 
 .menuImage{
@@ -60,7 +62,7 @@ canvas{
     inset:0;
     background:
         linear-gradient(
-            rgba(0,0,0,.22),
+            rgba(0,0,0,.18),
             rgba(0,0,0,.82)
         );
 }
@@ -68,7 +70,7 @@ canvas{
 .menuNoise{
     position:absolute;
     inset:0;
-    opacity:.12;
+    opacity:.13;
     pointer-events:none;
     background-image:
         repeating-radial-gradient(
@@ -89,20 +91,20 @@ canvas{
         repeating-linear-gradient(
             to bottom,
             transparent 0,
-            transparent 3px,
-            rgba(0,0,0,.15) 4px
+            transparent 2px,
+            rgba(255,255,255,.045) 3px
         );
 }
 
 .menuContent{
     position:absolute;
-    top:18%;
+    top:17%;
     left:50%;
     transform:translateX(-50%);
+    width:90%;
     text-align:center;
     color:#fff;
-    width:90%;
-    text-shadow:0 3px 12px #000;
+    text-shadow:0 3px 14px #000;
 }
 
 .menuContent h1{
@@ -128,7 +130,7 @@ canvas{
 .menuButtons{
     position:absolute;
     left:50%;
-    bottom:11%;
+    bottom:10%;
     transform:translateX(-50%);
     width:min(500px,88vw);
     text-align:center;
@@ -166,15 +168,16 @@ button:hover{
     width:100%;
     font-size:18px;
     padding:17px;
-    background:rgba(0,0,0,.75);
+    background:rgba(0,0,0,.78);
 }
 
-#pause,#death{
+#pause,
+#death{
     display:none;
     align-items:center;
     justify-content:center;
     flex-direction:column;
-    background:rgba(0,0,0,.82);
+    background:rgba(0,0,0,.84);
     color:#fff;
     text-align:center;
 }
@@ -185,7 +188,8 @@ button:hover{
     margin:0 0 30px;
 }
 
-#pause button,#death button{
+#pause button,
+#death button{
     width:min(300px,80vw);
     margin:6px;
     font-size:16px;
@@ -210,7 +214,7 @@ button:hover{
 #hud{
     position:fixed;
     inset:0;
-    z-index:40;
+    z-index:20;
     pointer-events:none;
 }
 
@@ -218,16 +222,17 @@ button:hover{
     position:absolute;
     top:18px;
     left:20px;
-    color:rgba(255,255,255,.7);
+    color:rgba(255,255,255,.58);
     font-size:12px;
     letter-spacing:.18em;
+    font-family:monospace;
 }
 
 #tapeTime{
     position:absolute;
     top:18px;
     right:20px;
-    color:rgba(255,255,255,.7);
+    color:rgba(255,255,255,.58);
     font-family:monospace;
     font-size:13px;
 }
@@ -251,11 +256,11 @@ button:hover{
     width:4px;
     height:4px;
     transform:translate(-50%,-50%);
-    background:rgba(255,255,255,.45);
+    background:rgba(255,255,255,.4);
 }
 
 /* =========================================================
-   SECURITY CAMERA EFFECT
+   SECURITY CAMERA EFFECTS
 ========================================================= */
 
 .camScanlines,
@@ -263,8 +268,8 @@ button:hover{
 .camGrain,
 .camVignette,
 .camBleed,
-.camStatic,
-.camDarken{
+.camFlicker,
+.camNoiseBar{
     position:absolute;
     inset:0;
     pointer-events:none;
@@ -275,33 +280,28 @@ button:hover{
     background:
         repeating-linear-gradient(
             to bottom,
-            rgba(255,255,255,.025) 0,
-            rgba(255,255,255,.025) 1px,
-            rgba(0,0,0,.12) 2px,
-            transparent 4px
+            transparent 0,
+            transparent 2px,
+            rgba(255,255,255,.07) 3px,
+            rgba(0,0,0,.10) 4px
         );
 }
 
 .camTracking{
-    opacity:.09;
+    opacity:.10;
     background:
         repeating-linear-gradient(
             to bottom,
             transparent 0,
             transparent 7px,
-            rgba(255,255,255,.22) 8px,
+            rgba(255,255,255,.16) 8px,
             transparent 10px
         );
-    animation:tracking 7s linear infinite;
-}
-
-@keyframes tracking{
-    0%{transform:translateY(-10px)}
-    100%{transform:translateY(10px)}
+    mix-blend-mode:screen;
 }
 
 .camGrain{
-    opacity:.09;
+    opacity:.12;
     background-image:
         repeating-radial-gradient(
             circle at 0 0,
@@ -310,59 +310,55 @@ button:hover{
             transparent 1px,
             transparent 4px
         );
-    background-size:5px 5px;
-    animation:grain .15s steps(2) infinite;
+    background-size:6px 6px;
+    animation:grainMove .12s steps(2) infinite;
 }
 
-@keyframes grain{
+@keyframes grainMove{
     0%{transform:translate(0,0)}
     25%{transform:translate(-2px,1px)}
-    50%{transform:translate(1px,-1px)}
+    50%{transform:translate(1px,-2px)}
     75%{transform:translate(2px,2px)}
-    100%{transform:translate(-1px,-2px)}
+    100%{transform:translate(-1px,-1px)}
 }
 
 .camVignette{
     background:
         radial-gradient(
             ellipse at center,
-            transparent 28%,
-            rgba(0,0,0,.18) 55%,
-            rgba(0,0,0,.78) 100%
+            transparent 25%,
+            rgba(0,0,0,.12) 52%,
+            rgba(0,0,0,.55) 82%,
+            rgba(0,0,0,.88) 100%
         );
 }
 
 .camBleed{
-    opacity:.65;
     background:
         linear-gradient(
             90deg,
-            rgba(255,0,0,.045),
+            rgba(255,0,0,.08),
             transparent 15%,
             transparent 85%,
-            rgba(0,90,255,.055)
+            rgba(0,70,255,.08)
         );
     mix-blend-mode:screen;
 }
 
-.camStatic{
+.camFlicker{
+    background:#fff;
     opacity:0;
-    background:
-        repeating-linear-gradient(
-            0deg,
-            rgba(255,255,255,.3) 0,
-            rgba(255,255,255,.3) 1px,
-            transparent 2px,
-            transparent 4px
-        );
+    mix-blend-mode:screen;
 }
 
-.camDarken{
-    background:
-        linear-gradient(
-            rgba(0,0,0,.04),
-            rgba(0,0,0,.08)
-        );
+.camNoiseBar{
+    height:4px;
+    top:35%;
+    bottom:auto;
+    opacity:0;
+    background:rgba(255,255,255,.35);
+    box-shadow:
+        0 1px 10px rgba(255,255,255,.5);
 }
 
 #error{
@@ -374,7 +370,7 @@ button:hover{
     bottom:20px;
     padding:18px;
     color:#fff;
-    background:rgba(120,0,0,.92);
+    background:rgba(120,0,0,.94);
     border:1px solid #f66;
     white-space:pre-wrap;
     font-family:monospace;
@@ -390,58 +386,63 @@ button:hover{
 
 <div id="menu">
 
-<img class="menuImage active"
-src="./textures/menu.jpg"
-onerror="this.style.display='none'">
+    <img class="menuImage active"
+         src="./textures/menu.jpg"
+         onerror="this.style.display='none'">
 
-<img class="menuImage"
-src="./textures/menu2.jpg"
-onerror="this.style.display='none'">
+    <img class="menuImage"
+         src="./textures/menu2.jpg"
+         onerror="this.style.display='none'">
 
-<img class="menuImage"
-src="./textures/menu3.jpg"
-onerror="this.style.display='none'">
+    <img class="menuImage"
+         src="./textures/menu3.jpg"
+         onerror="this.style.display='none'">
 
-<img class="menuImage"
-src="./textures/menu4.jpg"
-onerror="this.style.display='none'">
+    <img class="menuImage"
+         src="./textures/menu4.jpg"
+         onerror="this.style.display='none'">
 
-<img class="menuImage"
-src="./textures/menu5.jpg"
-onerror="this.style.display='none'">
+    <img class="menuImage"
+         src="./textures/menu5.jpg"
+         onerror="this.style.display='none'">
 
-<div class="menuDark"></div>
-<div class="menuNoise"></div>
-<div class="menuScan"></div>
+    <div class="menuDark"></div>
+    <div class="menuNoise"></div>
+    <div class="menuScan"></div>
 
-<div class="menuContent">
-<h1>THE BACKROOMS</h1>
+    <div class="menuContent">
+        <h1>THE BACKROOMS</h1>
+        <div class="menuSubtitle">LEVEL 0 // THE LOBBY</div>
+        <div class="menuHint">
+            THE BUILDING DOES NOT HAVE A MAP
+        </div>
+    </div>
 
-<div class="menuSubtitle">
-LEVEL 0 // THE LOBBY
-</div>
+    <div class="menuButtons">
 
-<div class="menuHint">
-THE BUILDING DOES NOT HAVE A MAP
-</div>
-</div>
+        <div class="menuDifficulty">
 
-<div class="menuButtons">
+            <button id="easyBtn">EASY</button>
 
-<div class="menuDifficulty">
+            <button id="normalBtn"
+                    class="selected">
+                NORMAL
+            </button>
 
-<button id="easyBtn">EASY</button>
-<button id="normalBtn" class="selected">NORMAL</button>
-<button id="hardBtn">HARD</button>
-<button id="nightmareBtn">NIGHTMARE</button>
+            <button id="hardBtn">HARD</button>
 
-</div>
+            <button id="nightmareBtn">
+                NIGHTMARE
+            </button>
 
-<button class="menuButton" id="startBtn">
-ENTER LEVEL 0
-</button>
+        </div>
 
-</div>
+        <button class="menuButton"
+                id="startBtn">
+            ENTER LEVEL 0
+        </button>
+
+    </div>
 </div>
 
 <!-- =========================================================
@@ -450,11 +451,11 @@ ENTER LEVEL 0
 
 <div id="pause">
 
-<h1>PAUSED</h1>
+    <h1>PAUSED</h1>
 
-<button id="resumeBtn">RESUME</button>
-<button id="restartBtn">RESTART</button>
-<button id="menuBtn">MAIN MENU</button>
+    <button id="resumeBtn">RESUME</button>
+    <button id="restartBtn">RESTART</button>
+    <button id="menuBtn">MAIN MENU</button>
 
 </div>
 
@@ -464,14 +465,14 @@ ENTER LEVEL 0
 
 <div id="death">
 
-<div id="deathTitle">YOU DIED</div>
+    <div id="deathTitle">YOU DIED</div>
 
-<div id="deathText">
-THE BACKROOMS GOT YOU
-</div>
+    <div id="deathText">
+        THE BACKROOMS GOT YOU
+    </div>
 
-<button id="retryBtn">RETRY</button>
-<button id="deathMenuBtn">MAIN MENU</button>
+    <button id="retryBtn">RETRY</button>
+    <button id="deathMenuBtn">MAIN MENU</button>
 
 </div>
 
@@ -481,18 +482,18 @@ THE BACKROOMS GOT YOU
 
 <div id="hud">
 
-<div id="difficultyHud">NORMAL</div>
-<div id="tapeTime">00:00:00</div>
-<div id="message"></div>
-<div id="crosshair"></div>
+    <div id="difficultyHud">NORMAL</div>
+    <div id="tapeTime">00:00:00</div>
+    <div id="message"></div>
+    <div id="crosshair"></div>
 
-<div class="camScanlines"></div>
-<div class="camTracking"></div>
-<div class="camGrain"></div>
-<div class="camVignette"></div>
-<div class="camBleed"></div>
-<div class="camStatic"></div>
-<div class="camDarken"></div>
+    <div class="camScanlines"></div>
+    <div class="camTracking"></div>
+    <div class="camGrain"></div>
+    <div class="camVignette"></div>
+    <div class="camBleed"></div>
+    <div class="camFlicker"></div>
+    <div class="camNoiseBar"></div>
 
 </div>
 
@@ -502,7 +503,9 @@ THE BACKROOMS GOT YOU
      LOCAL THREE.JS
      
      IMPORTANT:
-     three.min.js MUST BE BESIDE index.html.
+     three.min.js MUST be beside index.html.
+     
+     NO CDN.
 ========================================================= -->
 
 <script src="./three.min.js"></script>
@@ -516,19 +519,21 @@ THE BACKROOMS GOT YOU
 
 if(!window.THREE){
 
-    const error=document.getElementById("error");
+    const error =
+        document.getElementById("error");
 
     error.style.display="block";
 
-    error.textContent=
+    error.textContent =
         "THREE.JS FAILED TO LOAD.\n\n"+
-        "GitHub Pages is looking for:\n"+
-        "./three.min.js\n\n"+
-        "Make sure three.min.js is in the SAME folder as index.html.\n\n"+
-        "The filename must be exactly:\n"+
+        "This game expects:\n\n"+
+        "index.html\n"+
+        "three.min.js\n\n"+
+        "to be in the SAME GitHub Pages folder.\n\n"+
+        "Make sure the filename is exactly:\n"+
         "three.min.js";
 
-    throw new Error("Local Three.js failed to load.");
+    throw new Error("Local Three.js failed");
 }
 
 
@@ -536,26 +541,30 @@ if(!window.THREE){
    SCENE
 ========================================================= */
 
-const scene=new THREE.Scene();
+const scene =
+    new THREE.Scene();
 
-scene.background=new THREE.Color(0x17150e);
+scene.background =
+    new THREE.Color(0x14130c);
 
-scene.fog=new THREE.FogExp2(
-    0x17150e,
-    0.020
-);
+scene.fog =
+    new THREE.FogExp2(
+        0x14130c,
+        0.018
+    );
 
 
 /* =========================================================
    CAMERA
 ========================================================= */
 
-const camera=new THREE.PerspectiveCamera(
-    78,
-    innerWidth/innerHeight,
-    .025,
-    500
-);
+const camera =
+    new THREE.PerspectiveCamera(
+        76,
+        innerWidth/innerHeight,
+        .03,
+        300
+    );
 
 camera.rotation.order="YXZ";
 
@@ -564,10 +573,14 @@ camera.rotation.order="YXZ";
    RENDERER
 ========================================================= */
 
-const renderer=new THREE.WebGLRenderer({
-    antialias:false,
-    powerPreference:"high-performance"
-});
+const renderer =
+    new THREE.WebGLRenderer({
+
+        antialias:false,
+
+        powerPreference:
+            "high-performance"
+    });
 
 renderer.setSize(
     innerWidth,
@@ -576,24 +589,26 @@ renderer.setSize(
 
 renderer.setPixelRatio(
     Math.min(
-        window.devicePixelRatio||1,
-        1.35
+        devicePixelRatio || 1,
+        1.5
     )
 );
 
+renderer.shadowMap.enabled=true;
+
+renderer.shadowMap.type =
+    THREE.PCFSoftShadowMap;
+
 if("outputColorSpace" in renderer){
-    renderer.outputColorSpace=
+
+    renderer.outputColorSpace =
         THREE.SRGBColorSpace;
 }
 
-renderer.toneMapping=
+renderer.toneMapping =
     THREE.ACESFilmicToneMapping;
 
 renderer.toneMappingExposure=.72;
-
-renderer.shadowMap.enabled=true;
-renderer.shadowMap.type=
-    THREE.PCFSoftShadowMap;
 
 document.body.appendChild(
     renderer.domElement
@@ -601,30 +616,30 @@ document.body.appendChild(
 
 
 /* =========================================================
-   BASE LIGHTING
+   DARK BASE LIGHTING
 ========================================================= */
 
 scene.add(
     new THREE.AmbientLight(
-        0xffe8a0,
-        .045
+        0x242014,
+        .035
     )
 );
 
 scene.add(
     new THREE.HemisphereLight(
-        0xffd978,
-        0x020202,
-        .075
+        0x665f35,
+        0x030303,
+        .045
     )
 );
 
 
 /* =========================================================
-   TEXTURES
+   TEXTURE LOADER
 ========================================================= */
 
-const textureLoader=
+const textureLoader =
     new THREE.TextureLoader();
 
 let wallTexture=null;
@@ -633,24 +648,25 @@ let ceilingTexture=null;
 
 function prepareTexture(texture){
 
-    texture.colorSpace=
+    texture.colorSpace =
         THREE.SRGBColorSpace;
 
-    texture.wrapS=
+    texture.wrapS =
         THREE.RepeatWrapping;
 
-    texture.wrapT=
+    texture.wrapT =
         THREE.RepeatWrapping;
 
-    texture.magFilter=
+    texture.magFilter =
         THREE.LinearFilter;
 
-    texture.minFilter=
+    texture.minFilter =
         THREE.LinearMipmapLinearFilter;
 
-    texture.anisotropy=
+    texture.anisotropy =
         Math.min(
-            renderer.capabilities.getMaxAnisotropy(),
+            renderer.capabilities
+                .getMaxAnisotropy(),
             8
         );
 
@@ -668,6 +684,7 @@ function loadTexture(path){
             path,
 
             texture=>{
+
                 console.log(
                     "TEXTURE LOADED:",
                     path
@@ -691,22 +708,23 @@ function loadTexture(path){
                 resolve(null);
             }
         );
+
     });
 }
 
 async function loadTextures(){
 
-    wallTexture=
+    wallTexture =
         await loadTexture(
             "./textures/wall.png"
         );
 
-    floorTexture=
+    floorTexture =
         await loadTexture(
             "./textures/floor.png"
         );
 
-    ceilingTexture=
+    ceilingTexture =
         await loadTexture(
             "./textures/ceiling.png"
         );
@@ -730,33 +748,57 @@ async function loadTextures(){
 
     if(missing.length){
 
-        const error=
-            document.getElementById("error");
+        const error =
+            document.getElementById(
+                "error"
+            );
 
         error.style.display="block";
 
-        error.textContent=
-            "TEXTURE FILES NOT FOUND.\n\n"+
+        error.textContent =
+            "TEXTURE FILE ERROR\n\n"+
+            "These files could not be loaded:\n\n"+
             missing.join("\n")+
             "\n\n"+
-            "Your GitHub repository should look like:\n\n"+
-            "index.html\n"+
-            "three.min.js\n"+
-            "textures/\n"+
-            "    wall.png\n"+
-            "    floor.png\n"+
-            "    ceiling.png\n"+
-            "    menu.jpg\n"+
-            "    menu2.jpg\n"+
-            "    menu3.jpg\n"+
-            "    menu4.jpg\n"+
-            "    menu5.jpg";
+            "GitHub Pages is case-sensitive.\n"+
+            "Check the spelling and capitalization.";
     }
 }
 
 
 /* =========================================================
-   WORLD MANAGEMENT
+   PLAYER
+========================================================= */
+
+const player =
+    new THREE.Object3D();
+
+scene.add(player);
+
+player.add(camera);
+
+const EYE_HEIGHT=1.18;
+const PLAYER_HEIGHT=1.55;
+const PLAYER_RADIUS=.28;
+
+let yaw=0;
+let pitch=0;
+
+let velocityY=0;
+let grounded=false;
+
+let running=false;
+let paused=false;
+let dead=false;
+
+let fallingIntoLevel=false;
+let fallTimer=0;
+
+const FALL_DURATION=2.25;
+
+
+/* =========================================================
+   WORLD ARRAYS
 ========================================================= */
 
 let worldObjects=[];
@@ -788,8 +830,8 @@ function disposeMaterial(material){
     }
 
     /*
-       Do NOT dispose the original
-       global textures.
+       DO NOT dispose the original
+       shared textures.
     */
 
     material.dispose();
@@ -797,21 +839,32 @@ function disposeMaterial(material){
 
 function clearWorld(){
 
-    for(const object of worldObjects){
+    for(
+        const object
+        of worldObjects
+    ){
 
         scene.remove(object);
 
-        object.traverse?.(
-            child=>{
+        object.traverse(child=>{
 
-                if(child.geometry)
-                    child.geometry.dispose();
+            if(child.geometry)
+                child.geometry.dispose();
 
-                if(child.material)
-                    disposeMaterial(
-                        child.material
-                    );
-            }
+            if(child.material)
+                disposeMaterial(
+                    child.material
+                );
+        });
+    }
+
+    for(
+        const item
+        of lights
+    ){
+
+        scene.remove(
+            item.light
         );
     }
 
@@ -820,64 +873,95 @@ function clearWorld(){
     deathHoles=[];
     lights=[];
 
-    if(exitLight){
-
-        scene.remove(exitLight);
-
-        exitLight=null;
-    }
-
     exitObject=null;
+    exitLight=null;
     entity=null;
 }
 
 
 /* =========================================================
-   WALL TEXTURE MATERIAL
+   WALL MATERIAL
 ========================================================= */
 
-function wallMaterial(
-    repeatX,
-    repeatY=1
-){
+function wallMaterial(){
 
     if(!wallTexture){
 
         return new THREE.MeshStandardMaterial({
 
-            color:0x9b913c,
+            color:0x80752e,
 
             roughness:.92,
-            metalness:0,
+
+            metalness:0
+        });
+    }
+
+    return new THREE.MeshStandardMaterial({
+
+        map:wallTexture,
+
+        color:0xffffff,
+
+        roughness:.95,
+
+        metalness:0
+    });
+}
+
+
+/* =========================================================
+   FLOOR MATERIAL
+========================================================= */
+
+function floorMaterial(){
+
+    if(!floorTexture){
+
+        return new THREE.MeshStandardMaterial({
+
+            color:0x776b31,
+
+            roughness:1
+        });
+    }
+
+    return new THREE.MeshStandardMaterial({
+
+        map:floorTexture,
+
+        color:0xffffff,
+
+        roughness:1
+    });
+}
+
+
+/* =========================================================
+   CEILING MATERIAL
+========================================================= */
+
+function ceilingMaterial(){
+
+    if(!ceilingTexture){
+
+        return new THREE.MeshStandardMaterial({
+
+            color:0x716b45,
+
+            roughness:1,
 
             side:THREE.DoubleSide
         });
     }
 
-    const texture=
-        wallTexture.clone();
-
-    texture.wrapS=
-        THREE.RepeatWrapping;
-
-    texture.wrapT=
-        THREE.RepeatWrapping;
-
-    texture.repeat.set(
-        repeatX,
-        repeatY
-    );
-
-    texture.needsUpdate=true;
-
     return new THREE.MeshStandardMaterial({
 
-        map:texture,
+        map:ceilingTexture,
 
         color:0xffffff,
 
-        roughness:.95,
-        metalness:0,
+        roughness:1,
 
         side:THREE.DoubleSide
     });
@@ -886,6 +970,9 @@ function wallMaterial(
 
 /* =========================================================
    WALL
+     
+   BOX GEOMETRY IS INTENTIONAL.
+   This prevents the previous invisible-wall problem.
 ========================================================= */
 
 function createWall(
@@ -896,6 +983,33 @@ function createWall(
 ){
 
     const height=3.1;
+
+    const geometry =
+        new THREE.BoxGeometry(
+            width,
+            height,
+            depth
+        );
+
+    const material =
+        wallMaterial();
+
+    const wall =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+    wall.position.set(
+        x,
+        height/2,
+        z
+    );
+
+    wall.castShadow=true;
+    wall.receiveShadow=true;
+
+    addWorldObject(wall);
 
     wallColliders.push({
 
@@ -909,121 +1023,7 @@ function createWall(
         maxY:height
     });
 
-    /*
-       Four real faces.
-
-       This avoids the old issue where large
-       planes could appear invisible from
-       particular directions.
-    */
-
-    const group=new THREE.Group();
-
-    const front=new THREE.Mesh(
-        new THREE.PlaneGeometry(
-            width,
-            height
-        ),
-        wallMaterial(
-            Math.max(width/4,1),
-            1
-        )
-    );
-
-    front.position.z=
-        depth/2;
-
-    front.position.y=
-        height/2;
-
-    group.add(front);
-
-
-    const back=new THREE.Mesh(
-        new THREE.PlaneGeometry(
-            width,
-            height
-        ),
-        wallMaterial(
-            Math.max(width/4,1),
-            1
-        )
-    );
-
-    back.rotation.y=
-        Math.PI;
-
-    back.position.z=
-        -depth/2;
-
-    back.position.y=
-        height/2;
-
-    group.add(back);
-
-
-    const left=new THREE.Mesh(
-        new THREE.PlaneGeometry(
-            depth,
-            height
-        ),
-        wallMaterial(
-            1,
-            1
-        )
-    );
-
-    left.rotation.y=
-        Math.PI/2;
-
-    left.position.x=
-        -width/2;
-
-    left.position.y=
-        height/2;
-
-    group.add(left);
-
-
-    const right=new THREE.Mesh(
-        new THREE.PlaneGeometry(
-            depth,
-            height
-        ),
-        wallMaterial(
-            1,
-            1
-        )
-    );
-
-    right.rotation.y=
-        -Math.PI/2;
-
-    right.position.x=
-        width/2;
-
-    right.position.y=
-        height/2;
-
-    group.add(right);
-
-
-    group.position.set(
-        x,
-        0,
-        z
-    );
-
-    group.traverse(child=>{
-
-        if(child.isMesh){
-
-            child.castShadow=true;
-            child.receiveShadow=true;
-        }
-    });
-
-    addWorldObject(group);
+    return wall;
 }
 
 
@@ -1033,61 +1033,29 @@ function createWall(
 
 function createFloor(){
 
-    let material;
+    const material =
+        floorMaterial();
 
     if(floorTexture){
 
-        const texture=
-            floorTexture.clone();
-
-        texture.wrapS=
-            THREE.RepeatWrapping;
-
-        texture.wrapT=
-            THREE.RepeatWrapping;
-
-        /*
-           Smaller repeat values make the texture
-           look like actual carpet instead of
-           one enormous stretched image.
-        */
-
-        texture.repeat.set(
-            75,
-            75
+        floorTexture.repeat.set(
+            70,
+            70
         );
 
-        texture.needsUpdate=true;
-
-        material=
-            new THREE.MeshStandardMaterial({
-
-                map:texture,
-
-                color:0xffffff,
-
-                roughness:1,
-                metalness:0
-            });
-
-    }else{
-
-        material=
-            new THREE.MeshStandardMaterial({
-
-                color:0x776b2c,
-
-                roughness:1
-            });
+        floorTexture.needsUpdate=true;
     }
 
-    const floor=new THREE.Mesh(
-        new THREE.PlaneGeometry(
-            260,
-            230
-        ),
-        material
-    );
+    const floor =
+        new THREE.Mesh(
+
+            new THREE.PlaneGeometry(
+                220,
+                220
+            ),
+
+            material
+        );
 
     floor.rotation.x=
         -Math.PI/2;
@@ -1104,69 +1072,57 @@ function createFloor(){
 
 function createCeiling(){
 
-    let material;
+    const material =
+        ceilingMaterial();
 
     if(ceilingTexture){
 
-        const texture=
-            ceilingTexture.clone();
-
-        texture.wrapS=
-            THREE.RepeatWrapping;
-
-        texture.wrapT=
-            THREE.RepeatWrapping;
-
-        texture.repeat.set(
-            86,
-            76
+        ceilingTexture.repeat.set(
+            70,
+            70
         );
 
-        texture.needsUpdate=true;
-
-        material=
-            new THREE.MeshStandardMaterial({
-
-                map:texture,
-
-                color:0xffffff,
-
-                roughness:.88,
-                metalness:0,
-
-                side:THREE.DoubleSide
-            });
-
-    }else{
-
-        material=
-            new THREE.MeshStandardMaterial({
-
-                color:0x5e5938,
-
-                roughness:1,
-
-                side:THREE.DoubleSide
-            });
+        ceilingTexture.needsUpdate=true;
     }
 
-    const ceiling=new THREE.Mesh(
-        new THREE.PlaneGeometry(
-            260,
-            230
-        ),
-        material
-    );
+    const ceiling =
+        new THREE.Mesh(
+
+            new THREE.PlaneGeometry(
+                220,
+                220
+            ),
+
+            material
+        );
 
     ceiling.rotation.x=
         Math.PI/2;
 
-    ceiling.position.y=
-        3.1;
+    ceiling.position.y=3.1;
 
     ceiling.receiveShadow=true;
 
     addWorldObject(ceiling);
+}
+
+
+/* =========================================================
+   OUTER WALLS
+========================================================= */
+
+function createOuterWalls(){
+
+    /*
+       CLOSED MAP.
+       There is NO visible void around the level.
+    */
+
+    createWall(0,-108,216,.4);
+    createWall(0,108,216,.4);
+
+    createWall(-108,0,.4,216);
+    createWall(108,0,.4,216);
 }
 
 
@@ -1177,305 +1133,214 @@ function createCeiling(){
 function buildFloorPlan(){
 
     /*
-       OUTER SHELL
+       The map is intentionally made from
+       long yellow maze-like walls.
 
-       These are actual walls, not an invisible
-       boundary. The player can see the same
-       yellow wall texture around the perimeter.
+       Outer walls remain closed.
     */
 
-    createWall(0,-111,220,.4);
-    createWall(0,111,220,.4);
-    createWall(-110,0,.4,222);
-    createWall(110,0,.4,222);
-
-
-    /*
-       LONG OUTER CORRIDORS
-    */
-
-    createWall(-82,-83,45);
-    createWall(-28,-83,35);
-    createWall(15,-83,45);
-    createWall(68,-83,40);
-
-    createWall(-91,-62,28);
-    createWall(-52,-63,19);
-    createWall(-27,-61,33);
-    createWall(13,-62,25);
-    createWall(48,-61,32);
-    createWall(88,-62,25);
-
-
-    /*
-       UPPER MAZE
-    */
-
-    createWall(-87,-45,22);
-    createWall(-61,-45,16);
-    createWall(-40,-45,28);
-
-    createWall(-87,-26,15);
-    createWall(-67,-28,26);
-    createWall(-35,-25,19);
-    createWall(-11,-29,30);
-
-    createWall(21,-28,20);
-    createWall(47,-27,32);
-    createWall(82,-30,19);
-
-    createWall(94,-9,28);
-    createWall(68,-8,18);
-    createWall(41,-8,22);
-    createWall(12,-8,21);
-    createWall(-15,-8,24);
-    createWall(-45,-8,24);
-    createWall(-75,-7,23);
-
-
-    /*
-       VERTICAL PARTITIONS
-
-       These create the recognizable
-       Backrooms zig-zag corridors.
-    */
-
-    createWall(-94,-34,.35,29);
-    createWall(-75,-48,.35,24);
-
-    createWall(-51,-35,.35,22);
-    createWall(-28,-49,.35,30);
-
-    createWall(-4,-34,.35,29);
-    createWall(19,-48,.35,28);
-
-    createWall(42,-34,.35,27);
-    createWall(66,-47,.35,29);
-
-    createWall(89,-35,.35,26);
-
-
-    /*
-       CENTRAL OPEN ROOM
-    */
-
-    createWall(-91,15,31);
-    createWall(-54,15,22);
-    createWall(-27,15,27);
-    createWall(5,15,24);
-    createWall(34,15,27);
-    createWall(67,15,25);
-    createWall(95,15,20);
-
-
-    /*
-       CENTRAL VERTICAL MAZE
-    */
-
-    createWall(-79,33,.35,31);
-    createWall(-56,29,.35,23);
-
-    createWall(-33,38,.35,32);
-    createWall(-7,29,.35,22);
-
-    createWall(17,39,.35,31);
-    createWall(42,29,.35,23);
-
-    createWall(68,38,.35,31);
-    createWall(89,29,.35,22);
-
-
-    /*
-       LOWER CENTRAL AREA
-    */
-
-    createWall(-91,57,25);
-    createWall(-62,57,19);
-    createWall(-38,57,29);
-    createWall(-4,57,20);
-    createWall(20,57,28);
-    createWall(53,57,19);
-    createWall(79,57,30);
-
-    createWall(-94,79,19);
-    createWall(-69,78,28);
-    createWall(-36,82,18);
-    createWall(-12,77,29);
-    createWall(21,82,20);
-    createWall(47,78,27);
-    createWall(79,82,20);
-
-
-    /*
-       LOWER CORRIDORS
-    */
-
-    createWall(-95,96,43);
-    createWall(-43,96,32);
-    createWall(-4,96,25);
-    createWall(28,96,39);
-    createWall(74,96,39);
-
-
-    /*
-       LOWER VERTICAL WALLS
-    */
-
-    createWall(-84,68,.35,22);
-    createWall(-59,84,.35,29);
-
-    createWall(-30,67,.35,24);
-    createWall(-8,85,.35,29);
-
-    createWall(17,67,.35,25);
-    createWall(39,85,.35,28);
-
-    createWall(63,67,.35,25);
-    createWall(87,84,.35,28);
-
-
-    /*
-       SMALL CLAUSTROPHOBIC ROOMS
-    */
-
-    createWall(-100,-95,16);
-    createWall(-88,-101,.35,13);
-    createWall(-72,-94,14);
-
-    createWall(80,-98,19);
-    createWall(94,-88,.35,17);
-
-    createWall(-100,45,13);
-    createWall(-93,53,.35,14);
-
-    createWall(94,42,14);
-    createWall(101,50,.35,15);
-
-
-    /*
-       RANDOM-LOOKING SHORT WALLS
-
-       These prevent the map from feeling like
-       a perfectly generated grid.
-    */
-
-    createWall(-68,-15,.35,11);
-    createWall(-18,-17,.35,14);
-    createWall(27,-14,.35,12);
-    createWall(73,-19,.35,15);
-
-    createWall(-46,22,12,.35);
-    createWall(7,24,14,.35);
-    createWall(55,21,11,.35);
-
-    createWall(-70,66,14,.35);
-    createWall(-18,70,11,.35);
-    createWall(32,66,15,.35);
-    createWall(71,72,12,.35);
-
-
-    /*
-       PILLARS
-
-       These make the open areas feel like a
-       giant commercial building.
-    */
-
-    createPillar(-18,5);
-    createPillar(18,5);
-    createPillar(-18,48);
-    createPillar(18,48);
-
-    createPillar(-53,35);
-    createPillar(53,35);
-
-    createPillar(-53,73);
-    createPillar(53,73);
-}
-
-
-function createPillar(x,z){
-
-    const size=.7;
-    const height=3.1;
-
-    const material=
-        wallMaterial(.7,1);
-
-    const pillar=new THREE.Mesh(
-        new THREE.BoxGeometry(
-            size,
-            height,
-            size
-        ),
-        material
-    );
-
-    pillar.position.set(
-        x,
-        height/2,
-        z
-    );
-
-    pillar.castShadow=true;
-    pillar.receiveShadow=true;
-
-    wallColliders.push({
-
-        minX:x-size/2,
-        maxX:x+size/2,
-
-        minZ:z-size/2,
-        maxZ:z+size/2,
-
-        minY:0,
-        maxY:height
-    });
-
-    addWorldObject(pillar);
+    /* WESTERN ROOMS */
+
+    createWall(-83,-82,30);
+    createWall(-58,-82,14);
+
+    createWall(-94,-68,.35,27);
+    createWall(-73,-65,.35,32);
+
+    createWall(-91,-47,28);
+    createWall(-65,-45,19);
+
+    createWall(-102,-28,22);
+    createWall(-79,-26,17);
+    createWall(-58,-30,22);
+
+    createWall(-93,-8,.35,30);
+    createWall(-70,-12,.35,19);
+    createWall(-48,-9,.35,27);
+
+    createWall(-93,12,23);
+    createWall(-68,15,18);
+    createWall(-47,13,18);
+
+    createWall(-101,34,18);
+    createWall(-80,38,16);
+    createWall(-61,34,23);
+    createWall(-38,38,18);
+
+    createWall(-94,57,.35,27);
+    createWall(-69,61,.35,23);
+    createWall(-45,59,.35,29);
+
+    createWall(-96,80,26);
+    createWall(-69,84,19);
+    createWall(-47,79,25);
+
+
+    /* NORTH CENTRAL */
+
+    createWall(-25,-88,20);
+    createWall(-2,-86,24);
+    createWall(24,-90,25);
+    createWall(51,-85,20);
+    createWall(77,-89,25);
+
+    createWall(-31,-70,.35,30);
+    createWall(-6,-68,.35,25);
+    createWall(21,-72,.35,33);
+    createWall(47,-69,.35,26);
+    createWall(72,-70,.35,31);
+
+    createWall(-24,-51,21);
+    createWall(1,-54,17);
+    createWall(21,-49,26);
+    createWall(48,-53,18);
+    createWall(73,-48,25);
+
+    createWall(-33,-30,.35,25);
+    createWall(-10,-31,.35,29);
+    createWall(15,-29,.35,23);
+    createWall(41,-31,.35,31);
+    createWall(68,-30,.35,26);
+
+
+    /* CENTRAL OPEN AREA */
+
+    createWall(-53,-4,18);
+    createWall(-31,-3,14);
+    createWall(-11,-4,16);
+    createWall(10,-3,19);
+    createWall(32,-4,16);
+    createWall(53,-2,21);
+    createWall(78,-4,19);
+
+    createWall(-61,20,.35,23);
+    createWall(-42,24,17);
+    createWall(-19,20,.35,20);
+    createWall(1,25,21);
+    createWall(24,20,.35,27);
+    createWall(45,24,17);
+    createWall(67,19,.35,25);
+
+    createWall(-57,43,25);
+    createWall(-29,40,18);
+    createWall(-6,44,23);
+    createWall(20,40,17);
+    createWall(42,45,25);
+    createWall(69,41,19);
+
+    createWall(-49,62,.35,24);
+    createWall(-24,61,.35,28);
+    createWall(0,65,21);
+    createWall(23,61,.35,23);
+    createWall(46,65,19);
+    createWall(68,61,.35,27);
+
+
+    /* EASTERN MAZE */
+
+    createWall(89,-76,.35,27);
+    createWall(98,-58,16);
+    createWall(87,-43,.35,24);
+    createWall(98,-25,18);
+    createWall(88,-9,.35,28);
+    createWall(98,10,20);
+    createWall(88,28,.35,25);
+    createWall(98,47,19);
+    createWall(88,65,.35,26);
+    createWall(98,82,18);
+
+    createWall(76,-62,16);
+    createWall(70,-41,14);
+    createWall(78,-20,17);
+    createWall(72,2,14);
+    createWall(79,22,18);
+    createWall(72,45,15);
+    createWall(79,68,19);
+
+
+    /* SOUTHERN ROOMS */
+
+    createWall(-91,94,26);
+    createWall(-63,99,21);
+    createWall(-39,94,25);
+    createWall(-12,100,19);
+    createWall(12,94,25);
+    createWall(39,99,20);
+    createWall(63,94,27);
+    createWall(91,99,20);
+
+    createWall(-82,78,.35,25);
+    createWall(-55,82,.35,20);
+    createWall(-27,78,.35,27);
+    createWall(0,82,.35,20);
+    createWall(27,78,.35,27);
+    createWall(55,82,.35,20);
+    createWall(83,78,.35,27);
+
+
+    /* EXTRA CLAUSTROPHOBIC CORRIDORS */
+
+    createWall(-8,8,9,.35);
+    createWall(3,12,9,.35);
+
+    createWall(31,9,10,.35);
+    createWall(42,14,10,.35);
+
+    createWall(-36,52,12,.35);
+    createWall(-22,57,11,.35);
+
+    createWall(13,51,12,.35);
+    createWall(27,56,11,.35);
+
+    createWall(52,-14,10,.35);
+    createWall(62,-9,11,.35);
+
+    createWall(-74,-39,9,.35);
+    createWall(-64,-34,10,.35);
 }
 
 
 /* =========================================================
-   HOLES
+   FLOOR HOLES
 ========================================================= */
 
 function createHoleRoom(){
 
-    const startX=-52;
-    const startZ=60;
+    const startX=-48;
+    const startZ=48;
 
-    const columns=14;
-    const rows=7;
-    const spacing=3.6;
+    for(let z=0;z<7;z++){
 
-    for(let z=0;z<rows;z++){
+        for(let x=0;x<15;x++){
 
-        for(let x=0;x<columns;x++){
-
-            if((x+z)%5===0)
+            if(
+                (x*3+z*5)%7===0
+            ){
                 continue;
+            }
 
             const px=
-                startX+x*spacing;
+                startX+x*3.5;
 
             const pz=
-                startZ+z*spacing;
+                startZ+z*3.5;
 
-            const hole=new THREE.Mesh(
+            const hole =
+                new THREE.Mesh(
 
-                new THREE.PlaneGeometry(
-                    2.6,
-                    2.6
-                ),
+                    new THREE.CircleGeometry(
+                        1.18,
+                        16
+                    ),
 
-                new THREE.MeshBasicMaterial({
+                    new THREE.MeshBasicMaterial({
 
-                    color:0x010101,
+                        color:0x010101,
 
-                    side:THREE.DoubleSide
-                })
-            );
+                        side:
+                            THREE.DoubleSide
+                    })
+                );
 
             hole.rotation.x=
                 -Math.PI/2;
@@ -1489,9 +1354,10 @@ function createHoleRoom(){
             addWorldObject(hole);
 
             deathHoles.push({
+
                 x:px,
                 z:pz,
-                radius:1.25
+                radius:1.08
             });
         }
     }
@@ -1510,56 +1376,57 @@ function addLight(
 ){
 
     /*
-       Fixture NEVER disappears.
-
-       Only the actual illumination changes.
+       Fixture never disappears.
+       Flickering changes intensity only.
     */
 
-    const fixture=new THREE.Mesh(
+    const fixture =
+        new THREE.Mesh(
 
-        new THREE.BoxGeometry(
-            1.25,
-            .055,
-            1.25
-        ),
+            new THREE.BoxGeometry(
+                1.25,
+                .045,
+                1.25
+            ),
 
-        new THREE.MeshBasicMaterial({
-            color:0xfff2c0
-        })
-    );
+            new THREE.MeshBasicMaterial({
+
+                color:0xffffd0
+            })
+        );
 
     fixture.position.set(
         x,
-        3.045,
+        3.035,
         z
     );
 
     addWorldObject(fixture);
 
 
-    const light=new THREE.PointLight(
-        0xffdca0,
-        intensity,
-        13,
-        1.8
-    );
+    const light =
+        new THREE.PointLight(
+            0xffedb0,
+            intensity,
+            15,
+            1.7
+        );
 
     light.position.set(
         x,
-        2.65,
+        2.72,
         z
     );
 
     light.castShadow=true;
 
-    light.shadow.mapSize.width=256;
-    light.shadow.mapSize.height=256;
+    light.shadow.mapSize.width=512;
+    light.shadow.mapSize.height=512;
 
     light.shadow.camera.near=.1;
-    light.shadow.camera.far=14;
+    light.shadow.camera.far=15;
 
     scene.add(light);
-
 
     lights.push({
 
@@ -1569,6 +1436,7 @@ function addLight(
         flicker,
 
         timer:
+            .1+
             Math.random()*2,
 
         base:intensity
@@ -1579,28 +1447,28 @@ function addLight(
 function buildLighting(){
 
     /*
-       Regular fluorescent grid.
+       Not every ceiling tile has a light.
+       This creates dark stretches between
+       fluorescent pools.
     */
 
     for(
         let x=-96;
         x<=96;
-        x+=12
+        x+=13
     ){
 
         for(
-            let z=-96;
-            z<=96;
-            z+=12
+            let z=-94;
+            z<=94;
+            z+=14
         ){
 
-            /*
-               Some missing lights create the
-               dark horror-game areas.
-            */
-
-            if(Math.random()<.18)
+            if(
+                Math.random()<.32
+            ){
                 continue;
+            }
 
             addLight(
 
@@ -1611,38 +1479,30 @@ function buildLighting(){
                 (Math.random()-.5)*2,
 
                 2.8+
-                Math.random()*1.5,
+                Math.random()*2.5,
 
-                Math.random()<.15
+                Math.random()<.16
             );
         }
     }
 
+    /* important landmarks */
 
-    /*
-       Important areas.
-    */
-
-    addLight(-18,-64,5.2);
-    addLight(20,-64,4.8);
-    addLight(42,-9,5);
-    addLight(5,18,5.2);
-    addLight(30,58,5.2);
-
-    /*
-       More unreliable lights.
-    */
-
-    addLight(-55,60,2,true);
-    addLight(-28,72,2,true);
-    addLight(2,60,1.7,true);
-    addLight(62,75,1.9,true);
+    addLight(-82,-82,4.8);
+    addLight(-42,-9,4.5);
+    addLight(8,-3,5);
+    addLight(45,24,4.7);
+    addLight(-24,61,4.5);
+    addLight(55,65,4.8);
 }
 
 
 function updateLights(dt){
 
-    for(const item of lights){
+    for(
+        const item
+        of lights
+    ){
 
         if(!item.flicker)
             continue;
@@ -1653,55 +1513,22 @@ function updateLights(dt){
 
             item.timer=
                 .08+
-                Math.random()*.65;
+                Math.random()*.8;
 
             /*
-               Fixture stays visible.
+               NEVER turn fixture off.
+               NEVER set intensity to zero.
             */
 
-            const amount=
-                Math.random()<.22
-                    ? .12
-                    : .55+
-                      Math.random()*.55;
-
             item.light.intensity=
-                item.base*amount;
+                item.base*
+                (
+                    .28+
+                    Math.random()*.72
+                );
         }
     }
 }
-
-
-/* =========================================================
-   PLAYER
-========================================================= */
-
-const player=new THREE.Object3D();
-
-scene.add(player);
-
-player.add(camera);
-
-const EYE_HEIGHT=1.18;
-const PLAYER_HEIGHT=1.55;
-const PLAYER_RADIUS=.28;
-
-let yaw=0;
-let pitch=0;
-
-let velocityY=0;
-let grounded=false;
-
-let running=false;
-let paused=false;
-let dead=false;
-
-let fallingIntoLevel=false;
-let fallTimer=0;
-
-const FALL_DURATION=2.25;
-
-let difficulty="normal";
 
 
 /* =========================================================
@@ -1717,24 +1544,34 @@ function collides(x,z){
         bottom+
         PLAYER_HEIGHT;
 
-    for(const wall of wallColliders){
+    for(
+        const wall
+        of wallColliders
+    ){
 
         if(
-            top<=wall.minY||
+            top<=wall.minY ||
             bottom>=wall.maxY
-        )
+        ){
             continue;
+        }
 
         const closestX=
             Math.max(
                 wall.minX,
-                Math.min(x,wall.maxX)
+                Math.min(
+                    x,
+                    wall.maxX
+                )
             );
 
         const closestZ=
             Math.max(
                 wall.minZ,
-                Math.min(z,wall.maxZ)
+                Math.min(
+                    z,
+                    wall.maxZ
+                )
             );
 
         const dx=
@@ -1748,8 +1585,9 @@ function collides(x,z){
             dz*dz<
             PLAYER_RADIUS*
             PLAYER_RADIUS
-        )
+        ){
             return true;
+        }
     }
 
     return false;
@@ -1758,18 +1596,27 @@ function collides(x,z){
 
 function entityHitsWall(x,z){
 
-    for(const wall of wallColliders){
+    for(
+        const wall
+        of wallColliders
+    ){
 
         const closestX=
             Math.max(
                 wall.minX,
-                Math.min(x,wall.maxX)
+                Math.min(
+                    x,
+                    wall.maxX
+                )
             );
 
         const closestZ=
             Math.max(
                 wall.minZ,
-                Math.min(z,wall.maxZ)
+                Math.min(
+                    z,
+                    wall.maxZ
+                )
             );
 
         const dx=
@@ -1781,9 +1628,10 @@ function entityHitsWall(x,z){
         if(
             dx*dx+
             dz*dz<
-            .43*.43
-        )
+            .5*.5
+        ){
             return true;
+        }
     }
 
     return false;
@@ -1804,9 +1652,16 @@ function blocked(
         Math.hypot(dx,dz);
 
     const steps=
-        Math.ceil(distance/.35);
+        Math.max(
+            1,
+            Math.ceil(distance/.3)
+        );
 
-    for(let i=1;i<steps;i++){
+    for(
+        let i=1;
+        i<steps;
+        i++
+    ){
 
         const t=i/steps;
 
@@ -1815,8 +1670,9 @@ function blocked(
                 x1+dx*t,
                 z1+dz*t
             )
-        )
+        ){
             return true;
+        }
     }
 
     return false;
@@ -1829,21 +1685,27 @@ function blocked(
 
 function playerInHole(){
 
-    for(const hole of deathHoles){
+    for(
+        const hole
+        of deathHoles
+    ){
 
         const dx=
-            player.position.x-hole.x;
+            player.position.x-
+            hole.x;
 
         const dz=
-            player.position.z-hole.z;
+            player.position.z-
+            hole.z;
 
         if(
             dx*dx+
             dz*dz<
             hole.radius*
             hole.radius
-        )
+        ){
             return true;
+        }
     }
 
     return false;
@@ -1864,34 +1726,23 @@ function createExit(){
 
     const locations=[
 
-        [-94,-75],
-        [-68,-46],
-        [-35,-64],
-        [-5,-51],
+        [-82,-64],
+        [-48,-49],
+        [-14,-70],
+        [23,-52],
+        [58,-71],
 
-        [20,-75],
-        [48,-61],
-        [80,-47],
+        [-72,-8],
+        [-35,17],
+        [3,26],
+        [40,14],
+        [72,28],
 
-        [-80,9],
-        [-47,19],
-        [-18,-1],
-
-        [13,26],
-        [42,8],
-        [70,29],
-
-        [-88,53],
-        [-62,75],
-        [-36,88],
-
-        [-4,73],
-        [24,89],
-        [52,73],
-
-        [82,62],
-        [91,28],
-        [92,-2]
+        [-82,53],
+        [-43,73],
+        [-5,57],
+        [34,72],
+        [73,57]
     ];
 
     const selected=
@@ -1905,28 +1756,26 @@ function createExit(){
     exitX=selected[0];
     exitZ=selected[1];
 
-
     const group=
         new THREE.Group();
-
 
     const frameMaterial=
         new THREE.MeshStandardMaterial({
 
             color:0x292923,
 
-            roughness:.9
+            roughness:.8
         });
 
-
-    const left=new THREE.Mesh(
-        new THREE.BoxGeometry(
-            .28,
-            2.7,
-            .28
-        ),
-        frameMaterial
-    );
+    const left=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                .28,
+                2.7,
+                .28
+            ),
+            frameMaterial
+        );
 
     left.position.set(
         -1.1,
@@ -1936,51 +1785,62 @@ function createExit(){
 
     group.add(left);
 
+    const right=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                .28,
+                2.7,
+                .28
+            ),
+            frameMaterial
+        );
 
-    const right=left.clone();
-
-    right.position.x=1.1;
+    right.position.set(
+        1.1,
+        1.35,
+        0
+    );
 
     group.add(right);
 
-
-    const top=new THREE.Mesh(
-        new THREE.BoxGeometry(
-            2.5,
-            .28,
-            .28
-        ),
-        frameMaterial
-    );
+    const top=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                2.5,
+                .28,
+                .28
+            ),
+            frameMaterial
+        );
 
     top.position.y=2.7;
 
     group.add(top);
 
+    const green=
+        new THREE.Mesh(
 
-    const green=new THREE.Mesh(
+            new THREE.PlaneGeometry(
+                1.9,
+                2.35
+            ),
 
-        new THREE.PlaneGeometry(
-            1.9,
-            2.35
-        ),
+            new THREE.MeshBasicMaterial({
 
-        new THREE.MeshBasicMaterial({
+                color:0x35b952,
 
-            color:0x35b952,
+                transparent:true,
 
-            transparent:true,
+                opacity:.85,
 
-            opacity:.85,
-
-            side:THREE.DoubleSide
-        })
-    );
+                side:
+                    THREE.DoubleSide
+            })
+        );
 
     green.position.y=1.25;
 
     group.add(green);
-
 
     group.position.set(
         exitX,
@@ -1992,12 +1852,11 @@ function createExit(){
 
     exitObject=group;
 
-
     exitLight=
         new THREE.PointLight(
             0x35ff5c,
-            8,
-            17,
+            5,
+            12,
             1.7
         );
 
@@ -2013,17 +1872,17 @@ function createExit(){
 
 /* =========================================================
    ENTITY
+     
+   ENTITY IS THE ONLY PNG USING
+   UNSHADED MATERIAL.
 ========================================================= */
 
 const entityAudio=
-    new Audio(
-        "./entity.mp3"
-    );
+    new Audio("./entity.mp3");
 
 entityAudio.loop=true;
 entityAudio.volume=0;
 entityAudio.preload="auto";
-
 
 const SETTINGS={
 
@@ -2048,6 +1907,7 @@ const SETTINGS={
     }
 };
 
+let difficulty="normal";
 
 let entity=null;
 
@@ -2085,7 +1945,6 @@ function createEntity(){
                 texture.minFilter=
                     THREE.LinearMipmapLinearFilter;
 
-
                 const aspect=
                     (
                         texture.image.width||1
@@ -2094,17 +1953,13 @@ function createEntity(){
                         texture.image.height||1
                     );
 
-
-                const height=1.55;
-
+                const height=1.7;
                 const width=
                     height*aspect;
 
-
                 /*
-                   ENTITY IS THE ONLY PNG
-                   THAT IS INTENTIONALLY
-                   UNSHADED.
+                   THIS IS THE ONLY UNSHADED
+                   ENVIRONMENT IMAGE.
                 */
 
                 const material=
@@ -2114,33 +1969,32 @@ function createEntity(){
 
                         transparent:true,
 
-                        alphaTest:.01,
+                        alphaTest:.02,
 
-                        side:THREE.DoubleSide,
+                        side:
+                            THREE.DoubleSide,
 
                         fog:false,
 
                         color:0xffffff
                     });
 
+                entity=
+                    new THREE.Mesh(
 
-                entity=new THREE.Mesh(
+                        new THREE.PlaneGeometry(
+                            width,
+                            height
+                        ),
 
-                    new THREE.PlaneGeometry(
-                        width,
-                        height
-                    ),
-
-                    material
-                );
-
+                        material
+                    );
 
                 entity.position.set(
-                    55,
-                    .775,
-                    -48
+                    65,
+                    .85,
+                    -55
                 );
-
 
                 addWorldObject(entity);
 
@@ -2156,25 +2010,26 @@ function createEntity(){
                     error
                 );
 
-                entity=new THREE.Mesh(
+                entity=
+                    new THREE.Mesh(
 
-                    new THREE.PlaneGeometry(
-                        1,
-                        1.55
-                    ),
+                        new THREE.PlaneGeometry(
+                            1,
+                            1.7
+                        ),
 
-                    new THREE.MeshBasicMaterial({
+                        new THREE.MeshBasicMaterial({
 
-                        color:0x010101,
+                            color:0x030303,
 
-                        transparent:true
-                    })
-                );
+                            transparent:true
+                        })
+                    );
 
                 entity.position.set(
-                    55,
-                    .775,
-                    -48
+                    65,
+                    .85,
+                    -55
                 );
 
                 addWorldObject(entity);
@@ -2198,13 +2053,12 @@ function updateEntity(dt){
         paused||
         dead||
         fallingIntoLevel
-    )
+    ){
         return;
-
+    }
 
     const settings=
         SETTINGS[difficulty];
-
 
     const dx=
         player.position.x-
@@ -2217,9 +2071,7 @@ function updateEntity(dt){
     const distance=
         Math.hypot(dx,dz);
 
-
     lastSeen+=dt;
-
 
     const visible=
         distance<
@@ -2231,10 +2083,8 @@ function updateEntity(dt){
             player.position.z
         );
 
-
     let dx2=0;
     let dz2=0;
-
 
     if(visible){
 
@@ -2244,7 +2094,6 @@ function updateEntity(dt){
         );
 
         lastSeen=0;
-
 
         dx2=
             dx/
@@ -2280,8 +2129,8 @@ function updateEntity(dt){
         if(wanderTimer<=0){
 
             wanderTimer=
-                .5+
-                Math.random()*1.8;
+                .6+
+                Math.random()*1.7;
 
             wanderAngle=
                 Math.random()*
@@ -2295,7 +2144,6 @@ function updateEntity(dt){
             Math.sin(wanderAngle);
     }
 
-
     const targetAngle=
         Math.atan2(dz2,dx2);
 
@@ -2305,17 +2153,15 @@ function updateEntity(dt){
             entityDirection.x
         );
 
-
     let difference=
-        targetAngle-currentAngle;
-
+        targetAngle-
+        currentAngle;
 
     while(difference>Math.PI)
         difference-=Math.PI*2;
 
     while(difference<-Math.PI)
         difference+=Math.PI*2;
-
 
     difference=
         Math.max(
@@ -2326,18 +2172,15 @@ function updateEntity(dt){
             )
         );
 
-
     const angle=
         currentAngle+
         difference;
-
 
     entityDirection.x=
         Math.cos(angle);
 
     entityDirection.y=
         Math.sin(angle);
-
 
     entityVelocity.x=
         THREE.MathUtils.lerp(
@@ -2355,24 +2198,19 @@ function updateEntity(dt){
             Math.min(1,dt*4)
         );
 
-
     const moveX=
         entityVelocity.x*dt;
 
     const moveZ=
         entityVelocity.y*dt;
 
-
     const nextX=
-        entity.position.x+moveX;
+        entity.position.x+
+        moveX;
 
     const nextZ=
-        entity.position.z+moveZ;
-
-
-    /*
-       JUKING / WALL AVOIDANCE
-    */
+        entity.position.z+
+        moveZ;
 
     if(
         !entityHitsWall(
@@ -2381,21 +2219,21 @@ function updateEntity(dt){
         )
     ){
 
-        entity.position.x=nextX;
+        entity.position.x=
+            nextX;
 
     }else{
 
         entityVelocity.x=0;
 
+        /*
+           Juke around corners.
+        */
+
         wanderAngle+=
-            Math.PI/2;
-
-        entityDirection.set(
-            Math.cos(wanderAngle),
-            Math.sin(wanderAngle)
-        );
+            Math.PI/2+
+            (Math.random()-.5)*.7;
     }
-
 
     if(
         !entityHitsWall(
@@ -2404,44 +2242,39 @@ function updateEntity(dt){
         )
     ){
 
-        entity.position.z=nextZ;
+        entity.position.z=
+            nextZ;
 
     }else{
 
         entityVelocity.y=0;
 
         wanderAngle+=
-            Math.PI/2;
-
-        entityDirection.set(
-            Math.cos(wanderAngle),
-            Math.sin(wanderAngle)
-        );
+            Math.PI/2+
+            (Math.random()-.5)*.7;
     }
 
-
     /*
-       Billboard toward player.
+       Billboard toward camera.
+       PNG remains completely unshaded.
     */
 
-    entity.rotation.y=
-        Math.atan2(
-            player.position.x-
-            entity.position.x,
-
-            player.position.z-
-            entity.position.z
-        );
-
+    entity.quaternion.copy(
+        camera.quaternion
+    );
 
     const killDistance=
         difficulty==="nightmare"
             ?1.55
             :1.25;
 
+    if(
+        distance<
+        killDistance
+    ){
 
-    if(distance<killDistance)
         killPlayer();
+    }
 }
 
 
@@ -2464,7 +2297,6 @@ function updateEntityAudio(){
         return;
     }
 
-
     const distance=
         Math.hypot(
 
@@ -2475,9 +2307,7 @@ function updateEntityAudio(){
             player.position.z
         );
 
-
     const maxDistance=34;
-
 
     if(distance>=maxDistance){
 
@@ -2486,14 +2316,11 @@ function updateEntityAudio(){
         return;
     }
 
-
     let volume=
         Math.pow(
-            1-
-            distance/maxDistance,
+            1-distance/maxDistance,
             1.6
         )*.9;
-
 
     if(
         blocked(
@@ -2507,7 +2334,6 @@ function updateEntityAudio(){
         volume*=.2;
     }
 
-
     entityAudio.volume=
         THREE.MathUtils.clamp(
             volume,
@@ -2515,15 +2341,14 @@ function updateEntityAudio(){
             .9
         );
 
-
     if(
         entityAudio.paused&&
         volume>.01
     ){
 
-        entityAudio.play().catch(
-            ()=>{}
-        );
+        entityAudio
+            .play()
+            .catch(()=>{});
     }
 }
 
@@ -2543,13 +2368,13 @@ const keys={
 
 let jumpPressed=false;
 
-
 addEventListener(
     "keydown",
     event=>{
 
         /*
-           FIXED:
+           W/S ARE EXPLICITLY DEFINED HERE.
+
            W = forward
            S = backward
         */
@@ -2569,27 +2394,29 @@ addEventListener(
         if(
             event.code==="ShiftLeft"||
             event.code==="ShiftRight"
-        )
+        ){
             keys.shift=true;
-
+        }
 
         if(
             event.code==="Space"&&
             !event.repeat
-        )
-            jumpPressed=true;
+        ){
 
+            jumpPressed=true;
+        }
 
         if(
             event.code==="Escape"&&
             running&&
             !dead&&
             !fallingIntoLevel
-        )
+        ){
+
             togglePause();
+        }
     }
 );
-
 
 addEventListener(
     "keyup",
@@ -2610,14 +2437,16 @@ addEventListener(
         if(
             event.code==="ShiftLeft"||
             event.code==="ShiftRight"
-        )
+        ){
+
             keys.shift=false;
+        }
     }
 );
 
 
 /* =========================================================
-   MOUSE
+   MOUSE LOOK
 ========================================================= */
 
 document.addEventListener(
@@ -2629,22 +2458,22 @@ document.addEventListener(
             paused||
             dead||
             fallingIntoLevel
-        )
+        ){
             return;
+        }
 
         if(
             document.pointerLockElement!==
             document.body
-        )
+        ){
             return;
-
+        }
 
         yaw-=
             event.movementX*.0022;
 
         pitch-=
             event.movementY*.0018;
-
 
         pitch=
             Math.max(
@@ -2655,7 +2484,6 @@ document.addEventListener(
                 )
             );
 
-
         player.rotation.y=yaw;
         camera.rotation.x=pitch;
     }
@@ -2663,7 +2491,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   PLAYER MOVEMENT
+   PLAYER UPDATE
 ========================================================= */
 
 function updatePlayer(dt){
@@ -2675,22 +2503,17 @@ function updatePlayer(dt){
         return;
     }
 
-
     /*
+       Direct movement values.
+
        W = +forward
        S = -forward
-
-       Camera forward direction:
-       +X = sin(yaw)
-       -Z = cos(yaw)
-
-       This is intentionally explicit so W/S
-       cannot accidentally become reversed.
+       D = +strafe
+       A = -strafe
     */
 
     let forward=0;
     let side=0;
-
 
     if(keys.w)
         forward+=1;
@@ -2704,13 +2527,11 @@ function updatePlayer(dt){
     if(keys.a)
         side-=1;
 
-
     const length=
         Math.hypot(
             forward,
             side
         );
-
 
     if(length){
 
@@ -2718,62 +2539,56 @@ function updatePlayer(dt){
         side/=length;
     }
 
-
     let speed=
         keys.shift
             ?5.9
             :3.5;
 
-
     if(difficulty==="easy")
         speed=
-            keys.shift
-                ?6.1
-                :3.8;
+            keys.shift?6.1:3.8;
 
     if(difficulty==="hard")
         speed=
-            keys.shift
-                ?6.3
-                :3.4;
+            keys.shift?6.3:3.4;
 
     if(difficulty==="nightmare")
         speed=
-            keys.shift
-                ?6.5
-                :3.25;
-
-
-    const sin=Math.sin(yaw);
-    const cos=Math.cos(yaw);
-
+            keys.shift?6.5:3.25;
 
     /*
-       FORWARD:
-       X = +sin
-       Z = -cos
+       Camera looks toward -Z at yaw 0.
 
-       BACKWARD:
-       X = -sin
-       Z = +cos
+       Therefore W moves toward -Z.
     */
+
+    const forwardX=
+        -Math.sin(yaw);
+
+    const forwardZ=
+        -Math.cos(yaw);
+
+    const rightX=
+        Math.cos(yaw);
+
+    const rightZ=
+        -Math.sin(yaw);
 
     const dx=
         (
-            forward*sin+
-            side*cos
+            forwardX*forward+
+            rightX*side
         )*
         speed*
         dt;
 
     const dz=
         (
-            -forward*cos+
-            side*sin
+            forwardZ*forward+
+            rightZ*side
         )*
         speed*
         dt;
-
 
     const nextX=
         player.position.x+dx;
@@ -2781,24 +2596,27 @@ function updatePlayer(dt){
     const nextZ=
         player.position.z+dz;
 
-
     if(
         !collides(
             nextX,
             player.position.z
         )
-    )
-        player.position.x=nextX;
+    ){
 
+        player.position.x=
+            nextX;
+    }
 
     if(
         !collides(
             player.position.x,
             nextZ
         )
-    )
-        player.position.z=nextZ;
+    ){
 
+        player.position.z=
+            nextZ;
+    }
 
     if(
         jumpPressed&&
@@ -2809,17 +2627,16 @@ function updatePlayer(dt){
         grounded=false;
     }
 
-
     jumpPressed=false;
-
 
     velocityY-=20*dt;
 
     player.position.y+=
         velocityY*dt;
 
-
-    if(player.position.y<=0){
+    if(
+        player.position.y<=0
+    ){
 
         player.position.y=0;
 
@@ -2827,7 +2644,6 @@ function updatePlayer(dt){
 
         grounded=true;
     }
-
 
     if(playerInHole()){
 
@@ -2837,7 +2653,6 @@ function updatePlayer(dt){
 
         return;
     }
-
 
     checkExit();
 }
@@ -2864,15 +2679,12 @@ function updateFall(dt){
             3
         );
 
-
     player.position.y=
         17-
         17*eased;
 
-
     camera.position.y=
         EYE_HEIGHT;
-
 
     camera.rotation.x=
         THREE.MathUtils.lerp(
@@ -2884,14 +2696,10 @@ function updateFall(dt){
             )
         );
 
-
     camera.rotation.z=
         Math.sin(
-            progress*
-            Math.PI*
-            9
+            progress*Math.PI*9
         )*.025;
-
 
     if(progress>=1){
 
@@ -2924,9 +2732,7 @@ function updateCamera(dt){
     if(fallingIntoLevel)
         return;
 
-
     cameraTime+=dt;
-
 
     const moving=
         keys.w||
@@ -2934,53 +2740,56 @@ function updateCamera(dt){
         keys.s||
         keys.d;
 
+    /*
+       Slightly heavier movement than before.
+    */
 
     const amount=
         moving
-            ?.012
-            :.003;
-
+            ?.014
+            :.004;
 
     camera.position.x=
         Math.sin(
             cameraTime*3.4
-        )*amount;
-
+        )*
+        amount;
 
     camera.position.y=
         EYE_HEIGHT+
         Math.sin(
             cameraTime*4.1
-        )*amount;
-
+        )*
+        amount;
 
     camera.position.z=
         Math.cos(
             cameraTime*3.1
-        )*amount*.55;
-
+        )*
+        amount*.55;
 
     camera.rotation.z=
         Math.sin(
             cameraTime*.9
         )*.004;
 
-
     /*
-       Security camera micro-jitters.
+       Random analog-camera interference.
     */
 
-    if(Math.random()<.009){
+    if(
+        Math.random()<.009
+    ){
 
         camera.position.x+=
             (
                 Math.random()-.5
-            )*.045;
+            )*.055;
 
         camera.position.y+=
             (
                 Math.random()-.5
-            )*.035;
+            )*.04;
 
         camera.rotation.z+=
             (
@@ -2991,55 +2800,89 @@ function updateCamera(dt){
 
 
 /* =========================================================
-   HORROR CAMERA GLITCHES
+   SECURITY CAMERA EFFECT UPDATE
 ========================================================= */
 
-let glitchTimer=0;
+let securityTimer=0;
 
-function updateCameraEffects(dt){
+function updateSecurityCamera(dt){
 
-    glitchTimer-=dt;
+    if(!running||paused){
 
-    const staticLayer=
+        return;
+    }
+
+    securityTimer-=dt;
+
+    const flicker=
         document.querySelector(
-            ".camStatic"
+            ".camFlicker"
         );
 
-    if(glitchTimer<=0){
+    const bar=
+        document.querySelector(
+            ".camNoiseBar"
+        );
 
-        glitchTimer=
-            2+
-            Math.random()*8;
+    flicker.style.opacity=
+        Math.max(
+            0,
+            Number(
+                flicker.style.opacity||0
+            )-
+            dt*4
+        );
 
-        if(Math.random()<.35){
+    bar.style.opacity=
+        Math.max(
+            0,
+            Number(
+                bar.style.opacity||0
+            )-
+            dt*3
+        );
 
-            staticLayer.style.opacity=
-                String(
-                    .08+
-                    Math.random()*.16
-                );
+    if(securityTimer<=0){
 
-            setTimeout(
-                ()=>{
-                    staticLayer.style.opacity="0";
-                },
-                60+
-                Math.random()*140
-            );
+        securityTimer=
+            .2+
+            Math.random()*1.8;
+
+        const roll=Math.random();
+
+        if(roll<.07){
+
+            flicker.style.opacity=
+                .20+
+                Math.random()*.35;
+        }
+
+        if(roll>.82){
+
+            bar.style.top=
+                Math.random()*100+
+                "%";
+
+            bar.style.opacity=
+                .15+
+                Math.random()*.3;
         }
     }
 }
 
 
 /* =========================================================
-   EXIT
+   EXIT CHECK
 ========================================================= */
 
 function checkExit(){
 
-    if(!exitObject||dead)
+    if(
+        !exitObject||
+        dead
+    ){
         return;
-
+    }
 
     const distance=
         Math.hypot(
@@ -3051,9 +2894,10 @@ function checkExit(){
             exitZ
         );
 
+    if(distance<1.8){
 
-    if(distance<1.8)
         winGame();
+    }
 }
 
 
@@ -3096,43 +2940,37 @@ function killPlayer(
     reason="THE BACKROOMS GOT YOU"
 ){
 
-    if(dead||!running)
+    if(
+        dead||
+        !running
+    ){
         return;
-
+    }
 
     dead=true;
-
     fallingIntoLevel=false;
-
 
     entityAudio.pause();
     entityAudio.volume=0;
 
-
     if(document.pointerLockElement)
         document.exitPointerLock();
 
-
     document.getElementById(
         "deathTitle"
-    ).textContent=
-        "YOU DIED";
-
+    ).textContent="YOU DIED";
 
     document.getElementById(
         "deathTitle"
     ).className="";
 
-
     document.getElementById(
         "deathText"
     ).textContent=reason;
 
-
     document.getElementById(
         "retryBtn"
     ).textContent="RETRY";
-
 
     document.getElementById(
         "death"
@@ -3146,48 +2984,40 @@ function killPlayer(
 
 function winGame(){
 
-    if(dead||!running)
+    if(
+        dead||
+        !running
+    ){
         return;
-
+    }
 
     dead=true;
-
 
     entityAudio.pause();
     entityAudio.volume=0;
 
-
     if(document.pointerLockElement)
         document.exitPointerLock();
 
-
     document.getElementById(
         "deathTitle"
-    ).textContent=
-        "YOU ESCAPED";
-
+    ).textContent="YOU ESCAPED";
 
     document.getElementById(
         "deathTitle"
     ).className="win";
 
-
     document.getElementById(
         "deathText"
-    ).textContent=
-        "YOU FOUND THE EXIT";
-
+    ).textContent="YOU FOUND THE EXIT";
 
     document.getElementById(
         "retryBtn"
-    ).textContent=
-        "PLAY AGAIN";
-
+    ).textContent="PLAY AGAIN";
 
     document.getElementById(
         "death"
-    ).style.display=
-        "flex";
+    ).style.display="flex";
 }
 
 
@@ -3201,12 +3031,11 @@ function togglePause(){
         !running||
         dead||
         fallingIntoLevel
-    )
+    ){
         return;
-
+    }
 
     paused=!paused;
-
 
     document.getElementById(
         "pause"
@@ -3214,7 +3043,6 @@ function togglePause(){
         paused
             ?"flex"
             :"none";
-
 
     if(paused){
 
@@ -3239,27 +3067,21 @@ function returnToMenu(){
     dead=false;
     fallingIntoLevel=false;
 
-
     entityAudio.pause();
     entityAudio.volume=0;
-
 
     if(document.pointerLockElement)
         document.exitPointerLock();
 
-
     clearWorld();
-
 
     document.getElementById(
         "pause"
     ).style.display="none";
 
-
     document.getElementById(
         "death"
     ).style.display="none";
-
 
     document.getElementById(
         "menu"
@@ -3282,41 +3104,44 @@ async function startGame(){
         await loadTextures();
     }
 
-
     clearWorld();
 
+    /*
+       Spawn inside the closed map.
+    */
 
     player.position.set(
-        -96,
+        -94,
         17,
-        -101
+        -96
     );
 
-
-    yaw=0;
+    yaw=.35;
     pitch=-.28;
 
     velocityY=0;
     grounded=false;
 
-
     createFloor();
     createCeiling();
 
+    createOuterWalls();
+
     buildFloorPlan();
+
     createHoleRoom();
+
     createExit();
+
     buildLighting();
 
     await createEntity();
 
-
     entity.position.set(
-        55,
-        .775,
-        -48
+        65,
+        .85,
+        -55
     );
-
 
     entityDirection.set(
         1,
@@ -3330,7 +3155,6 @@ async function startGame(){
 
     lastSeen=99;
 
-
     running=true;
     paused=false;
     dead=false;
@@ -3341,21 +3165,17 @@ async function startGame(){
 
     recordingTime=0;
 
-
     document.getElementById(
         "menu"
     ).style.display="none";
-
 
     document.getElementById(
         "pause"
     ).style.display="none";
 
-
     document.getElementById(
         "death"
     ).style.display="none";
-
 
     camera.position.set(
         0,
@@ -3363,12 +3183,10 @@ async function startGame(){
         0
     );
 
-
     camera.rotation.x=pitch;
     camera.rotation.z=0;
 
     player.rotation.y=yaw;
-
 
     showMessage(
         "ENTERING LEVEL 0..."
@@ -3384,7 +3202,6 @@ function setDifficulty(value){
 
     difficulty=value;
 
-
     document
         .querySelectorAll(
             ".menuDifficulty button"
@@ -3396,24 +3213,22 @@ function setDifficulty(value){
                 )
         );
 
-
     const id=
         value==="nightmare"
             ?"nightmareBtn"
             :value+"Btn";
 
-
     document.getElementById(
         id
-    ).classList.add("selected");
-
+    ).classList.add(
+        "selected"
+    );
 
     document.getElementById(
         "difficultyHud"
     ).textContent=
         value.toUpperCase();
 }
-
 
 document.getElementById(
     "easyBtn"
@@ -3490,7 +3305,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   MENU IMAGES
+   MENU IMAGE ROTATION
 ========================================================= */
 
 const menuImages=
@@ -3507,11 +3322,11 @@ function cycleMenuImage(){
     if(!menuImages.length)
         return;
 
-
     menuImages[
         menuIndex
-    ].classList.remove("active");
-
+    ].classList.remove(
+        "active"
+    );
 
     menuIndex=
         (
@@ -3519,10 +3334,11 @@ function cycleMenuImage(){
         )%
         menuImages.length;
 
-
     menuImages[
         menuIndex
-    ].classList.add("active");
+    ].classList.add(
+        "active"
+    );
 }
 
 setInterval(
@@ -3551,8 +3367,8 @@ addEventListener(
 
         renderer.setPixelRatio(
             Math.min(
-                window.devicePixelRatio||1,
-                1.35
+                devicePixelRatio||1,
+                1.5
             )
         );
     }
@@ -3570,18 +3386,19 @@ let recordingTime=0;
 
 function updateTimer(dt){
 
-    if(!running||paused)
+    if(
+        !running||
+        paused
+    ){
         return;
-
+    }
 
     recordingTime+=dt;
-
 
     const total=
         Math.floor(
             recordingTime
         );
-
 
     const hours=
         Math.floor(
@@ -3596,12 +3413,10 @@ function updateTimer(dt){
     const seconds=
         total%60;
 
-
     const format=
         n=>
             String(n)
                 .padStart(2,"0");
-
 
     document.getElementById(
         "tapeTime"
@@ -3622,13 +3437,11 @@ function animate(){
         animate
     );
 
-
     const dt=
         Math.min(
             clock.getDelta(),
             .05
         );
-
 
     if(
         running&&
@@ -3644,7 +3457,7 @@ function animate(){
 
         updateCamera(dt);
 
-        updateCameraEffects(dt);
+        updateSecurityCamera(dt);
 
         updateEntityAudio();
 
@@ -3657,7 +3470,6 @@ function animate(){
         updateEntityAudio();
     }
 
-
     renderer.render(
         scene,
         camera
@@ -3666,7 +3478,7 @@ function animate(){
 
 
 /* =========================================================
-   INITIALIZE
+   INITIAL LOAD
 ========================================================= */
 
 loadTextures();
