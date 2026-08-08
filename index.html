@@ -1,271 +1,272 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>The Backrooms</title>
 
 <style>
-* {
-    box-sizing: border-box;
+*{box-sizing:border-box}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+    font-family:Arial,sans-serif;
 }
 
-html, body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #000;
-    font-family: Arial, sans-serif;
+canvas{
+    display:block;
 }
 
-#game {
-    position: fixed;
-    inset: 0;
-}
-
-canvas {
-    display: block;
-}
-
-/* =========================
-   MENU
-========================= */
-
-#menu {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+#menu,
+#pause{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    color:#eee;
     background:
         radial-gradient(
             ellipse at center,
-            rgba(45, 42, 20, .75),
-            rgba(0, 0, 0, .98)
+            rgba(55,52,25,.65),
+            rgba(0,0,0,.97)
         );
-    color: white;
-    text-align: center;
 }
 
-#menu h1 {
-    margin: 0 0 10px;
-    color: #d6c34b;
-    font-size: 48px;
-    letter-spacing: 8px;
-    text-shadow: 0 0 25px #000;
+#pause{
+    display:none;
+    background:rgba(0,0,0,.72);
+    backdrop-filter:blur(5px);
 }
 
-#menu p {
-    color: #aaa;
-    margin: 5px 0 25px;
+h1{
+    margin:0 0 10px;
+    font-size:48px;
+    letter-spacing:9px;
+    color:#d5c54c;
+    text-shadow:0 0 25px #000;
 }
 
-.levelButton {
-    width: 320px;
-    padding: 16px;
-    margin: 7px;
-    border: 1px solid #777;
-    border-radius: 5px;
-    background: #171717;
-    color: white;
-    cursor: pointer;
-    font-size: 17px;
-    transition: .15s;
+.subtitle{
+    color:#aaa;
+    margin-bottom:25px;
 }
 
-.levelButton:hover {
-    background: #39351a;
-    border-color: #d9c94c;
-    transform: scale(1.02);
+.button{
+    width:330px;
+    margin:7px;
+    padding:15px;
+    background:#171717;
+    border:1px solid #666;
+    color:#eee;
+    cursor:pointer;
+    font-size:16px;
 }
 
-#controls {
-    margin-top: 25px;
-    color: #999;
-    line-height: 1.7;
-    font-size: 13px;
+.button:hover{
+    background:#39351b;
+    border-color:#d6c64d;
 }
 
-/* =========================
-   HUD
-========================= */
-
-#crosshair {
-    position: fixed;
-    z-index: 20;
-    left: 50%;
-    top: 50%;
-    width: 6px;
-    height: 6px;
-    margin: -3px;
-    border: 1px solid rgba(255,255,255,.8);
-    border-radius: 50%;
-    pointer-events: none;
+.controls{
+    margin-top:25px;
+    text-align:center;
+    color:#999;
+    font-size:13px;
+    line-height:1.8;
 }
 
-#hud {
-    position: fixed;
-    left: 18px;
-    bottom: 18px;
-    z-index: 20;
-    color: white;
-    text-shadow: 2px 2px 6px #000;
-    pointer-events: none;
+#crosshair{
+    position:fixed;
+    z-index:20;
+    left:50%;
+    top:50%;
+    width:7px;
+    height:7px;
+    margin:-3px;
+    border:1px solid white;
+    border-radius:50%;
+    pointer-events:none;
 }
 
-#levelName {
-    font-size: 17px;
-    margin-bottom: 7px;
+#hud{
+    position:fixed;
+    z-index:20;
+    left:18px;
+    bottom:18px;
+    color:white;
+    text-shadow:2px 2px 5px #000;
+    pointer-events:none;
 }
 
-#staminaOuter {
-    width: 190px;
-    height: 10px;
-    background: rgba(0,0,0,.65);
-    border: 1px solid rgba(255,255,255,.45);
+#level{
+    font-size:17px;
+    margin-bottom:7px;
 }
 
-#stamina {
-    width: 100%;
-    height: 100%;
-    background: #e1d143;
+#staminaBox{
+    width:190px;
+    height:9px;
+    background:#111;
+    border:1px solid #777;
 }
 
-#message {
-    position: fixed;
-    top: 35px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 30;
-    color: white;
-    font-size: 25px;
-    text-shadow: 2px 2px 8px #000;
-    pointer-events: none;
+#stamina{
+    width:100%;
+    height:100%;
+    background:#d7c63e;
 }
 
-#danger {
-    position: fixed;
-    inset: 0;
-    z-index: 15;
-    pointer-events: none;
+#message{
+    position:fixed;
+    z-index:30;
+    top:35px;
+    left:50%;
+    transform:translateX(-50%);
+    color:white;
+    font-size:22px;
+    text-shadow:2px 2px 8px #000;
 }
 
-#camcorder {
-    position: fixed;
-    inset: 0;
-    z-index: 12;
-    pointer-events: none;
-    opacity: .4;
-    mix-blend-mode: screen;
+#rec{
+    position:fixed;
+    z-index:25;
+    top:18px;
+    right:20px;
+    color:#eee;
+    font:12px monospace;
+    text-shadow:2px 2px 5px #000;
+}
 
+#dot{
+    display:inline-block;
+    width:8px;
+    height:8px;
+    margin-right:5px;
+    border-radius:50%;
+    background:#e22;
+    box-shadow:0 0 8px red;
+}
+
+#vhs{
+    position:fixed;
+    inset:0;
+    z-index:15;
+    pointer-events:none;
+    opacity:.35;
     background:
         repeating-linear-gradient(
             to bottom,
             rgba(255,255,255,.035) 0px,
             rgba(255,255,255,.035) 1px,
-            rgba(0,0,0,.04) 2px,
-            rgba(0,0,0,.04) 4px
+            rgba(0,0,0,.045) 2px,
+            rgba(0,0,0,.045) 4px
         );
 }
 
-#vignette {
-    position: fixed;
-    inset: 0;
-    z-index: 13;
-    pointer-events: none;
-
+#vignette{
+    position:fixed;
+    inset:0;
+    z-index:16;
+    pointer-events:none;
     background:
         radial-gradient(
             ellipse at center,
             transparent 45%,
-            rgba(0,0,0,.25) 75%,
-            rgba(0,0,0,.72) 100%
+            rgba(0,0,0,.25) 72%,
+            rgba(0,0,0,.75) 100%
         );
 }
 
-#rec {
-    position: fixed;
-    top: 18px;
-    right: 22px;
-    z-index: 25;
-    color: #eee;
-    font: 12px monospace;
-    text-shadow: 1px 1px 4px #000;
-    pointer-events: none;
+#danger{
+    position:fixed;
+    inset:0;
+    z-index:17;
+    pointer-events:none;
 }
 
-#recDot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    margin-right: 5px;
-    border-radius: 50%;
-    background: #e33;
-    box-shadow: 0 0 8px #e33;
+#pause h1{
+    font-size:42px;
+}
+
+.small{
+    color:#777;
+    font-size:12px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="game"></div>
+<div id="menu">
+    <h1>THE BACKROOMS</h1>
+    <div class="subtitle">Choose your destination</div>
 
-<div id="crosshair"></div>
-<div id="danger"></div>
-<div id="camcorder"></div>
-<div id="vignette"></div>
+    <button class="button" id="backroomsButton">
+        BACKROOMS
+    </button>
 
-<div id="rec">
-    <span id="recDot"></span>REC
+    <button class="button" id="hotelButton">
+        HOTEL
+    </button>
+
+    <div class="controls">
+        WASD — Move<br>
+        SHIFT — Sprint<br>
+        SPACE — Jump<br>
+        Mouse — Look<br>
+        ESC / P — Pause
+    </div>
 </div>
 
-<div id="message"></div>
+<div id="pause">
+    <h1>PAUSED</h1>
+
+    <button class="button" id="resume">
+        RESUME
+    </button>
+
+    <button class="button" id="restart">
+        RESTART
+    </button>
+
+    <button class="button" id="levels">
+        CHANGE LEVEL
+    </button>
+</div>
+
+<div id="crosshair"></div>
 
 <div id="hud">
-    <div id="levelName"></div>
-
-    <div id="staminaOuter">
+    <div id="level">BACKROOMS</div>
+    <div id="staminaBox">
         <div id="stamina"></div>
     </div>
 </div>
 
-<div id="menu">
+<div id="message"></div>
 
-    <h1>THE BACKROOMS</h1>
-
-    <p>Choose a level</p>
-
-    <button class="levelButton" id="level0Button">
-        LEVEL 0 — THE HUB
-    </button>
-
-    <button class="levelButton" id="level188Button">
-        LEVEL 188 — THE WINDOWS
-    </button>
-
-    <div id="controls">
-        WASD — Move<br>
-        SHIFT — Sprint<br>
-        SPACE — Jump<br>
-        Mouse — Look
-    </div>
-
+<div id="rec">
+    <span id="dot"></span>REC
 </div>
 
+<div id="danger"></div>
+<div id="vhs"></div>
+<div id="vignette"></div>
 
 <script type="importmap">
 {
-    "imports": {
-        "three":
-        "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+    "imports":{
+        "three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
     }
 }
 </script>
-
 
 <script type="module">
 
@@ -273,196 +274,25 @@ import * as THREE from "three";
 
 
 /* =========================================================
-   SETTINGS
+   BASIC SETUP
 ========================================================= */
 
-const CELL_SIZE = 4;
-
-const PLAYER_RADIUS = .35;
-const ENTITY_RADIUS = .38;
-
-const WALK_SPEED = 4.5;
-const SPRINT_SPEED = 7.5;
-
-const ENTITY_SPEED = SPRINT_SPEED;
-
-const JUMP_FORCE = 7.5;
-const GRAVITY = 20;
-
-const MAX_STAMINA = 100;
-const SPRINT_DRAIN = 27;
-const STAMINA_REGEN = 17;
-
-let stamina = MAX_STAMINA;
-
-let verticalVelocity = 0;
-let grounded = true;
-let isFalling = false;
-
-
-/* =========================================================
-   LEVEL 0 MAP
-
-   Large open areas + halls.
-========================================================= */
-
-const LEVEL_0_MAP = [
-
-"############################################################",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........#########.......................................#",
-"#..........#.......#.......................................#",
-"#..........#.......#.......................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#.........................########........................#",
-"#.........................#......#........................#",
-"#.........................#......#........................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#.....####.................................................#",
-"#.....#...................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#............................#########.....................#",
-"#............................#.......#.....................#",
-"#............................#.......#.....................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#........########.........................................#",
-"#........#......#.........................................#",
-"#........#......#.........................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#....................##########............................#",
-"#....................#........#............................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"############################################################"
-
-];
-
-
-/* =========================================================
-   LEVEL 188 MAP
-========================================================= */
-
-const LEVEL_188_MAP = [
-
-"############################################################",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#.........##########.......................................#",
-"#.........#........#.......................................#",
-"#.........#........#.......................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#.......................############.......................#",
-"#.......................#..........#.......................#",
-"#.......................#..........#.......................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#.....#########..........................................#",
-"#.....#.......#..........................................#",
-"#.....#.......#..........................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#...............................#########..................#",
-"#...............................#.......#..................#",
-"#...............................#.......#..................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#........########.........................................#",
-"#........#......#.........................................#",
-"#........#......#.........................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#......................##########..........................#",
-"#......................#........#..........................#",
-"#......................#........#..........................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#............###########...................................#",
-"#............#.........#...................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"#..........................................................#",
-"############################################################"
-
-];
-
-
-let currentLevel =
-    localStorage.getItem("backroomsLevel") || "level0";
-
-let MAP =
-    currentLevel === "level188"
-    ? LEVEL_188_MAP
-    : LEVEL_0_MAP;
-
-
-/* =========================================================
-   SCENE
-========================================================= */
-
-const scene = new THREE.Scene();
+const scene =
+    new THREE.Scene();
 
 const camera =
     new THREE.PerspectiveCamera(
         75,
         innerWidth / innerHeight,
         .05,
-        220
+        300
     );
 
 camera.rotation.order = "YXZ";
 
 const renderer =
     new THREE.WebGLRenderer({
-        antialias: true
+        antialias:true
     });
 
 renderer.setSize(
@@ -471,1036 +301,49 @@ renderer.setSize(
 );
 
 renderer.setPixelRatio(
-    Math.min(devicePixelRatio, 2)
+    Math.min(devicePixelRatio,2)
 );
 
 renderer.outputColorSpace =
     THREE.SRGBColorSpace;
 
-document
-    .getElementById("game")
-    .appendChild(renderer.domElement);
-
-
-/* =========================================================
-   LEVEL MATERIALS
-========================================================= */
-
-let wallMaterial;
-let floorMaterial;
-
-
-if(currentLevel === "level188") {
-
-    scene.background =
-        new THREE.Color(0x111820);
-
-    scene.fog =
-        new THREE.Fog(
-            0x111820,
-            12,
-            80
-        );
-
-    wallMaterial =
-        new THREE.MeshStandardMaterial({
-            color: 0xaaa39a,
-            roughness: .9
-        });
-
-    floorMaterial =
-        new THREE.MeshStandardMaterial({
-            color: 0x403c39,
-            roughness: 1
-        });
-
-} else {
-
-    scene.background =
-        new THREE.Color(0x17150b);
-
-    scene.fog =
-        new THREE.Fog(
-            0x17150b,
-            10,
-            70
-        );
-
-    wallMaterial =
-        new THREE.MeshStandardMaterial({
-            map: makeWallTexture(),
-            roughness: 1
-        });
-
-    floorMaterial =
-        new THREE.MeshStandardMaterial({
-            map: makeFloorTexture(),
-            roughness: 1
-        });
-}
-
-
-/* =========================================================
-   LEVEL 0 WALLPAPER
-========================================================= */
-
-function makeWallTexture() {
-
-    const canvas =
-        document.createElement("canvas");
-
-    canvas.width = 1024;
-    canvas.height = 1024;
-
-    const ctx =
-        canvas.getContext("2d");
-
-    ctx.fillStyle = "#c5b344";
-
-    ctx.fillRect(
-        0,
-        0,
-        1024,
-        1024
-    );
-
-    for(
-        let x = 0;
-        x < 1024;
-        x += 30
-    ) {
-
-        ctx.fillStyle =
-            "rgba(80,65,10,.12)";
-
-        ctx.fillRect(
-            x,
-            0,
-            2,
-            1024
-        );
-    }
-
-    for(
-        let i = 0;
-        i < 50000;
-        i++
-    ) {
-
-        ctx.fillStyle =
-            Math.random() > .5
-            ? "rgba(255,240,120,.06)"
-            : "rgba(40,30,5,.09)";
-
-        const size =
-            Math.random() * 3 + 1;
-
-        ctx.fillRect(
-            Math.random() * 1024,
-            Math.random() * 1024,
-            size,
-            size
-        );
-    }
-
-    const texture =
-        new THREE.CanvasTexture(canvas);
-
-    texture.wrapS =
-        THREE.RepeatWrapping;
-
-    texture.wrapT =
-        THREE.RepeatWrapping;
-
-    texture.repeat.set(
-        2.5,
-        2.5
-    );
-
-    return texture;
-}
-
-
-/* =========================================================
-   DAMP GREY CARPET
-========================================================= */
-
-function makeFloorTexture() {
-
-    const canvas =
-        document.createElement("canvas");
-
-    canvas.width = 1024;
-    canvas.height = 1024;
-
-    const ctx =
-        canvas.getContext("2d");
-
-    ctx.fillStyle = "#555754";
-
-    ctx.fillRect(
-        0,
-        0,
-        1024,
-        1024
-    );
-
-    /*
-       Carpet fibers.
-    */
-
-    for(
-        let i = 0;
-        i < 65000;
-        i++
-    ) {
-
-        const shade =
-            90 +
-            Math.floor(
-                Math.random() * 45
-            );
-
-        ctx.fillStyle =
-            `rgba(
-                ${shade},
-                ${shade},
-                ${shade - 4},
-                .07
-            )`;
-
-        const size =
-            Math.random() * 3 + 1;
-
-        ctx.fillRect(
-            Math.random() * 1024,
-            Math.random() * 1024,
-            size,
-            size
-        );
-    }
-
-    /*
-       Damp stains.
-    */
-
-    for(
-        let i = 0;
-        i < 80;
-        i++
-    ) {
-
-        const x =
-            Math.random() * 1024;
-
-        const y =
-            Math.random() * 1024;
-
-        const radius =
-            Math.random() * 60 + 15;
-
-        const gradient =
-            ctx.createRadialGradient(
-                x,
-                y,
-                0,
-                x,
-                y,
-                radius
-            );
-
-        gradient.addColorStop(
-            0,
-            "rgba(15,20,18,.25)"
-        );
-
-        gradient.addColorStop(
-            .55,
-            "rgba(30,35,32,.11)"
-        );
-
-        gradient.addColorStop(
-            1,
-            "rgba(20,25,22,0)"
-        );
-
-        ctx.fillStyle = gradient;
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x,
-            y,
-            radius,
-            0,
-            Math.PI * 2
-        );
-
-        ctx.fill();
-    }
-
-    const texture =
-        new THREE.CanvasTexture(canvas);
-
-    texture.wrapS =
-        THREE.RepeatWrapping;
-
-    texture.wrapT =
-        THREE.RepeatWrapping;
-
-    texture.repeat.set(
-        3,
-        3
-    );
-
-    return texture;
-}
-
-
-/* =========================================================
-   LIGHTING
-========================================================= */
-
-scene.add(
-    new THREE.AmbientLight(
-        currentLevel === "level188"
-        ? 0xc8d7df
-        : 0xffe6a1,
-
-        currentLevel === "level188"
-        ? 1
-        : 1.7
-    )
+document.body.appendChild(
+    renderer.domElement
 );
 
 
 /* =========================================================
-   MAP FUNCTIONS
+   GAME STATE
 ========================================================= */
 
-function cellToWorld(row, col) {
+let currentLevel = null;
+let gameStarted = false;
+let paused = false;
 
-    const width =
-        MAP[0].length;
+let worldObjects = [];
+let colliders = [];
 
-    return new THREE.Vector3(
+let entity = null;
 
-        (col - width / 2 + .5)
-        * CELL_SIZE,
+let entityPath = [];
+let pathTimer = 0;
 
-        0,
+let falling = false;
 
-        (row - MAP.length / 2 + .5)
-        * CELL_SIZE
-    );
-}
+let velocityY = 0;
+let grounded = true;
 
+let stamina = 100;
 
-function isWall(row, col) {
+const WALK_SPEED = 4.5;
+const SPRINT_SPEED = 7.5;
+const ENTITY_SPEED = 7.5;
 
-    if(
-        row < 0 ||
-        row >= MAP.length ||
-        col < 0 ||
-        col >= MAP[0].length
-    )
-        return true;
+const GRAVITY = 20;
+const JUMP = 7.5;
 
-    return MAP[row][col] === "#";
-}
-
-
-function worldToCell(position) {
-
-    return {
-
-        row: Math.floor(
-            position.z / CELL_SIZE +
-            MAP.length / 2
-        ),
-
-        col: Math.floor(
-            position.x / CELL_SIZE +
-            MAP[0].length / 2
-        )
-
-    };
-}
-
-
-/* =========================================================
-   LEVEL 0 FLOOR
-========================================================= */
-
-const floorTiles = [];
-
-const holeCells = new Set();
-
-
-function createLevel0Floor() {
-
-    for(
-        let r = 0;
-        r < MAP.length;
-        r++
-    ) {
-
-        for(
-            let c = 0;
-            c < MAP[r].length;
-            c++
-        ) {
-
-            if(
-                MAP[r][c] === "#"
-            )
-                continue;
-
-            const pos =
-                cellToWorld(r, c);
-
-            const tile =
-                new THREE.Mesh(
-
-                    new THREE.PlaneGeometry(
-                        CELL_SIZE * .94,
-                        CELL_SIZE * .94
-                    ),
-
-                    floorMaterial
-                );
-
-            tile.rotation.x =
-                -Math.PI / 2;
-
-            tile.position.set(
-                pos.x,
-                0,
-                pos.z
-            );
-
-            scene.add(tile);
-
-            floorTiles.push(tile);
-        }
-    }
-}
-
-
-/* =========================================================
-   REAL GRID OF HOLES
-========================================================= */
-
-function createHoleGrid() {
-
-    /*
-       This section is deliberately
-       placed in the large open area
-       on the right side of Level 0.
-    */
-
-    const startRow = 19;
-    const endRow = 37;
-
-    const startCol = 38;
-    const endCol = 53;
-
-    for(
-        let r = startRow;
-        r <= endRow;
-        r++
-    ) {
-
-        for(
-            let c = startCol;
-            c <= endCol;
-            c++
-        ) {
-
-            if(
-                r < 0 ||
-                r >= MAP.length ||
-                c < 0 ||
-                c >= MAP[r].length
-            )
-                continue;
-
-            if(
-                MAP[r][c] === "#"
-            )
-                continue;
-
-            /*
-               Checkerboard grid.
-            */
-
-            if(
-                (r + c) % 2 !== 0
-            )
-                continue;
-
-            const key =
-                `${r},${c}`;
-
-            holeCells.add(key);
-
-            /*
-               Remove the normal floor tile.
-            */
-
-            for(
-                let i = floorTiles.length - 1;
-                i >= 0;
-                i--
-            ) {
-
-                const tile =
-                    floorTiles[i];
-
-                const cell =
-                    worldToCell(
-                        tile.position
-                    );
-
-                if(
-                    cell.row === r &&
-                    cell.col === c
-                ) {
-
-                    scene.remove(tile);
-
-                    floorTiles.splice(
-                        i,
-                        1
-                    );
-
-                    break;
-                }
-            }
-
-            /*
-               Deep bottom of the hole.
-            */
-
-            const pos =
-                cellToWorld(r, c);
-
-            const pit =
-                new THREE.Mesh(
-
-                    new THREE.PlaneGeometry(
-                        CELL_SIZE,
-                        CELL_SIZE
-                    ),
-
-                    new THREE.MeshBasicMaterial({
-                        color: 0x020302
-                    })
-                );
-
-            pit.rotation.x =
-                -Math.PI / 2;
-
-            pit.position.set(
-                pos.x,
-                -20,
-                pos.z
-            );
-
-            scene.add(pit);
-        }
-    }
-}
-
-
-/* =========================================================
-   LEVEL FLOORS
-========================================================= */
-
-if(
-    currentLevel === "level0"
-) {
-
-    createLevel0Floor();
-
-    createHoleGrid();
-
-} else {
-
-    const floor =
-        new THREE.Mesh(
-
-            new THREE.PlaneGeometry(
-                MAP[0].length * CELL_SIZE,
-                MAP.length * CELL_SIZE
-            ),
-
-            floorMaterial
-        );
-
-    floor.rotation.x =
-        -Math.PI / 2;
-
-    scene.add(floor);
-
-    /*
-       Second floor.
-    */
-
-    const secondFloor =
-        floor.clone();
-
-    secondFloor.position.y = 7;
-
-    scene.add(secondFloor);
-}
-
-
-/* =========================================================
-   WALLS + COLLISION BOXES
-========================================================= */
-
-const wallBoxes = [];
-
-
-function createWalls(yOffset = 0) {
-
-    const geometry =
-        new THREE.BoxGeometry(
-            CELL_SIZE,
-            3.5,
-            CELL_SIZE
-        );
-
-    for(
-        let r = 0;
-        r < MAP.length;
-        r++
-    ) {
-
-        for(
-            let c = 0;
-            c < MAP[r].length;
-            c++
-        ) {
-
-            if(
-                MAP[r][c] !== "#"
-            )
-                continue;
-
-            const pos =
-                cellToWorld(r, c);
-
-            const wall =
-                new THREE.Mesh(
-                    geometry,
-                    wallMaterial
-                );
-
-            wall.position.set(
-                pos.x,
-                1.75 + yOffset,
-                pos.z
-            );
-
-            scene.add(wall);
-
-            wallBoxes.push(
-                new THREE.Box3()
-                    .setFromObject(wall)
-            );
-        }
-    }
-}
-
-
-createWalls(0);
-
-if(
-    currentLevel === "level188"
-) {
-
-    createWalls(7);
-}
-
-
-/* =========================================================
-   LEVEL 188 COURTYARD
-========================================================= */
-
-if(
-    currentLevel === "level188"
-) {
-
-    /*
-       Grass area.
-    */
-
-    const grass =
-        new THREE.Mesh(
-
-            new THREE.PlaneGeometry(
-                32,
-                26
-            ),
-
-            new THREE.MeshStandardMaterial({
-                color: 0x304d27,
-                roughness: 1
-            })
-        );
-
-    grass.rotation.x =
-        -Math.PI / 2;
-
-    grass.position.set(
-        0,
-        -.04,
-        0
-    );
-
-    scene.add(grass);
-
-
-    /*
-       Bridge.
-    */
-
-    const bridge =
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                12,
-                .45,
-                4
-            ),
-
-            new THREE.MeshStandardMaterial({
-                color: 0x5b514a,
-                roughness: .9
-            })
-        );
-
-    bridge.position.set(
-        0,
-        7,
-        0
-    );
-
-    scene.add(bridge);
-
-
-    /*
-       Bridge railings.
-    */
-
-    const railMaterial =
-        new THREE.MeshStandardMaterial({
-            color: 0x302d2b,
-            roughness: .8
-        });
-
-
-    for(
-        const x of [-5.7, 5.7]
-    ) {
-
-        const rail =
-            new THREE.Mesh(
-
-                new THREE.BoxGeometry(
-                    .2,
-                    1.1,
-                    4
-                ),
-
-                railMaterial
-            );
-
-        rail.position.set(
-            x,
-            7.7,
-            0
-        );
-
-        scene.add(rail);
-    }
-
-
-    /*
-       Supports.
-    */
-
-    for(
-        const x of [-4, 4]
-    ) {
-
-        const support =
-            new THREE.Mesh(
-
-                new THREE.BoxGeometry(
-                    .4,
-                    7,
-                    .4
-                ),
-
-                railMaterial
-            );
-
-        support.position.set(
-            x,
-            3.5,
-            0
-        );
-
-        scene.add(support);
-    }
-}
-
-
-/* =========================================================
-   CEILINGS
-========================================================= */
-
-function createCeiling(y) {
-
-    const ceiling =
-        new THREE.Mesh(
-
-            new THREE.PlaneGeometry(
-                MAP[0].length * CELL_SIZE,
-                MAP.length * CELL_SIZE
-            ),
-
-            new THREE.MeshStandardMaterial({
-                color:
-                    currentLevel === "level188"
-                    ? 0x777b7d
-                    : 0x93883e,
-
-                roughness: 1
-            })
-        );
-
-    ceiling.rotation.x =
-        Math.PI / 2;
-
-    ceiling.position.y = y;
-
-    scene.add(ceiling);
-}
-
-
-createCeiling(3.5);
-
-if(
-    currentLevel === "level188"
-) {
-
-    createCeiling(10.5);
-}
-
-
-/* =========================================================
-   LIGHTS
-========================================================= */
-
-function createLights(yOffset = 0) {
-
-    for(
-        let r = 1;
-        r < MAP.length - 1;
-        r++
-    ) {
-
-        for(
-            let c = 1;
-            c < MAP[r].length - 1;
-            c++
-        ) {
-
-            if(
-                MAP[r][c] !== "."
-            )
-                continue;
-
-            if(
-                Math.random() >
-                (
-                    currentLevel === "level188"
-                    ? .09
-                    : .17
-                )
-            )
-                continue;
-
-            const pos =
-                cellToWorld(r, c);
-
-            const light =
-                new THREE.PointLight(
-
-                    currentLevel === "level188"
-                    ? 0xc7d9e4
-                    : 0xffe8a0,
-
-                    currentLevel === "level188"
-                    ? 2.4
-                    : 4.2,
-
-                    15
-                );
-
-            light.position.set(
-                pos.x,
-                3.1 + yOffset,
-                pos.z
-            );
-
-            scene.add(light);
-
-            const fixture =
-                new THREE.Mesh(
-
-                    new THREE.BoxGeometry(
-                        1.5,
-                        .06,
-                        .45
-                    ),
-
-                    new THREE.MeshBasicMaterial({
-                        color:
-                            currentLevel === "level188"
-                            ? 0xe4f0ff
-                            : 0xffffcf
-                    })
-                );
-
-            fixture.position.copy(
-                light.position
-            );
-
-            scene.add(fixture);
-        }
-    }
-}
-
-
-createLights(0);
-
-if(
-    currentLevel === "level188"
-) {
-
-    createLights(7);
-}
-
-
-/* =========================================================
-   COLLISION
-========================================================= */
-
-function circleHitsWall(
-    position,
-    radius
-) {
-
-    for(
-        const box of wallBoxes
-    ) {
-
-        const closestX =
-            Math.max(
-                box.min.x,
-                Math.min(
-                    position.x,
-                    box.max.x
-                )
-            );
-
-        const closestZ =
-            Math.max(
-                box.min.z,
-                Math.min(
-                    position.z,
-                    box.max.z
-                )
-            );
-
-        const dx =
-            position.x - closestX;
-
-        const dz =
-            position.z - closestZ;
-
-        if(
-            dx * dx +
-            dz * dz <
-            radius * radius
-        )
-            return true;
-    }
-
-    return false;
-}
-
-
-function moveWithCollision(
-    object,
-    direction,
-    speed,
-    radius,
-    delta
-) {
-
-    const movement =
-        direction.clone()
-        .multiplyScalar(
-            speed * delta
-        );
-
-    /*
-       X movement.
-    */
-
-    const nextX =
-        object.position.clone();
-
-    nextX.x += movement.x;
-
-    if(
-        !circleHitsWall(
-            nextX,
-            radius
-        )
-    ) {
-
-        object.position.x =
-            nextX.x;
-    }
-
-
-    /*
-       Z movement.
-    */
-
-    const nextZ =
-        object.position.clone();
-
-    nextZ.z += movement.z;
-
-    if(
-        !circleHitsWall(
-            nextZ,
-            radius
-        )
-    ) {
-
-        object.position.z =
-            nextZ.z;
-    }
-}
+const PLAYER_RADIUS = .38;
+const ENTITY_RADIUS = .38;
 
 
 /* =========================================================
@@ -1509,12 +352,6 @@ function moveWithCollision(
 
 const player =
     new THREE.Object3D();
-
-player.position.copy(
-    cellToWorld(1, 1)
-);
-
-player.position.y = 1.65;
 
 scene.add(player);
 
@@ -1536,54 +373,46 @@ let pitch = 0;
 
 const keys = {};
 
-
 addEventListener(
     "keydown",
     e => {
 
-        keys[
-            e.key.toLowerCase()
-        ] = true;
+        keys[e.key.toLowerCase()] = true;
 
-
-        /*
-           Jump.
-        */
-
-        if(
-            e.code === "Space"
-        ) {
-
+        if(e.code === "Space"){
             e.preventDefault();
 
             if(
                 grounded &&
-                !isFalling
-            ) {
-
-                verticalVelocity =
-                    JUMP_FORCE;
-
+                !falling &&
+                gameStarted &&
+                !paused
+            ){
+                velocityY = JUMP;
                 grounded = false;
             }
+        }
+
+        if(
+            e.code === "Escape" ||
+            e.key.toLowerCase() === "p"
+        ){
+            if(gameStarted)
+                togglePause();
         }
     }
 );
 
-
 addEventListener(
     "keyup",
     e => {
-
-        keys[
-            e.key.toLowerCase()
-        ] = false;
+        keys[e.key.toLowerCase()] = false;
     }
 );
 
 
 /* =========================================================
-   MOUSE LOOK
+   MOUSE
 ========================================================= */
 
 document.addEventListener(
@@ -1596,11 +425,8 @@ document.addEventListener(
         )
             return;
 
-        yaw -=
-            e.movementX * .002;
-
-        pitch -=
-            e.movementY * .002;
+        yaw -= e.movementX * .002;
+        pitch -= e.movementY * .002;
 
         pitch =
             Math.max(
@@ -1611,25 +437,1567 @@ document.addEventListener(
                 )
             );
 
-        player.rotation.y =
-            yaw;
-
-        camera.rotation.x =
-            pitch;
+        player.rotation.y = yaw;
+        camera.rotation.x = pitch;
     }
 );
+
+
+/* =========================================================
+   MATERIAL HELPERS
+========================================================= */
+
+function material(
+    color,
+    roughness=1
+){
+    return new THREE.MeshStandardMaterial({
+        color,
+        roughness
+    });
+}
+
+
+/* =========================================================
+   LEVEL CLEANUP
+========================================================= */
+
+function clearWorld(){
+
+    for(
+        const object of worldObjects
+    ){
+        scene.remove(object);
+    }
+
+    worldObjects = [];
+    colliders = [];
+
+    entity = null;
+
+    entitySound.pause();
+
+    entitySound.currentTime = 0;
+}
+
+
+/* =========================================================
+   ADD OBJECT
+========================================================= */
+
+function addObject(object){
+
+    scene.add(object);
+    worldObjects.push(object);
+
+    return object;
+}
+
+
+/* =========================================================
+   COLLIDER
+========================================================= */
+
+function addCollider(object){
+
+    const box =
+        new THREE.Box3()
+        .setFromObject(object);
+
+    colliders.push(box);
+}
+
+
+/* =========================================================
+   PLAYER COLLISION
+========================================================= */
+
+function hitsWall(position){
+
+    for(
+        const box of colliders
+    ){
+
+        const x =
+            Math.max(
+                box.min.x,
+                Math.min(
+                    position.x,
+                    box.max.x
+                )
+            );
+
+        const z =
+            Math.max(
+                box.min.z,
+                Math.min(
+                    position.z,
+                    box.max.z
+                )
+            );
+
+        const dx =
+            position.x - x;
+
+        const dz =
+            position.z - z;
+
+        if(
+            dx*dx +
+            dz*dz <
+            PLAYER_RADIUS *
+            PLAYER_RADIUS
+        ){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+function moveObject(
+    object,
+    direction,
+    speed,
+    radius
+){
+
+    const movement =
+        direction
+        .clone()
+        .multiplyScalar(
+            speed *
+            clock.getDelta()
+        );
+
+    let next =
+        object.position.clone();
+
+    next.x += movement.x;
+
+    if(
+        !hitsWallRadius(
+            next,
+            radius
+        )
+    ){
+        object.position.x =
+            next.x;
+    }
+
+    next =
+        object.position.clone();
+
+    next.z += movement.z;
+
+    if(
+        !hitsWallRadius(
+            next,
+            radius
+        )
+    ){
+        object.position.z =
+            next.z;
+    }
+}
+
+
+function hitsWallRadius(
+    position,
+    radius
+){
+
+    for(
+        const box of colliders
+    ){
+
+        const x =
+            Math.max(
+                box.min.x,
+                Math.min(
+                    position.x,
+                    box.max.x
+                )
+            );
+
+        const z =
+            Math.max(
+                box.min.z,
+                Math.min(
+                    position.z,
+                    box.max.z
+                )
+            );
+
+        const dx =
+            position.x - x;
+
+        const dz =
+            position.z - z;
+
+        if(
+            dx*dx +
+            dz*dz <
+            radius*radius
+        ){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+/* =========================================================
+   BACKROOMS TEXTURES
+========================================================= */
+
+function wallpaperTexture(){
+
+    const c =
+        document.createElement("canvas");
+
+    c.width = 1024;
+    c.height = 1024;
+
+    const x =
+        c.getContext("2d");
+
+    x.fillStyle="#c7b64c";
+    x.fillRect(0,0,1024,1024);
+
+    for(
+        let i=0;
+        i<40000;
+        i++
+    ){
+
+        const s =
+            Math.random()*3+1;
+
+        x.fillStyle =
+            Math.random()>.5
+            ? "rgba(255,240,100,.06)"
+            : "rgba(50,40,5,.09)";
+
+        x.fillRect(
+            Math.random()*1024,
+            Math.random()*1024,
+            s,
+            s
+        );
+    }
+
+    for(
+        let i=0;
+        i<35;
+        i++
+    ){
+
+        x.strokeStyle =
+            "rgba(70,55,5,.12)";
+
+        x.lineWidth=2;
+
+        const xx =
+            Math.random()*1024;
+
+        x.beginPath();
+        x.moveTo(xx,0);
+        x.lineTo(
+            xx + Math.random()*30-15,
+            1024
+        );
+        x.stroke();
+    }
+
+    const texture =
+        new THREE.CanvasTexture(c);
+
+    texture.wrapS =
+        THREE.RepeatWrapping;
+
+    texture.wrapT =
+        THREE.RepeatWrapping;
+
+    texture.repeat.set(2.5,2.5);
+
+    return texture;
+}
+
+
+function carpetTexture(){
+
+    const c =
+        document.createElement("canvas");
+
+    c.width=1024;
+    c.height=1024;
+
+    const x =
+        c.getContext("2d");
+
+    x.fillStyle="#555754";
+    x.fillRect(0,0,1024,1024);
+
+    for(
+        let i=0;
+        i<70000;
+        i++
+    ){
+
+        const s =
+            Math.random()*3+1;
+
+        const v =
+            70 +
+            Math.random()*45;
+
+        x.fillStyle =
+            `rgba(${v},${v},${v},.10)`;
+
+        x.fillRect(
+            Math.random()*1024,
+            Math.random()*1024,
+            s,
+            s
+        );
+    }
+
+    for(
+        let i=0;
+        i<70;
+        i++
+    ){
+
+        const px =
+            Math.random()*1024;
+
+        const py =
+            Math.random()*1024;
+
+        const r =
+            15+Math.random()*55;
+
+        const g =
+            x.createRadialGradient(
+                px,py,0,
+                px,py,r
+            );
+
+        g.addColorStop(
+            0,
+            "rgba(15,20,18,.25)"
+        );
+
+        g.addColorStop(
+            1,
+            "rgba(15,20,18,0)"
+        );
+
+        x.fillStyle=g;
+
+        x.beginPath();
+        x.arc(px,py,r,0,Math.PI*2);
+        x.fill();
+    }
+
+    return new THREE.CanvasTexture(c);
+}
+
+
+/* =========================================================
+   CREATE FLOOR
+========================================================= */
+
+function createFloor(
+    width,
+    depth,
+    y,
+    mat
+){
+
+    const floor =
+        new THREE.Mesh(
+            new THREE.PlaneGeometry(
+                width,
+                depth
+            ),
+            mat
+        );
+
+    floor.rotation.x =
+        -Math.PI/2;
+
+    floor.position.y=y;
+
+    addObject(floor);
+
+    return floor;
+}
+
+
+/* =========================================================
+   CREATE BOX
+========================================================= */
+
+function box(
+    w,
+    h,
+    d,
+    x,
+    y,
+    z,
+    mat,
+    collision=true
+){
+
+    const object =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                w,h,d
+            ),
+            mat
+        );
+
+    object.position.set(
+        x,y,z
+    );
+
+    addObject(object);
+
+    if(collision)
+        addCollider(object);
+
+    return object;
+}
+
+
+/* =========================================================
+   BACKROOMS
+========================================================= */
+
+function buildBackrooms(){
+
+    currentLevel="backrooms";
+
+    document
+        .getElementById("level")
+        .textContent =
+        "BACKROOMS";
+
+    scene.background =
+        new THREE.Color(
+            0x16140a
+        );
+
+    scene.fog =
+        new THREE.Fog(
+            0x16140a,
+            12,
+            90
+        );
+
+    scene.add(
+        new THREE.AmbientLight(
+            0xffe7a0,
+            1.5
+        )
+    );
+
+    const wallMat =
+        new THREE.MeshStandardMaterial({
+            map:wallpaperTexture(),
+            roughness:1
+        });
+
+    const floorMat =
+        new THREE.MeshStandardMaterial({
+            map:carpetTexture(),
+            roughness:1
+        });
+
+    const width=150;
+    const depth=130;
+    const wallH=4;
+
+    createFloor(
+        width,
+        depth,
+        0,
+        floorMat
+    );
+
+
+    /*
+       Ceiling.
+    */
+
+    const ceiling =
+        new THREE.Mesh(
+            new THREE.PlaneGeometry(
+                width,
+                depth
+            ),
+            material(0x89803d)
+        );
+
+    ceiling.rotation.x=
+        Math.PI/2;
+
+    ceiling.position.y=
+        wallH;
+
+    addObject(ceiling);
+
+
+    /*
+       Outer walls.
+    */
+
+    box(
+        width,
+        wallH,
+        1,
+        0,
+        wallH/2,
+        -depth/2,
+        wallMat
+    );
+
+    box(
+        width,
+        wallH,
+        1,
+        0,
+        wallH/2,
+        depth/2,
+        wallMat
+    );
+
+    box(
+        1,
+        wallH,
+        depth,
+        -width/2,
+        wallH/2,
+        0,
+        wallMat
+    );
+
+    box(
+        1,
+        wallH,
+        depth,
+        width/2,
+        wallH/2,
+        0,
+        wallMat
+    );
+
+
+    /*
+       Interior hall network.
+       Large openings are deliberately
+       left between the walls.
+    */
+
+    const walls=[
+        [-40,0,70,1],
+        [40,0,70,1],
+        [0,-38,1,75],
+        [0,38,1,75],
+
+        [-20,-15,1,42],
+        [20,15,1,42],
+
+        [-48,22,35,1],
+        [48,-22,35,1],
+
+        [-15,5,28,1],
+        [15,-5,28,1],
+
+        [-55,-38,1,35],
+        [55,38,1,35]
+    ];
+
+    for(
+        const w of walls
+    ){
+
+        if(w[2] > w[3]){
+
+            box(
+                w[2],
+                wallH,
+                w[3],
+                w[0],
+                wallH/2,
+                w[1],
+                wallMat
+            );
+
+        }else{
+
+            box(
+                w[2],
+                wallH,
+                w[3],
+                w[0],
+                wallH/2,
+                w[1],
+                wallMat
+            );
+        }
+    }
+
+
+    /*
+       Fluorescent lights.
+    */
+
+    const lightMat =
+        new THREE.MeshBasicMaterial({
+            color:0xffffd0
+        });
+
+    for(
+        let x=-60;
+        x<=60;
+        x+=12
+    ){
+
+        for(
+            let z=-50;
+            z<=50;
+            z+=14
+        ){
+
+            const fixture =
+                new THREE.Mesh(
+                    new THREE.BoxGeometry(
+                        2.2,.08,.45
+                    ),
+                    lightMat
+                );
+
+            fixture.position.set(
+                x,
+                3.82,
+                z
+            );
+
+            addObject(fixture);
+
+            const light =
+                new THREE.PointLight(
+                    0xffeaa0,
+                    2.8,
+                    16
+                );
+
+            light.position.set(
+                x,
+                3.65,
+                z
+            );
+
+            addObject(light);
+        }
+    }
+
+
+    /*
+       Deadly square-hole grid.
+       It is a large regular grid,
+       not random holes.
+    */
+
+    const holeMaterial =
+        new THREE.MeshBasicMaterial({
+            color:0x010201
+        });
+
+    for(
+        let x=-18;
+        x<=18;
+        x+=4
+    ){
+
+        for(
+            let z=18;
+            z<=50;
+            z+=4
+        ){
+
+            const hole =
+                new THREE.Mesh(
+                    new THREE.PlaneGeometry(
+                        3.1,
+                        3.1
+                    ),
+                    holeMaterial
+                );
+
+            hole.rotation.x=
+                -Math.PI/2;
+
+            hole.position.set(
+                x,
+                -.15,
+                z
+            );
+
+            addObject(hole);
+        }
+    }
+
+
+    /*
+       Spawn away from the hole area.
+    */
+
+    player.position.set(
+        -45,
+        1.65,
+        -42
+    );
+
+    yaw=0;
+    pitch=0;
+
+    createEntity(
+        38,
+        38
+    );
+}
+
+
+/* =========================================================
+   HOTEL — LEVEL 188
+========================================================= */
+
+function buildHotel(){
+
+    currentLevel="hotel";
+
+    document
+        .getElementById("level")
+        .textContent =
+        "HOTEL";
+
+    scene.background =
+        new THREE.Color(
+            0x0d1013
+        );
+
+    scene.fog =
+        new THREE.Fog(
+            0x0d1013,
+            20,
+            130
+        );
+
+    scene.add(
+        new THREE.AmbientLight(
+            0x9aa6ad,
+            .75
+        )
+    );
+
+
+    const concrete =
+        material(
+            0x85827d,
+            .92
+        );
+
+    const darkConcrete =
+        material(
+            0x555450,
+            1
+        );
+
+    const courtyardGrass =
+        material(
+            0x263d20,
+            1
+        );
+
+    const carpet =
+        material(
+            0x4d4a46,
+            1
+        );
+
+
+    /*
+       CENTRAL COURTYARD
+
+       Large rectangular open area.
+    */
+
+    createFloor(
+        60,
+        70,
+        0,
+        courtyardGrass
+    );
+
+
+    /*
+       Paved perimeter.
+    */
+
+    const pavement =
+        material(
+            0x696762,
+            1
+        );
+
+    box(
+        8,
+        .15,
+        70,
+        -34,
+        .05,
+        0,
+        pavement,
+        false
+    );
+
+    box(
+        8,
+        .15,
+        70,
+        34,
+        .05,
+        0,
+        pavement,
+        false
+    );
+
+    box(
+        68,
+        .15,
+        8,
+        0,
+        .05,
+        -39,
+        pavement,
+        false
+    );
+
+    box(
+        68,
+        .15,
+        8,
+        0,
+        .05,
+        39,
+        pavement,
+        false
+    );
+
+
+    /*
+       Five hotel floors.
+    */
+
+    const FLOOR_HEIGHT=4.2;
+
+    for(
+        let floor=0;
+        floor<5;
+        floor++
+    ){
+
+        const y =
+            floor *
+            FLOOR_HEIGHT;
+
+        buildHotelFloor(
+            y,
+            concrete,
+            darkConcrete,
+            carpet
+        );
+    }
+
+
+    /*
+       Central bridge/walkway.
+    */
+
+    buildHotelBridge(
+        FLOOR_HEIGHT*2,
+        concrete
+    );
+
+
+    /*
+       Rooftop rim.
+    */
+
+    const top =
+        FLOOR_HEIGHT*5;
+
+    box(
+        78,
+        .6,
+        2,
+        0,
+        top,
+        -38,
+        darkConcrete
+    );
+
+    box(
+        78,
+        .6,
+        2,
+        0,
+        top,
+        38,
+        darkConcrete
+    );
+
+
+    /*
+       Hotel-style exterior lighting.
+    */
+
+    for(
+        let floor=0;
+        floor<5;
+        floor++
+    ){
+
+        const y =
+            2 +
+            floor*FLOOR_HEIGHT;
+
+        for(
+            let x=-28;
+            x<=28;
+            x+=7
+        ){
+
+            const light =
+                new THREE.PointLight(
+                    0xd7d0bd,
+                    .7,
+                    12
+                );
+
+            light.position.set(
+                x,
+                y,
+                -34
+            );
+
+            addObject(light);
+        }
+    }
+
+
+    /*
+       Spawn in the courtyard.
+    */
+
+    player.position.set(
+        0,
+        1.65,
+        27
+    );
+
+    yaw=Math.PI;
+    pitch=0;
+
+    createEntity(
+        -24,
+        -27
+    );
+}
+
+
+/* =========================================================
+   HOTEL FLOOR
+========================================================= */
+
+function buildHotelFloor(
+    y,
+    concrete,
+    darkConcrete,
+    carpet
+){
+
+    const H=3.8;
+
+    /*
+       Four building wings around courtyard.
+    */
+
+    const thickness=5;
+
+    /*
+       North.
+    */
+
+    buildWing(
+        0,
+        y,
+        -35,
+        76,
+        thickness,
+        H,
+        concrete,
+        carpet
+    );
+
+    /*
+       South.
+    */
+
+    buildWing(
+        0,
+        y,
+        35,
+        76,
+        thickness,
+        H,
+        concrete,
+        carpet
+    );
+
+    /*
+       West.
+    */
+
+    buildWing(
+        -35,
+        y,
+        0,
+        thickness,
+        70,
+        H,
+        concrete,
+        carpet
+    );
+
+    /*
+       East.
+    */
+
+    buildWing(
+        35,
+        y,
+        0,
+        thickness,
+        70,
+        H,
+        concrete,
+        carpet
+    );
+
+
+    /*
+       Window grids facing courtyard.
+    */
+
+    createWindowGrid(
+        -28,
+        y+2.0,
+        0,
+        "west"
+    );
+
+    createWindowGrid(
+        28,
+        y+2.0,
+        0,
+        "east"
+    );
+
+    createWindowGrid(
+        0,
+        y+2.0,
+        -28,
+        "north"
+    );
+
+    createWindowGrid(
+        0,
+        y+2.0,
+        28,
+        "south"
+    );
+
+
+    /*
+       Interior corridor around each floor.
+    */
+
+    createCorridor(
+        y,
+        carpet
+    );
+}
+
+
+/* =========================================================
+   HOTEL WING
+========================================================= */
+
+function buildWing(
+    x,
+    y,
+    z,
+    width,
+    depth,
+    height,
+    wallMat,
+    carpet
+){
+
+    /*
+       Floor slab.
+    */
+
+    box(
+        width,
+        .25,
+        depth,
+        x,
+        y,
+        z,
+        concreteMaterial(),
+        true
+    );
+
+
+    /*
+       Outer wall.
+    */
+
+    if(width > depth){
+
+        box(
+            width,
+            height,
+            1.5,
+            x,
+            y+height/2,
+            z,
+            wallMat
+        );
+
+    }else{
+
+        box(
+            1.5,
+            height,
+            depth,
+            x,
+            y+height/2,
+            z,
+            wallMat
+        );
+    }
+
+
+    /*
+       Roof/ceiling slab.
+    */
+
+    box(
+        width,
+        .25,
+        depth,
+        x,
+        y+height,
+        z,
+        wallMat
+    );
+}
+
+
+function concreteMaterial(){
+
+    return material(
+        0x686762,
+        .95
+    );
+}
+
+
+/* =========================================================
+   HOTEL WINDOWS
+========================================================= */
+
+function createWindowGrid(
+    x,
+    y,
+    z,
+    side
+){
+
+    const frame =
+        material(
+            0x353735,
+            .8
+        );
+
+    const darkGlass =
+        new THREE.MeshStandardMaterial({
+            color:0x101517,
+            roughness:.25,
+            metalness:.1,
+            emissive:0x020304
+        });
+
+    const litGlass =
+        new THREE.MeshStandardMaterial({
+            color:0xd0b878,
+            emissive:0x75632e,
+            emissiveIntensity:.45
+        });
+
+
+    /*
+       Windows are intentionally
+       small and repeated.
+    */
+
+    for(
+        let i=0;
+        i<8;
+        i++
+    ){
+
+        for(
+            let j=0;
+            j<2;
+            j++
+        ){
+
+            const lit =
+                Math.random()<.16;
+
+            const window =
+                new THREE.Mesh(
+                    new THREE.BoxGeometry(
+                        side==="north" ||
+                        side==="south"
+                        ? 3.1
+                        : .15,
+
+                        2.0,
+
+                        side==="north" ||
+                        side==="south"
+                        ? .15
+                        : 3.1
+                    ),
+
+                    lit
+                    ? litGlass
+                    : darkGlass
+                );
+
+
+            if(
+                side==="north" ||
+                side==="south"
+            ){
+
+                window.position.set(
+                    -25 +
+                    i*7,
+                    y,
+                    z
+                );
+
+            }else{
+
+                window.position.set(
+                    x,
+                    y,
+                    -25 +
+                    i*7
+                );
+            }
+
+            addObject(window);
+
+
+            /*
+               Four-sided window frame.
+            */
+
+            const wx =
+                side==="north" ||
+                side==="south"
+                ? 3.5
+                : .25;
+
+            const wz =
+                side==="north" ||
+                side==="south"
+                ? .25
+                : 3.5;
+
+            const top =
+                new THREE.Mesh(
+                    new THREE.BoxGeometry(
+                        wx,
+                        .15,
+                        wz
+                    ),
+                    frame
+                );
+
+            top.position.copy(
+                window.position
+            );
+
+            top.position.y += 1.1;
+
+            addObject(top);
+
+
+            const bottom =
+                top.clone();
+
+            bottom.position.y -= 2.2;
+
+            addObject(bottom);
+        }
+    }
+}
+
+
+/* =========================================================
+   HOTEL CORRIDORS
+========================================================= */
+
+function createCorridor(
+    y,
+    carpet
+){
+
+    /*
+       Long interior walkways.
+    */
+
+    const floor =
+        new THREE.Mesh(
+            new THREE.PlaneGeometry(
+                62,
+                4
+            ),
+            carpet
+        );
+
+    floor.rotation.x=
+        -Math.PI/2;
+
+    floor.position.set(
+        0,
+        y+.15,
+        -31
+    );
+
+    addObject(floor);
+
+
+    const floor2 =
+        floor.clone();
+
+    floor2.position.z=31;
+
+    addObject(floor2);
+
+
+    const side =
+        new THREE.Mesh(
+            new THREE.PlaneGeometry(
+                62,
+                4
+            ),
+            carpet
+        );
+
+    side.rotation.x=
+        -Math.PI/2;
+
+    side.rotation.z=
+        Math.PI/2;
+
+    side.position.set(
+        -31,
+        y+.15,
+        0
+    );
+
+    addObject(side);
+
+
+    const side2 =
+        side.clone();
+
+    side2.position.x=31;
+
+    addObject(side2);
+
+
+    /*
+       Doors along corridors.
+    */
+
+    for(
+        let x=-25;
+        x<=25;
+        x+=7
+    ){
+
+        createDoor(
+            x,
+            y+1.8,
+            -32
+        );
+
+        createDoor(
+            x,
+            y+1.8,
+            32
+        );
+    }
+}
+
+
+function createDoor(
+    x,
+    y,
+    z
+){
+
+    const door =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                2.8,
+                3.3,
+                .15
+            ),
+            material(0x403b36,.8)
+        );
+
+    door.position.set(
+        x,y,z
+    );
+
+    addObject(door);
+
+    addCollider(door);
+}
+
+
+/* =========================================================
+   HOTEL BRIDGE
+========================================================= */
+
+function buildHotelBridge(
+    y,
+    mat
+){
+
+    const bridge =
+        box(
+            12,
+            .35,
+            50,
+            0,
+            y,
+            0,
+            mat
+        );
+
+
+    /*
+       Rails.
+    */
+
+    box(
+        .2,
+        1.1,
+        50,
+        -5.7,
+        y+.7,
+        0,
+        darkRailMaterial()
+    );
+
+    box(
+        .2,
+        1.1,
+        50,
+        5.7,
+        y+.7,
+        0,
+        darkRailMaterial()
+    );
+
+
+    /*
+       Supports.
+    */
+
+    for(
+        let z=-18;
+        z<=18;
+        z+=12
+    ){
+
+        box(
+            .35,
+            y,
+            .35,
+            -4,
+            y/2,
+            z,
+            darkRailMaterial()
+        );
+
+        box(
+            .35,
+            y,
+            .35,
+            4,
+            y/2,
+            z,
+            darkRailMaterial()
+        );
+    }
+}
+
+
+function darkRailMaterial(){
+
+    return material(
+        0x292b29,
+        .8
+    );
+}
 
 
 /* =========================================================
    ENTITY
 ========================================================= */
 
-const textureLoader =
-    new THREE.TextureLoader();
-
-
 const entityTexture =
-    textureLoader.load(
+    new THREE.TextureLoader()
+    .load(
         "./entity.png"
     );
 
@@ -1637,787 +2005,154 @@ entityTexture.colorSpace =
     THREE.SRGBColorSpace;
 
 
-const entityMaterial =
-    new THREE.MeshBasicMaterial({
-        map: entityTexture,
-        transparent: true,
-        side: THREE.DoubleSide
-    });
-
-
-const entity =
-    new THREE.Mesh(
-
-        new THREE.PlaneGeometry(
-            1.7,
-            3.2
-        ),
-
-        entityMaterial
-    );
-
-
-entity.position.copy(
-    cellToWorld(
-        MAP.length - 2,
-        MAP[0].length - 2
-    )
-);
-
-entity.position.y = 1.6;
-
-scene.add(entity);
-
-
-/* =========================================================
-   ENTITY SOUND
-========================================================= */
-
 const entitySound =
     new Audio(
         "./entity.mp3"
     );
 
-entitySound.loop = true;
-entitySound.volume = 0;
+entitySound.loop=true;
+entitySound.volume=0;
 
 
-/* =========================================================
-   PATHFINDING
-========================================================= */
+function createEntity(
+    x,
+    z
+){
 
-function findPath(
-    start,
-    target
-) {
+    if(entity)
+        scene.remove(entity);
 
-    const queue = [start];
-
-    const cameFrom = {};
-
-    const key =
-        (r, c) =>
-            `${r},${c}`;
-
-
-    cameFrom[
-        key(
-            start.row,
-            start.col
-        )
-    ] = null;
-
-
-    while(
-        queue.length
-    ) {
-
-        const current =
-            queue.shift();
-
-
-        if(
-            current.row === target.row &&
-            current.col === target.col
-        )
-            break;
-
-
-        const neighbors = [
-
-            {
-                row: current.row - 1,
-                col: current.col
-            },
-
-            {
-                row: current.row + 1,
-                col: current.col
-            },
-
-            {
-                row: current.row,
-                col: current.col - 1
-            },
-
-            {
-                row: current.row,
-                col: current.col + 1
-            }
-        ];
-
-
-        for(
-            const next of neighbors
-        ) {
-
-            if(
-                isWall(
-                    next.row,
-                    next.col
-                )
-            )
-                continue;
-
-
-            /*
-               Entity cannot walk
-               through Level 0 holes.
-            */
-
-            if(
-                currentLevel === "level0" &&
-                holeCells.has(
-                    key(
-                        next.row,
-                        next.col
-                    )
-                )
-            )
-                continue;
-
-
-            const k =
-                key(
-                    next.row,
-                    next.col
-                );
-
-
-            if(
-                k in cameFrom
-            )
-                continue;
-
-
-            cameFrom[k] =
-                current;
-
-            queue.push(next);
-        }
-    }
-
-
-    const targetKey =
-        key(
-            target.row,
-            target.col
+    entity =
+        new THREE.Mesh(
+            new THREE.PlaneGeometry(
+                1.8,
+                3.4
+            ),
+            new THREE.MeshBasicMaterial({
+                map:entityTexture,
+                transparent:true,
+                side:THREE.DoubleSide
+            })
         );
 
+    entity.position.set(
+        x,
+        1.7,
+        z
+    );
 
-    if(
-        !(targetKey in cameFrom)
-    )
-        return [];
+    addObject(entity);
 
-
-    const path = [];
-
-    let current = target;
-
-
-    while(current) {
-
-        path.unshift(
-            current
-        );
-
-        current =
-            cameFrom[
-                key(
-                    current.row,
-                    current.col
-                )
-            ];
-    }
-
-
-    return path;
+    entityPath=[];
+    pathTimer=0;
 }
 
 
-let entityPath = [];
-
-let pathTimer = 0;
-
-
 /* =========================================================
-   HOLE DETECTION
+   SIMPLE ENTITY CHASE
 ========================================================= */
 
-function checkForHole() {
+function updateEntity(delta){
 
-    if(
-        currentLevel !== "level0" ||
-        isFalling
-    )
+    if(!entity)
         return;
 
-
-    const cell =
-        worldToCell(
-            player.position
-        );
-
-
-    const key =
-        `${cell.row},${cell.col}`;
-
-
-    if(
-        holeCells.has(key)
-    ) {
-
-        isFalling = true;
-
-        verticalVelocity = 0;
-    }
-}
-
-
-/* =========================================================
-   MENU — FIXED
-========================================================= */
-
-const menu =
-    document.getElementById(
-        "menu"
-    );
-
-const levelName =
-    document.getElementById(
-        "levelName"
-    );
-
-
-levelName.textContent =
-    currentLevel === "level188"
-    ? "LEVEL 188 — THE WINDOWS"
-    : "LEVEL 0 — THE HUB";
-
-
-function startLevel(level) {
-
-    localStorage.setItem(
-        "backroomsLevel",
-        level
-    );
-
-    location.reload();
-}
-
-
-document
-    .getElementById(
-        "level0Button"
-    )
-    .addEventListener(
-        "click",
-        () => {
-
-            startLevel(
-                "level0"
-            );
-        }
-    );
-
-
-document
-    .getElementById(
-        "level188Button"
-    )
-    .addEventListener(
-        "click",
-        () => {
-
-            startLevel(
-                "level188"
-            );
-        }
-    );
-
-
-/*
-   Clicking the screen after
-   entering the level locks mouse.
-*/
-
-document.addEventListener(
-    "click",
-    () => {
-
-        if(
-            menu.style.display === "none"
-        ) {
-
-            document.body.requestPointerLock();
-
-            entitySound
-                .play()
-                .catch(() => {});
-        }
-    }
-);
-
-
-/*
-   Hide menu after page loads
-   if a level was selected.
-
-   This means the first visit
-   shows the menu, while the
-   selected level loads afterward.
-*/
-
-if(
-    sessionStorage.getItem(
-        "gameStarted"
-    ) === "true"
-) {
-
-    menu.style.display =
-        "none";
-
-} else {
-
-    sessionStorage.setItem(
-        "gameStarted",
-        "true"
-    );
-
     /*
-       The menu stays visible
-       until the user chooses.
+       Rather than allowing the entity
+       to walk through walls, it moves
+       toward the player only when there
+       is a clear line of sight.
+
+       Otherwise it searches around
+       obstacles using small waypoints.
     */
-}
 
-
-/*
-   Once a level button is clicked,
-   the reload should automatically
-   enter that level.
-*/
-
-if(
-    localStorage.getItem(
-        "backroomsLevel"
-    )
-) {
-
-    /*
-       Don't automatically hide
-       the menu on first load.
-    */
-}
-
-
-/* =========================================================
-   START LEVEL AFTER SELECTION
-========================================================= */
-
-function hideMenuAndStart() {
-
-    menu.style.display =
-        "none";
-
-    document.body.requestPointerLock();
-
-    entitySound
-        .play()
-        .catch(() => {});
-}
-
-
-/*
-   The buttons reload the page.
-   On reload, automatically hide
-   the menu if a level has already
-   been chosen.
-*/
-
-if(
-    sessionStorage.getItem(
-        "levelChosen"
-    ) === "true"
-) {
-
-    menu.style.display =
-        "none";
-
-    sessionStorage.removeItem(
-        "levelChosen"
-    );
-}
-
-
-/*
-   Correct button behavior:
-   save level, mark it selected,
-   then reload.
-*/
-
-document
-    .getElementById(
-        "level0Button"
-    )
-    .onclick = () => {
-
-        sessionStorage.setItem(
-            "levelChosen",
-            "true"
+    const target =
+        new THREE.Vector3(
+            player.position.x,
+            entity.position.y,
+            player.position.z
         );
 
-        localStorage.setItem(
-            "backroomsLevel",
-            "level0"
-        );
+    const direction =
+        target
+        .sub(entity.position);
 
-        location.reload();
-    };
+    direction.y=0;
 
+    const distance =
+        direction.length();
 
-document
-    .getElementById(
-        "level188Button"
-    )
-    .onclick = () => {
 
-        sessionStorage.setItem(
-            "levelChosen",
-            "true"
-        );
+    if(distance>.2){
 
-        localStorage.setItem(
-            "backroomsLevel",
-            "level188"
-        );
+        direction.normalize();
 
-        location.reload();
-    };
-
-
-/* =========================================================
-   GAME LOOP
-========================================================= */
-
-const clock =
-    new THREE.Clock();
-
-
-function animate() {
-
-    requestAnimationFrame(
-        animate
-    );
-
-
-    const delta =
-        Math.min(
-            clock.getDelta(),
-            .05
-        );
-
-
-    /* =====================================================
-       FALLING
-    ===================================================== */
-
-    if(
-        isFalling
-    ) {
-
-        verticalVelocity +=
-            GRAVITY * delta;
-
-        player.position.y -=
-            verticalVelocity * delta;
-
-        camera.rotation.z +=
-            delta * .8;
-
-
-        if(
-            player.position.y < -10
-        ) {
-
-            isFalling = false;
-
-            player.position.copy(
-                cellToWorld(
-                    1,
-                    1
-                )
-            );
-
-            player.position.y =
-                1.65;
-
-            verticalVelocity = 0;
-
-            grounded = true;
-
-            camera.rotation.z = 0;
-
-            stamina =
-                MAX_STAMINA;
-
-            document
-                .getElementById(
-                    "message"
-                )
-                .textContent =
-                    "YOU FELL.";
-
-            setTimeout(
-                () => {
-
-                    document
-                        .getElementById(
-                            "message"
-                        )
-                        .textContent = "";
-
-                },
-                1500
-            );
-        }
-
-    } else {
-
-
-        /* =================================================
-           PLAYER MOVEMENT
-        ================================================= */
-
-        const direction =
-            new THREE.Vector3();
-
-
-        if(keys["w"])
-            direction.z -= 1;
-
-        if(keys["s"])
-            direction.z += 1;
-
-        if(keys["a"])
-            direction.x -= 1;
-
-        if(keys["d"])
-            direction.x += 1;
-
-
-        let sprinting = false;
-
-
-        if(
-            direction.lengthSq() > 0
-        ) {
-
-            direction.normalize();
-
-
-            direction.applyAxisAngle(
-                new THREE.Vector3(
-                    0,
-                    1,
-                    0
-                ),
-                yaw
-            );
-
-
-            sprinting =
-                keys["shift"] &&
-                stamina > 0;
-
-
-            if(sprinting) {
-
-                stamina -=
-                    SPRINT_DRAIN *
-                    delta;
-
-                stamina =
-                    Math.max(
-                        0,
-                        stamina
-                    );
-
-            } else {
-
-                stamina +=
-                    STAMINA_REGEN *
-                    delta;
-
-                stamina =
-                    Math.min(
-                        MAX_STAMINA,
-                        stamina
-                    );
-            }
-
-
-            const speed =
-                sprinting
-                ? SPRINT_SPEED
-                : WALK_SPEED;
-
-
-            moveWithCollision(
-                player,
-                direction,
-                speed,
-                PLAYER_RADIUS,
-                delta
-            );
-
-        } else {
-
-            stamina +=
-                STAMINA_REGEN *
-                delta;
-
-            stamina =
-                Math.min(
-                    MAX_STAMINA,
-                    stamina
-                );
-        }
-
-
-        /* =================================================
-           GRAVITY
-        ================================================= */
-
-        verticalVelocity -=
-            GRAVITY * delta;
-
-        player.position.y +=
-            verticalVelocity * delta;
-
-
-        if(
-            player.position.y <= 1.65
-        ) {
-
-            player.position.y =
-                1.65;
-
-            verticalVelocity = 0;
-
-            grounded = true;
-        }
-
-
-        checkForHole();
-    }
-
-
-    /* =====================================================
-       STAMINA UI
-    ===================================================== */
-
-    const staminaBar =
-        document.getElementById(
-            "stamina"
-        );
-
-    staminaBar.style.width =
-        `${stamina}%`;
-
-    staminaBar.style.background =
-        stamina < 25
-        ? "#d33"
-        : "#e1d143";
-
-
-    /* =====================================================
-       ENTITY PATH
-    ===================================================== */
-
-    pathTimer -= delta;
-
-
-    if(
-        pathTimer <= 0 &&
-        !isFalling
-    ) {
-
-        pathTimer = .3;
-
-
-        const start =
-            worldToCell(
-                entity.position
-            );
-
-
-        const target =
-            worldToCell(
-                player.position
-            );
-
-
-        entityPath =
-            findPath(
-                start,
-                target
-            );
-    }
-
-
-    /* =====================================================
-       ENTITY MOVEMENT
-    ===================================================== */
-
-    if(
-        entityPath.length > 1
-    ) {
+        /*
+           Try direct movement.
+        */
 
         const next =
-            entityPath[1];
-
-
-        const target =
-            cellToWorld(
-                next.row,
-                next.col
+            entity.position
+            .clone()
+            .add(
+                direction
+                .clone()
+                .multiplyScalar(
+                    ENTITY_SPEED*delta
+                )
             );
-
-
-        const direction =
-            new THREE.Vector3(
-                target.x -
-                entity.position.x,
-
-                0,
-
-                target.z -
-                entity.position.z
-            );
-
 
         if(
-            direction.length() > .12
-        ) {
+            !hitsWallRadius(
+                next,
+                ENTITY_RADIUS
+            )
+        ){
 
-            direction.normalize();
+            entity.position.copy(next);
 
+        }else{
 
-            moveWithCollision(
-                entity,
-                direction,
-                ENTITY_SPEED,
-                ENTITY_RADIUS,
-                delta
-            );
+            /*
+               If blocked, try sideways.
+            */
+
+            const side =
+                new THREE.Vector3(
+                    -direction.z,
+                    0,
+                    direction.x
+                );
+
+            const nextSide =
+                entity.position
+                .clone()
+                .add(
+                    side
+                    .multiplyScalar(
+                        ENTITY_SPEED*delta
+                    )
+                );
+
+            if(
+                !hitsWallRadius(
+                    nextSide,
+                    ENTITY_RADIUS
+                )
+            ){
+
+                entity.position.copy(
+                    nextSide
+                );
+            }
         }
     }
 
 
-    /* =====================================================
-       ENTITY LOOK
-    ===================================================== */
+    /*
+       Face player.
+    */
 
     entity.lookAt(
         player.position.x,
@@ -2426,24 +2161,19 @@ function animate() {
     );
 
 
-    /* =====================================================
-       ENTITY AUDIO
-    ===================================================== */
+    /*
+       Distance sound.
+    */
 
-    const distance =
+    const d =
         entity.position.distanceTo(
             player.position
         );
 
-
-    const maxSoundDistance = 32;
-
+    const max=35;
 
     let volume =
-        1 -
-        distance /
-        maxSoundDistance;
-
+        1-d/max;
 
     volume =
         THREE.MathUtils.clamp(
@@ -2452,120 +2182,536 @@ function animate() {
             1
         );
 
-
     entitySound.volume =
-        volume * volume;
+        volume*volume;
 
 
-    /* =====================================================
-       ENTITY DANGER EFFECT
-    ===================================================== */
+    /*
+       Danger effect.
+    */
 
     const danger =
         document.getElementById(
             "danger"
         );
 
-
-    if(
-        distance < 14
-    ) {
+    if(d<15){
 
         const intensity =
-            Math.max(
-                0,
-                1 -
-                distance / 14
-            );
-
+            1-d/15;
 
         danger.style.boxShadow =
             `inset 0 0 180px
-             rgba(
-                255,
-                0,
-                0,
-                ${intensity * .6}
-             )`;
+             rgba(180,0,0,
+             ${intensity*.65})`;
 
-    } else {
+    }else{
 
-        danger.style.boxShadow =
-            "none";
+        danger.style.boxShadow="none";
     }
 
 
-    /* =====================================================
-       CAMCORDER FLICKER
-    ===================================================== */
-
-    document
-        .getElementById(
-            "camcorder"
-        )
-        .style.opacity =
-            .36 +
-            Math.random() * .09;
-
-
-    /* =====================================================
-       ENTITY CATCHES PLAYER
-    ===================================================== */
+    /*
+       Entity catches player.
+    */
 
     if(
-        distance < 1.25 &&
-        !isFalling
-    ) {
+        d<1.25 &&
+        !falling
+    ){
 
         document
-            .getElementById(
-                "message"
-            )
-            .textContent =
-                "THE ENTITY FOUND YOU.";
+            .getElementById("message")
+            .textContent=
+            "THE ENTITY FOUND YOU";
 
-
-        player.position.copy(
-            cellToWorld(
-                1,
-                1
-            )
-        );
-
-        player.position.y =
-            1.65;
-
-
-        entity.position.copy(
-            cellToWorld(
-                MAP.length - 2,
-                MAP[0].length - 2
-            )
-        );
-
-
-        stamina =
-            MAX_STAMINA;
-
+        respawnPlayer();
 
         setTimeout(
-            () => {
-
+            ()=>{
                 document
-                    .getElementById(
-                        "message"
-                    )
-                    .textContent = "";
-
+                    .getElementById("message")
+                    .textContent="";
             },
             1800
         );
     }
+}
 
 
-    /* =====================================================
-       RENDER
-    ===================================================== */
+/* =========================================================
+   PLAYER RESPAWN
+========================================================= */
+
+function respawnPlayer(){
+
+    if(currentLevel==="hotel"){
+
+        player.position.set(
+            0,
+            1.65,
+            27
+        );
+
+    }else{
+
+        player.position.set(
+            -45,
+            1.65,
+            -42
+        );
+    }
+
+    velocityY=0;
+    grounded=true;
+    falling=false;
+    stamina=100;
+}
+
+
+/* =========================================================
+   HOLES
+========================================================= */
+
+function checkBackroomsHoles(){
+
+    if(
+        currentLevel!=="backrooms" ||
+        falling
+    )
+        return;
+
+    /*
+       Same grid used when the holes
+       were created.
+    */
+
+    const x=player.position.x;
+    const z=player.position.z;
+
+    if(
+        x>=-19 &&
+        x<=19 &&
+        z>=16 &&
+        z<=52
+    ){
+
+        const gx =
+            Math.round(
+                (x+18)/4
+            );
+
+        const gz =
+            Math.round(
+                (z-18)/4
+            );
+
+        const hx =
+            -18+gx*4;
+
+        const hz =
+            18+gz*4;
+
+        if(
+            Math.abs(x-hx)<1.5 &&
+            Math.abs(z-hz)<1.5
+        ){
+
+            falling=true;
+            velocityY=0;
+        }
+    }
+}
+
+
+/* =========================================================
+   PLAYER UPDATE
+========================================================= */
+
+function updatePlayer(delta){
+
+    if(falling){
+
+        velocityY -=
+            GRAVITY*delta;
+
+        player.position.y -=
+            velocityY*delta;
+
+        if(
+            player.position.y<
+            -12
+        ){
+
+            respawnPlayer();
+        }
+
+        return;
+    }
+
+
+    const direction =
+        new THREE.Vector3();
+
+
+    if(keys.w)
+        direction.z-=1;
+
+    if(keys.s)
+        direction.z+=1;
+
+    if(keys.a)
+        direction.x-=1;
+
+    if(keys.d)
+        direction.x+=1;
+
+
+    if(
+        direction.lengthSq()>0
+    ){
+
+        direction.normalize();
+
+        direction.applyAxisAngle(
+            new THREE.Vector3(
+                0,1,0
+            ),
+            yaw
+        );
+
+
+        const sprint =
+            keys.shift &&
+            stamina>0;
+
+
+        const speed =
+            sprint
+            ? SPRINT_SPEED
+            : WALK_SPEED;
+
+
+        if(sprint){
+
+            stamina -=
+                27*delta;
+
+        }else{
+
+            stamina +=
+                17*delta;
+        }
+
+
+        stamina =
+            THREE.MathUtils.clamp(
+                stamina,
+                0,
+                100
+            );
+
+
+        const movement =
+            direction
+            .clone()
+            .multiplyScalar(
+                speed*delta
+            );
+
+
+        const nextX =
+            player.position.clone();
+
+        nextX.x += movement.x;
+
+        if(
+            !hitsWall(
+                nextX
+            )
+        ){
+            player.position.x=
+                nextX.x;
+        }
+
+
+        const nextZ =
+            player.position.clone();
+
+        nextZ.z += movement.z;
+
+        if(
+            !hitsWall(
+                nextZ
+            )
+        ){
+            player.position.z=
+                nextZ.z;
+        }
+
+    }else{
+
+        stamina +=
+            17*delta;
+
+        stamina =
+            Math.min(
+                100,
+                stamina
+            );
+    }
+
+
+    /*
+       Gravity.
+    */
+
+    velocityY -=
+        GRAVITY*delta;
+
+    player.position.y +=
+        velocityY*delta;
+
+
+    if(
+        player.position.y<=1.65
+    ){
+
+        player.position.y=1.65;
+
+        velocityY=0;
+
+        grounded=true;
+
+    }else{
+
+        grounded=false;
+    }
+
+
+    checkBackroomsHoles();
+
+
+    document
+        .getElementById("stamina")
+        .style.width=
+        stamina+"%";
+}
+
+
+/* =========================================================
+   START LEVEL
+========================================================= */
+
+function startLevel(level){
+
+    clearWorld();
+
+    currentLevel=level;
+
+    if(level==="hotel")
+        buildHotel();
+    else
+        buildBackrooms();
+
+    gameStarted=true;
+    paused=false;
+
+    document
+        .getElementById("menu")
+        .style.display="none";
+
+    document
+        .getElementById("pause")
+        .style.display="none";
+
+    document.body.requestPointerLock();
+
+    entitySound
+        .play()
+        .catch(()=>{});
+}
+
+
+/* =========================================================
+   PAUSE
+========================================================= */
+
+function togglePause(){
+
+    if(!gameStarted)
+        return;
+
+    if(paused)
+        resumeGame();
+    else
+        pauseGame();
+}
+
+
+function pauseGame(){
+
+    paused=true;
+
+    document
+        .getElementById("pause")
+        .style.display="flex";
+
+    document.exitPointerLock();
+
+    entitySound.pause();
+}
+
+
+function resumeGame(){
+
+    paused=false;
+
+    document
+        .getElementById("pause")
+        .style.display="none";
+
+    document.body.requestPointerLock();
+
+    entitySound
+        .play()
+        .catch(()=>{});
+}
+
+
+/* =========================================================
+   MENU BUTTONS
+========================================================= */
+
+document
+    .getElementById("backroomsButton")
+    .onclick=()=>{
+        startLevel("backrooms");
+    };
+
+
+document
+    .getElementById("hotelButton")
+    .onclick=()=>{
+        startLevel("hotel");
+    };
+
+
+document
+    .getElementById("resume")
+    .onclick=()=>{
+        resumeGame();
+    };
+
+
+document
+    .getElementById("restart")
+    .onclick=()=>{
+
+        if(currentLevel)
+            startLevel(currentLevel);
+    };
+
+
+document
+    .getElementById("levels")
+    .onclick=()=>{
+
+        paused=false;
+        gameStarted=false;
+
+        document.exitPointerLock();
+
+        entitySound.pause();
+
+        clearWorld();
+
+        document
+            .getElementById("pause")
+            .style.display="none";
+
+        document
+            .getElementById("menu")
+            .style.display="flex";
+    };
+
+
+/* =========================================================
+   CLICK TO LOCK MOUSE
+========================================================= */
+
+document.addEventListener(
+    "click",
+    ()=>{
+        if(
+            gameStarted &&
+            !paused &&
+            document.pointerLockElement!==document.body
+        ){
+            document.body.requestPointerLock();
+
+            entitySound
+                .play()
+                .catch(()=>{});
+        }
+    }
+);
+
+
+/* =========================================================
+   CLOCK
+========================================================= */
+
+const clock =
+    new THREE.Clock();
+
+
+/* =========================================================
+   GAME LOOP
+========================================================= */
+
+function animate(){
+
+    requestAnimationFrame(
+        animate
+    );
+
+    const delta =
+        Math.min(
+            clock.getDelta(),
+            .05
+        );
+
+
+    if(
+        !gameStarted ||
+        paused
+    ){
+
+        renderer.render(
+            scene,
+            camera
+        );
+
+        return;
+    }
+
+
+    updatePlayer(delta);
+
+    updateEntity(delta);
+
+
+    /*
+       Camcorder flicker.
+    */
+
+    document
+        .getElementById("vhs")
+        .style.opacity =
+        .30+
+        Math.random()*.08;
+
 
     renderer.render(
         scene,
@@ -2583,10 +2729,10 @@ animate();
 
 addEventListener(
     "resize",
-    () => {
+    ()=>{
 
-        camera.aspect =
-            innerWidth /
+        camera.aspect=
+            innerWidth/
             innerHeight;
 
         camera.updateProjectionMatrix();
@@ -2602,4 +2748,3 @@ addEventListener(
 
 </body>
 </html>
-```
