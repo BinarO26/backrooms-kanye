@@ -3,20 +3,23 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>The Backrooms</title>
 
 <style>
+
 *{
     box-sizing:border-box;
 }
 
-html,body{
+html,
+body{
     margin:0;
     width:100%;
     height:100%;
     overflow:hidden;
-    background:#111;
+    background:#000;
     font-family:Arial,Helvetica,sans-serif;
 }
 
@@ -24,35 +27,26 @@ canvas{
     display:block;
 }
 
-button{
-    width:340px;
-    padding:15px;
-    margin:6px;
-    border:1px solid #777;
-    background:#151515;
-    color:#eee;
-    font-size:16px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#403b17;
-    border-color:#d9cc61;
-}
+/* =========================================================
+   MENUS
+========================================================= */
 
 .overlay{
     position:fixed;
     inset:0;
     z-index:100;
+
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    color:white;
+
+    color:#fff;
+
     background:
         radial-gradient(
             ellipse at center,
-            rgba(70,65,30,.85),
+            rgba(80,74,32,.82),
             rgba(0,0,0,.97)
         );
 }
@@ -62,21 +56,16 @@ button:hover{
     display:none;
 }
 
-#death{
-    background:
-        radial-gradient(
-            ellipse at center,
-            rgba(65,0,0,.55),
-            rgba(0,0,0,.98)
-        );
-}
-
 h1{
     margin:0 0 12px;
+
     color:#d8cb60;
+
     font-size:45px;
     letter-spacing:8px;
-    text-shadow:0 0 25px #000;
+
+    text-shadow:
+        0 0 25px #000;
 }
 
 .subtitle{
@@ -84,23 +73,57 @@ h1{
     margin-bottom:20px;
 }
 
+button{
+    width:340px;
+
+    padding:15px;
+    margin:6px;
+
+    border:
+        1px solid #777;
+
+    background:#151515;
+
+    color:#eee;
+
+    font-size:16px;
+
+    cursor:pointer;
+
+    transition:
+        background .15s,
+        border-color .15s;
+}
+
+button:hover{
+    background:#403b17;
+    border-color:#d9cc61;
+}
+
 .difficultyTitle{
     color:#aaa;
+
     font-size:12px;
+
     letter-spacing:2px;
+
     margin-bottom:6px;
 }
 
 .difficulty{
     display:flex;
     gap:6px;
+
     margin-bottom:16px;
 }
 
 .difficulty button{
     width:105px;
+
     padding:10px 4px;
+
     margin:0;
+
     font-size:12px;
 }
 
@@ -111,145 +134,342 @@ h1{
 
 .controls{
     color:#999;
+
     text-align:center;
+
     font-size:12px;
+
     line-height:1.8;
+
     margin-top:18px;
 }
 
 #textureStatus{
     margin-top:12px;
+
     color:#aaa;
-    font:10px monospace;
+
+    font:
+        10px monospace;
+
     text-align:center;
 }
 
+.deathTitle{
+    color:#b40000;
+
+    font-size:55px;
+
+    letter-spacing:9px;
+
+    text-shadow:
+        0 0 30px #000;
+}
+
+.deathText{
+    color:#aaa;
+
+    margin:
+        8px 0 22px;
+}
+
+/* =========================================================
+   HUD
+========================================================= */
+
 #crosshair{
     position:fixed;
+
     z-index:20;
+
     left:50%;
     top:50%;
+
     width:5px;
     height:5px;
+
     margin:-2px;
-    border:1px solid rgba(255,255,255,.8);
+
+    border:
+        1px solid
+        rgba(255,255,255,.8);
+
     border-radius:50%;
+
     pointer-events:none;
 }
 
 #hud{
     position:fixed;
+
     left:18px;
     bottom:18px;
+
     z-index:20;
+
     color:#fff;
+
     font-size:13px;
-    text-shadow:2px 2px 6px #000;
+
+    text-shadow:
+        2px 2px 6px #000;
 }
 
 #difficultyHud{
     margin-top:4px;
+
     color:#aaa;
+
     font-size:11px;
 }
 
 #rec{
     position:fixed;
+
     top:18px;
     right:18px;
+
     z-index:20;
+
     color:#fff;
-    font:12px monospace;
-    text-shadow:2px 2px 6px #000;
+
+    font:
+        12px monospace;
+
+    text-shadow:
+        2px 2px 6px #000;
 }
 
 #recDot{
     display:inline-block;
+
     width:8px;
     height:8px;
+
     margin-right:5px;
+
     border-radius:50%;
+
     background:red;
-    animation:blink 1s infinite;
+
+    animation:
+        blink 1s infinite;
 }
 
 @keyframes blink{
-    0%,45%{opacity:1}
-    46%,100%{opacity:.2}
-}
 
-#film{
-    position:fixed;
-    inset:0;
-    z-index:15;
-    pointer-events:none;
-    opacity:.055;
-    background:
-        repeating-linear-gradient(
-            to bottom,
-            rgba(255,255,255,.04) 0,
-            rgba(255,255,255,.04) 1px,
-            transparent 2px,
-            transparent 5px
-        );
-}
+    0%,
+    45%{
+        opacity:1;
+    }
 
-#vignette{
-    position:fixed;
-    inset:0;
-    z-index:16;
-    pointer-events:none;
-    background:
-        radial-gradient(
-            ellipse at center,
-            transparent 55%,
-            rgba(0,0,0,.08) 75%,
-            rgba(0,0,0,.4) 100%
-        );
+    46%,
+    100%{
+        opacity:.2;
+    }
+
 }
 
 #message{
     position:fixed;
+
     top:40px;
     left:50%;
-    transform:translateX(-50%);
+
+    transform:
+        translateX(-50%);
+
     z-index:30;
-    color:white;
+
+    color:#fff;
+
     font-size:16px;
-    text-shadow:2px 2px 8px #000;
+
+    text-shadow:
+        2px 2px 8px #000;
+
     pointer-events:none;
 }
 
+/* =========================================================
+   FOUND FOOTAGE CAMERA EFFECT
+========================================================= */
+
+#film{
+    position:fixed;
+
+    inset:0;
+
+    z-index:15;
+
+    pointer-events:none;
+
+    opacity:.11;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255,255,255,.045)
+            0px,
+            rgba(255,255,255,.045)
+            1px,
+            transparent
+            2px,
+            transparent
+            5px
+        );
+
+    mix-blend-mode:overlay;
+}
+
+#cameraNoise{
+    position:fixed;
+
+    inset:0;
+
+    z-index:17;
+
+    pointer-events:none;
+
+    opacity:.035;
+
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(255,255,255,.6)
+            0px,
+            transparent
+            1px,
+            transparent
+            3px
+        );
+
+    animation:
+        cameraNoiseMove
+        .08s
+        steps(2)
+        infinite;
+}
+
+@keyframes cameraNoiseMove{
+
+    0%{
+        transform:
+            translate(0,0);
+    }
+
+    25%{
+        transform:
+            translate(-1px,1px);
+    }
+
+    50%{
+        transform:
+            translate(1px,-1px);
+    }
+
+    75%{
+        transform:
+            translate(1px,1px);
+    }
+
+    100%{
+        transform:
+            translate(0,0);
+    }
+
+}
+
+#vignette{
+    position:fixed;
+
+    inset:0;
+
+    z-index:16;
+
+    pointer-events:none;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            transparent 43%,
+            rgba(0,0,0,.08) 65%,
+            rgba(0,0,0,.38) 100%
+        );
+}
+
+#colorGrade{
+    position:fixed;
+
+    inset:0;
+
+    z-index:14;
+
+    pointer-events:none;
+
+    background:
+        linear-gradient(
+            rgba(205,190,80,.035),
+            rgba(205,190,80,.035)
+        );
+
+    mix-blend-mode:color;
+}
+
+#fallFade{
+    position:fixed;
+
+    inset:0;
+
+    z-index:80;
+
+    pointer-events:none;
+
+    background:#000;
+
+    opacity:1;
+
+    transition:
+        opacity 1.5s ease;
+}
+
+/* =========================================================
+   ERROR
+========================================================= */
+
 #error{
     position:fixed;
+
     left:10px;
     right:10px;
     bottom:10px;
+
     z-index:500;
+
     display:none;
+
     padding:15px;
+
     background:#450000;
+
     border:1px solid red;
+
     color:white;
-    font:13px monospace;
+
+    font:
+        13px monospace;
+
     white-space:pre-wrap;
 }
 
-.deathTitle{
-    color:#b40000;
-    font-size:55px;
-    letter-spacing:9px;
-    text-shadow:0 0 30px #000;
-}
-
-.deathText{
-    color:#aaa;
-    margin:8px 0 22px;
-}
 </style>
 </head>
 
 <body>
+
+<!-- =======================================================
+     MENU
+======================================================= -->
 
 <div id="menu" class="overlay">
 
@@ -269,7 +489,10 @@ h1{
             EASY
         </button>
 
-        <button id="normalBtn" class="selected">
+        <button
+            id="normalBtn"
+            class="selected"
+        >
             NORMAL
         </button>
 
@@ -288,11 +511,13 @@ h1{
     </button>
 
     <div class="controls">
+
         WASD — Move<br>
         SHIFT — Sprint — No cooldown<br>
         SPACE — Jump<br>
         Mouse — Look<br>
         ESC / P — Pause
+
     </div>
 
     <div id="textureStatus">
@@ -300,6 +525,10 @@ h1{
     </div>
 
 </div>
+
+<!-- =======================================================
+     PAUSE
+======================================================= -->
 
 <div id="pause" class="overlay">
 
@@ -319,14 +548,21 @@ h1{
 
 </div>
 
+<!-- =======================================================
+     DEATH
+======================================================= -->
+
 <div id="death" class="overlay">
 
     <div class="deathTitle">
         YOU DIED
     </div>
 
-    <div class="deathText">
-        THE ENTITY FOUND YOU
+    <div
+        id="deathText"
+        class="deathText"
+    >
+        THE BACKROOMS GOT YOU
     </div>
 
     <button id="retryBtn">
@@ -342,10 +578,13 @@ h1{
 <div id="crosshair"></div>
 
 <div id="hud">
+
     LEVEL 0
+
     <div id="difficultyHud">
         NORMAL
     </div>
+
 </div>
 
 <div id="rec">
@@ -354,26 +593,35 @@ h1{
 </div>
 
 <div id="message"></div>
+
 <div id="film"></div>
+<div id="colorGrade"></div>
 <div id="vignette"></div>
+<div id="cameraNoise"></div>
+
+<div id="fallFade"></div>
+
 <div id="error"></div>
 
 <script src="./three.min.js"></script>
 
 <script>
 
-"use strict";
-
 /* =========================================================
    BASIC CHECK
 ========================================================= */
 
-if(typeof THREE === "undefined"){
+if(
+    typeof THREE === "undefined"
+){
 
     const error =
-        document.getElementById("error");
+        document.getElementById(
+            "error"
+        );
 
-    error.style.display = "block";
+    error.style.display =
+        "block";
 
     error.textContent =
         "three.min.js could not be loaded.";
@@ -381,6 +629,7 @@ if(typeof THREE === "undefined"){
     throw new Error(
         "Three.js missing"
     );
+
 }
 
 /* =========================================================
@@ -436,14 +685,13 @@ const scene =
 
 scene.background =
     new THREE.Color(
-        0x77703c
+        0x70683a
     );
 
 scene.fog =
-    new THREE.Fog(
-        0x77703c,
-        65,
-        180
+    new THREE.FogExp2(
+        0x70683a,
+        0.009
     );
 
 /* =========================================================
@@ -452,11 +700,16 @@ scene.fog =
 
 const camera =
     new THREE.PerspectiveCamera(
-        78,
+
+        76,
+
         innerWidth /
         innerHeight,
+
         .03,
-        250
+
+        260
+
     );
 
 /* =========================================================
@@ -481,7 +734,7 @@ renderer.setSize(
 renderer.setPixelRatio(
     Math.min(
         devicePixelRatio,
-        2
+        1.75
     )
 );
 
@@ -495,8 +748,50 @@ if(
 
 }
 
+if(
+    "toneMapping"
+    in renderer
+){
+
+    renderer.toneMapping =
+        THREE.ACESFilmicToneMapping;
+
+    renderer.toneMappingExposure =
+        0.82;
+
+}
+
 document.body.appendChild(
     renderer.domElement
+);
+
+/* =========================================================
+   FOUND FOOTAGE LIGHTING
+========================================================= */
+
+const ambientLight =
+    new THREE.AmbientLight(
+        0x6f673b,
+        0.35
+    );
+
+scene.add(
+    ambientLight
+);
+
+const hemisphereLight =
+    new THREE.HemisphereLight(
+
+        0xd7cb78,
+
+        0x17150f,
+
+        0.55
+
+    );
+
+scene.add(
+    hemisphereLight
 );
 
 /* =========================================================
@@ -514,15 +809,26 @@ player.add(
     camera
 );
 
-const EYE_HEIGHT = 1.18;
-const PLAYER_HEIGHT = 1.55;
-const PLAYER_RADIUS = .28;
+const EYE_HEIGHT =
+    1.18;
 
-const WALK_SPEED = 3.8;
-const SPRINT_SPEED = 6.5;
+const PLAYER_HEIGHT =
+    1.55;
 
-const GRAVITY = 20;
-const JUMP_SPEED = 6.3;
+const PLAYER_RADIUS =
+    .28;
+
+const WALK_SPEED =
+    3.8;
+
+const SPRINT_SPEED =
+    6.5;
+
+const GRAVITY =
+    20;
+
+const JUMP_SPEED =
+    6.3;
 
 camera.position.set(
     0,
@@ -534,22 +840,38 @@ let yaw = 0;
 let pitch = 0;
 
 let velocityY = 0;
+
 let grounded = true;
 
 /* =========================================================
-   STATE
+   GAME STATE
 ========================================================= */
 
 let running = false;
 let paused = false;
 let dead = false;
 
-let difficulty = "normal";
+let fallingIntoLevel = false;
+
+let fallTimer = 0;
+
+const FALL_DURATION =
+    2.25;
+
+let difficulty =
+    "normal";
 
 let entity = null;
 
 let worldObjects = [];
+
 let walls = [];
+
+let floorObjects = [];
+
+let deathHoles = [];
+
+let ladders = [];
 
 let entityVelocity =
     new THREE.Vector2(
@@ -575,6 +897,7 @@ let hasLastKnownPosition =
 let lastSeenTimer = 0;
 
 let wanderTimer = 0;
+
 let wanderAngle = 0;
 
 /* =========================================================
@@ -591,11 +914,6 @@ let ceilingTexture = null;
 
 const textureLoader =
     new THREE.TextureLoader();
-
-/*
-    Configure all textures for crisp,
-    proportional repeating.
-*/
 
 function prepareTexture(
     texture
@@ -618,20 +936,21 @@ function prepareTexture(
 
     texture.anisotropy =
         Math.min(
-            renderer.capabilities
+
+            renderer
+                .capabilities
                 .getMaxAnisotropy(),
+
             8
+
         );
 
     texture.needsUpdate =
         true;
 
     return texture;
-}
 
-/* =========================================================
-   LOAD TEXTURE
-========================================================= */
+}
 
 function loadTexture(
     url,
@@ -671,6 +990,7 @@ function loadTexture(
                     );
 
                     resolve(null);
+
                 }
 
             );
@@ -679,10 +999,6 @@ function loadTexture(
     );
 
 }
-
-/* =========================================================
-   LOAD ENVIRONMENT
-========================================================= */
 
 async function loadEnvironmentTextures(){
 
@@ -725,7 +1041,7 @@ async function loadEnvironmentTextures(){
     ){
 
         status.textContent =
-            "WARNING: One or more textures failed to load.";
+            "WARNING: texture failed to load.";
 
         status.style.color =
             "#ff7777";
@@ -740,30 +1056,35 @@ async function loadEnvironmentTextures(){
 }
 
 /* =========================================================
-   MATERIAL HELPERS
+   MATERIALS
 ========================================================= */
 
 /*
-    MeshBasicMaterial is intentional.
+    Standard material is intentional here.
 
-    The PNG is displayed directly.
-    Scene lighting does NOT darken or recolor it.
+    The PNG remains the texture, but the fluorescent
+    lights can now illuminate it.
+
+    This is what was missing from the old completely-flat
+    MeshBasicMaterial setup.
 */
 
 function makeMaterial(
     texture
 ){
 
-    return new THREE.MeshBasicMaterial({
+    return new THREE.MeshStandardMaterial({
 
         map:texture,
 
         side:
             THREE.DoubleSide,
 
-        fog:true,
+        roughness:1,
 
-        toneMapped:false
+        metalness:0,
+
+        fog:true
 
     });
 
@@ -786,6 +1107,7 @@ function addObject(
     );
 
     return object;
+
 }
 
 /* =========================================================
@@ -821,32 +1143,15 @@ function clearWorld(){
                 )
             ){
 
-                object.material
-                    .forEach(
-                        m => {
+                object.material.forEach(
+                    material => {
 
-                            if(
-                                m.map
-                            ){
-                                m.map.dispose();
-                            }
+                        material.dispose();
 
-                            m.dispose();
-                        }
-                    );
+                    }
+                );
 
             }else{
-
-                if(
-                    object.material.map
-                ){
-
-                    /*
-                        Don't dispose the
-                        original loaded texture.
-                    */
-
-                }
 
                 object.material.dispose();
 
@@ -858,20 +1163,29 @@ function clearWorld(){
 
     worldObjects = [];
     walls = [];
+    floorObjects = [];
+    deathHoles = [];
+    ladders = [];
+
     entity = null;
+
 }
 
 /* =========================================================
-   FLOOR TEXTURE
+   FLOOR
 ========================================================= */
 
 function createFloorMaterial(){
 
     if(!floorTexture){
 
-        return new THREE.MeshBasicMaterial({
-            color:0x9a8e4c,
-            side:THREE.DoubleSide
+        return new THREE.MeshStandardMaterial({
+
+            color:
+                0x9a8e4c,
+
+            roughness:1
+
         });
 
     }
@@ -886,16 +1200,17 @@ function createFloorMaterial(){
         THREE.RepeatWrapping;
 
     /*
-        ONE TILE = 2 x 2 world units.
-
-        Therefore the image repeats as a
-        real square grid instead of stretching
-        across the entire floor.
+        3x3 texture tiles.
     */
 
-    const WORLD_WIDTH = 180;
-    const WORLD_DEPTH = 160;
-    const TILE_SIZE = 2;
+    const WORLD_WIDTH =
+        180;
+
+    const WORLD_DEPTH =
+        160;
+
+    const TILE_SIZE =
+        3;
 
     texture.repeat.set(
 
@@ -907,77 +1222,14 @@ function createFloorMaterial(){
 
     );
 
-    texture.offset.set(
-        0,
-        0
-    );
-
     texture.needsUpdate =
         true;
 
     return makeMaterial(
         texture
     );
+
 }
-
-/* =========================================================
-   CEILING TEXTURE
-========================================================= */
-
-function createCeilingMaterial(){
-
-    if(!ceilingTexture){
-
-        return new THREE.MeshBasicMaterial({
-            color:0xd7d1b7,
-            side:THREE.DoubleSide
-        });
-
-    }
-
-    const texture =
-        ceilingTexture.clone();
-
-    texture.wrapS =
-        THREE.RepeatWrapping;
-
-    texture.wrapT =
-        THREE.RepeatWrapping;
-
-    /*
-        Same square grid as the floor.
-    */
-
-    const WORLD_WIDTH = 180;
-    const WORLD_DEPTH = 160;
-    const TILE_SIZE = 2;
-
-    texture.repeat.set(
-
-        WORLD_WIDTH /
-        TILE_SIZE,
-
-        WORLD_DEPTH /
-        TILE_SIZE
-
-    );
-
-    texture.offset.set(
-        0,
-        0
-    );
-
-    texture.needsUpdate =
-        true;
-
-    return makeMaterial(
-        texture
-    );
-}
-
-/* =========================================================
-   FLOOR
-========================================================= */
 
 function addFloor(){
 
@@ -1008,13 +1260,71 @@ function addFloor(){
     addObject(
         floor
     );
+
+    floorObjects.push(
+        floor
+    );
+
 }
 
 /* =========================================================
    CEILING
 ========================================================= */
 
-const CEILING_Y = 3.1;
+const CEILING_Y =
+    3.1;
+
+function createCeilingMaterial(){
+
+    if(!ceilingTexture){
+
+        return new THREE.MeshStandardMaterial({
+
+            color:
+                0xd7d1b7,
+
+            roughness:1
+
+        });
+
+    }
+
+    const texture =
+        ceilingTexture.clone();
+
+    texture.wrapS =
+        THREE.RepeatWrapping;
+
+    texture.wrapT =
+        THREE.RepeatWrapping;
+
+    const WORLD_WIDTH =
+        180;
+
+    const WORLD_DEPTH =
+        160;
+
+    const TILE_SIZE =
+        3;
+
+    texture.repeat.set(
+
+        WORLD_WIDTH /
+        TILE_SIZE,
+
+        WORLD_DEPTH /
+        TILE_SIZE
+
+    );
+
+    texture.needsUpdate =
+        true;
+
+    return makeMaterial(
+        texture
+    );
+
+}
 
 function addCeiling(){
 
@@ -1045,36 +1355,12 @@ function addCeiling(){
     addObject(
         ceiling
     );
+
 }
 
 /* =========================================================
-   WALL TEXTURE MAPPING
+   WALL MATERIAL
 ========================================================= */
-
-/*
-    THIS IS THE IMPORTANT PART.
-
-    A wall is made from separate planes.
-
-    This gives us complete control over the
-    texture dimensions.
-
-    Vertical:
-
-        floor
-          |
-          |
-          |
-        ceiling
-
-    = exactly ONE texture height.
-
-    Horizontal:
-
-        [PNG][PNG][PNG][PNG][partial]
-
-    The final tile is clipped naturally.
-*/
 
 function createWallMaterial(
     width,
@@ -1083,9 +1369,16 @@ function createWallMaterial(
 
     if(!wallTexture){
 
-        return new THREE.MeshBasicMaterial({
-            color:0xc8bb48,
-            side:THREE.DoubleSide
+        return new THREE.MeshStandardMaterial({
+
+            color:
+                0xc8bb48,
+
+            roughness:1,
+
+            side:
+                THREE.DoubleSide
+
         });
 
     }
@@ -1096,30 +1389,8 @@ function createWallMaterial(
     texture.wrapS =
         THREE.RepeatWrapping;
 
-    /*
-        Clamp vertically.
-
-        This guarantees that the texture
-        does NOT stretch vertically.
-    */
-
     texture.wrapT =
         THREE.ClampToEdgeWrapping;
-
-    texture.colorSpace =
-        THREE.SRGBColorSpace;
-
-    /*
-        Preserve original PNG aspect ratio.
-
-        Example:
-
-        If PNG is 512x512,
-        one tile is H x H.
-
-        If PNG is 1024x512,
-        one tile is 2H x H.
-    */
 
     const imageWidth =
         texture.image.width;
@@ -1127,22 +1398,20 @@ function createWallMaterial(
     const imageHeight =
         texture.image.height;
 
-    const imageAspect =
+    const aspect =
         imageWidth /
         imageHeight;
 
     /*
-        Width of ONE proportional texture tile.
+        One vertical texture tile is exactly the
+        wall height.
+
+        Horizontal repetition is proportional.
     */
 
     const tileWidth =
         height *
-        imageAspect;
-
-    /*
-        Number of complete/partial tiles
-        needed across this wall.
-    */
+        aspect;
 
     const repeatX =
         width /
@@ -1156,17 +1425,13 @@ function createWallMaterial(
 
     );
 
-    texture.offset.set(
-        0,
-        0
-    );
-
     texture.needsUpdate =
         true;
 
     return makeMaterial(
         texture
     );
+
 }
 
 /* =========================================================
@@ -1214,6 +1479,7 @@ function addWallPlane(
     );
 
     return wall;
+
 }
 
 /* =========================================================
@@ -1229,60 +1495,41 @@ function addWall(
     z
 ){
 
-    /*
-        Four individually mapped wall faces.
+    addWallPlane(
+        width,
+        height,
+        x,
+        y,
+        z - depth/2,
+        0
+    );
 
-        The geometry is slightly thicker than
-        the visible texture plane, preventing
-        the player from seeing through corners.
-    */
+    addWallPlane(
+        width,
+        height,
+        x,
+        y,
+        z + depth/2,
+        Math.PI
+    );
 
-    const front =
-        addWallPlane(
-            width,
-            height,
-            x,
-            y,
-            z - depth/2,
-            0
-        );
+    addWallPlane(
+        depth,
+        height,
+        x - width/2,
+        y,
+        z,
+        Math.PI/2
+    );
 
-    const back =
-        addWallPlane(
-            width,
-            height,
-            x,
-            y,
-            z + depth/2,
-            Math.PI
-        );
-
-    const side1 =
-        addWallPlane(
-            depth,
-            height,
-            x - width/2,
-            y,
-            z,
-            Math.PI/2
-        );
-
-    const side2 =
-        addWallPlane(
-            depth,
-            height,
-            x + width/2,
-            y,
-            z,
-            -Math.PI/2
-        );
-
-    /*
-        Invisible collision box.
-
-        This means visual texture geometry
-        doesn't affect collision.
-    */
+    addWallPlane(
+        depth,
+        height,
+        x + width/2,
+        y,
+        z,
+        -Math.PI/2
+    );
 
     walls.push({
 
@@ -1312,44 +1559,40 @@ function addWall(
 
     });
 
-    return {
-        front,
-        back,
-        side1,
-        side2
-    };
 }
 
 /* =========================================================
-   LIGHT FIXTURE
+   LIGHTS
 ========================================================= */
 
-const LIGHT_SIZE = 2;
+const LIGHT_SIZE =
+    2;
 
 function addLight(
     x,
-    z
+    z,
+    intensity = 11
 ){
 
     /*
-        White square fixture.
-
-        Exactly 2x2 world units.
+        Visible fluorescent panel.
     */
 
     const fixture =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
+
                 LIGHT_SIZE,
                 .055,
                 LIGHT_SIZE
+
             ),
 
             new THREE.MeshBasicMaterial({
 
                 color:
-                    0xffffdc,
+                    0xfff3bd,
 
                 side:
                     THREE.DoubleSide
@@ -1368,6 +1611,260 @@ function addLight(
         fixture
     );
 
+    /*
+        Actual illumination.
+    */
+
+    const light =
+        new THREE.PointLight(
+
+            0xffe89a,
+
+            intensity,
+
+            15,
+
+            1.7
+
+        );
+
+    light.position.set(
+        x,
+        2.9,
+        z
+    );
+
+    scene.add(
+        light
+    );
+
+}
+
+/* =========================================================
+   HOLE SYSTEM
+========================================================= */
+
+function createDeathHole(
+    x,
+    z,
+    width,
+    depth
+){
+
+    deathHoles.push({
+
+        x,
+        z,
+        width,
+        depth
+
+    });
+
+    /*
+        Black depth inside hole.
+    */
+
+    const pit =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+
+                width,
+                10,
+                depth
+
+            ),
+
+            new THREE.MeshBasicMaterial({
+
+                color:
+                    0x030302,
+
+                side:
+                    THREE.DoubleSide
+
+            })
+
+        );
+
+    pit.position.set(
+        x,
+        -5,
+        z
+    );
+
+    addObject(
+        pit
+    );
+
+}
+
+/* =========================================================
+   HOLE DETECTION
+========================================================= */
+
+function isInsideDeathHole(
+    x,
+    z
+){
+
+    for(
+        const hole
+        of deathHoles
+    ){
+
+        if(
+
+            x >
+            hole.x -
+            hole.width/2 &&
+
+            x <
+            hole.x +
+            hole.width/2 &&
+
+            z >
+            hole.z -
+            hole.depth/2 &&
+
+            z <
+            hole.z +
+            hole.depth/2
+
+        ){
+
+            return true;
+
+        }
+
+    }
+
+    return false;
+
+}
+
+/* =========================================================
+   LADDER
+========================================================= */
+
+function addLadder(
+    x,
+    y,
+    z,
+    rotationY = 0
+){
+
+    const group =
+        new THREE.Group();
+
+    group.position.set(
+        x,
+        y,
+        z
+    );
+
+    group.rotation.y =
+        rotationY;
+
+    const metalMaterial =
+        new THREE.MeshStandardMaterial({
+
+            color:
+                0x6a624b,
+
+            roughness:
+                .9,
+
+            metalness:
+                .15
+
+        });
+
+    /*
+        Vertical rails.
+    */
+
+    const railGeometry =
+        new THREE.BoxGeometry(
+            .09,
+            2.7,
+            .09
+        );
+
+    const leftRail =
+        new THREE.Mesh(
+            railGeometry,
+            metalMaterial
+        );
+
+    leftRail.position.x =
+        -.42;
+
+    group.add(
+        leftRail
+    );
+
+    const rightRail =
+        new THREE.Mesh(
+            railGeometry,
+            metalMaterial
+        );
+
+    rightRail.position.x =
+        .42;
+
+    group.add(
+        rightRail
+    );
+
+    /*
+        Rungs.
+    */
+
+    for(
+        let i = 0;
+        i < 8;
+        i++
+    ){
+
+        const rung =
+            new THREE.Mesh(
+
+                new THREE.BoxGeometry(
+                    .92,
+                    .08,
+                    .08
+                ),
+
+                metalMaterial
+
+            );
+
+        rung.position.set(
+
+            0,
+
+            -1.1 +
+            i * .31,
+
+            0
+
+        );
+
+        group.add(
+            rung
+        );
+
+    }
+
+    addObject(
+        group
+    );
+
+    ladders.push(
+        group
+    );
+
 }
 
 /* =========================================================
@@ -1379,10 +1876,10 @@ function buildLevel(){
     clearWorld();
 
     addFloor();
-
     addCeiling();
 
-    const H = 3.1;
+    const H =
+        3.1;
 
     /* =====================================================
        OUTER WALLS
@@ -1425,134 +1922,210 @@ function buildLevel(){
     );
 
     /* =====================================================
-       LARGE ROOMS
+       LARGE IRREGULAR ROOMS
     ===================================================== */
 
     addWall(
-        1,
-        H,
-        95,
-        -55,
-        H/2,
-        0
-    );
-
-    addWall(
-        1,
-        H,
-        95,
-        55,
-        H/2,
-        0
-    );
-
-    addWall(
-        75,
+        38,
         H,
         1,
-        0,
+        -30,
         H/2,
         -52
     );
 
     addWall(
-        75,
+        1,
+        H,
+        32,
+        -49,
+        H/2,
+        -36
+    );
+
+    addWall(
+        24,
         H,
         1,
-        0,
+        -61,
         H/2,
-        52
+        -20
+    );
+
+    addWall(
+        1,
+        H,
+        36,
+        -73,
+        H/2,
+        -2
+    );
+
+    addWall(
+        28,
+        H,
+        1,
+        -59,
+        H/2,
+        16
+    );
+
+    addWall(
+        1,
+        H,
+        28,
+        -45,
+        H/2,
+        30
     );
 
     /* =====================================================
-       INTERIOR WALLS
+       CENTRAL LONG CORRIDORS
     ===================================================== */
+
+    addWall(
+        1,
+        H,
+        65,
+        -22,
+        H/2,
+        -20
+    );
+
+    addWall(
+        1,
+        H,
+        46,
+        8,
+        H/2,
+        -28
+    );
 
     addWall(
         35,
         H,
         1,
-        -25,
+        -4,
+        H/2,
+        -51
+    );
+
+    addWall(
+        28,
+        H,
+        1,
+        18,
+        H/2,
+        -3
+    );
+
+    addWall(
+        1,
+        H,
+        32,
+        32,
+        H/2,
+        13
+    );
+
+    /* =====================================================
+       EASTERN OPEN AREA
+    ===================================================== */
+
+    addWall(
+        1,
+        H,
+        44,
+        53,
         H/2,
         -25
     );
 
     addWall(
-        35,
-        H,
         1,
-        25,
+        H,
+        32,
+        72,
         H/2,
-        25
+        8
     );
 
     addWall(
-        1,
+        31,
         H,
-        30,
-        -42,
-        H/2,
-        27
-    );
-
-    addWall(
         1,
-        H,
-        30,
-        42,
+        57,
         H/2,
-        -27
+        24
     );
-
-    /* =====================================================
-       CLAUSTROPHOBIC AREA
-    ===================================================== */
-
-    for(
-        let i = 0;
-        i < 7;
-        i++
-    ){
-
-        addWall(
-            .8,
-            H,
-            25,
-            -35 +
-            i * 5,
-            H/2,
-            0
-        );
-
-    }
-
-    /* =====================================================
-       MORE ROOMS
-    ===================================================== */
 
     addWall(
         18,
         H,
         1,
-        -68,
+        72,
         H/2,
-        -35
+        42
     );
 
     addWall(
         1,
         H,
-        20,
-        -77,
+        24,
+        81,
         H/2,
-        -25
+        54
+    );
+
+    /* =====================================================
+       SOUTHERN AREA
+    ===================================================== */
+
+    addWall(
+        1,
+        H,
+        42,
+        -2,
+        H/2,
+        42
     );
 
     addWall(
+        1,
+        H,
+        29,
         20,
+        H/2,
+        52
+    );
+
+    addWall(
+        35,
         H,
         1,
-        65,
+        38,
+        H/2,
+        67
+    );
+
+    addWall(
+        1,
+        H,
+        18,
+        55,
+        H/2,
+        58
+    );
+
+    /* =====================================================
+       CLAUSTROPHOBIC CORRIDOR
+    ===================================================== */
+
+    addWall(
+        1,
+        H,
+        20,
+        -8,
         H/2,
         38
     );
@@ -1561,43 +2134,357 @@ function buildLevel(){
         1,
         H,
         20,
-        55,
+        -1,
+        H/2,
+        38
+    );
+
+    addWall(
+        18,
+        H,
+        1,
+        -4.5,
         H/2,
         48
     );
 
     /* =====================================================
-       CEILING LIGHT GRID
+       WEIRD OFFSET SECTIONS
     ===================================================== */
 
+    addWall(
+        16,
+        H,
+        1,
+        45,
+        H/2,
+        -54
+    );
+
+    addWall(
+        1,
+        H,
+        20,
+        37,
+        H/2,
+        -44
+    );
+
+    addWall(
+        22,
+        H,
+        1,
+        26,
+        H/2,
+        62
+    );
+
+    addWall(
+        1,
+        H,
+        14,
+        15,
+        H/2,
+        69
+    );
+
+    /* =====================================================
+       SUPPORT COLUMNS
+    ===================================================== */
+
+    const columns = [
+
+        [-65,-38],
+        [-54,10],
+        [-36,25],
+        [-12,-12],
+        [10,8],
+        [27,38],
+        [49,8],
+        [68,-10],
+        [75,35],
+        [-70,44]
+
+    ];
+
     for(
-        let x = -80;
-        x <= 80;
-        x += 10
+        const [x,z]
+        of columns
     ){
 
-        for(
-            let z = -70;
-            z <= 70;
-            z += 10
-        ){
-
-            addLight(
-                x,
-                z
-            );
-
-        }
+        addWall(
+            .7,
+            H,
+            .7,
+            x,
+            H/2,
+            z
+        );
 
     }
 
     /* =====================================================
-       PLAYER SPAWN
+       THE HOLE / LADDER ROOM
+
+       This is the distinctive room.
+
+       The back wall is split around a large opening.
+    ===================================================== */
+
+    const HOLE_ROOM_X =
+        -60;
+
+    const HOLE_ROOM_Z =
+        58;
+
+    /*
+        Left wall section.
+    */
+
+    addWall(
+        10,
+        H,
+        1,
+        HOLE_ROOM_X - 7.5,
+        H/2,
+        HOLE_ROOM_Z
+    );
+
+    /*
+        Right wall section.
+
+        Leaves a large opening between them.
+    */
+
+    addWall(
+        10,
+        H,
+        1,
+        HOLE_ROOM_X + 7.5,
+        H/2,
+        HOLE_ROOM_Z
+    );
+
+    /*
+        Side walls.
+    */
+
+    addWall(
+        1,
+        H,
+        24,
+        HOLE_ROOM_X - 12.5,
+        H/2,
+        HOLE_ROOM_Z - 12
+    );
+
+    addWall(
+        1,
+        H,
+        24,
+        HOLE_ROOM_X + 12.5,
+        H/2,
+        HOLE_ROOM_Z - 12
+    );
+
+    /*
+        Ladder leading toward the opening.
+    */
+
+    addLadder(
+        HOLE_ROOM_X,
+        1.45,
+        HOLE_ROOM_Z - 2.2,
+        0
+    );
+
+    /* =====================================================
+       FLOOR HOLE
+
+       Walking into this area makes the player fall.
+    ===================================================== */
+
+    createDeathHole(
+        HOLE_ROOM_X,
+        HOLE_ROOM_Z + 7,
+        5.5,
+        5
+    );
+
+    /* =====================================================
+       SECOND GREEN ROOM
+    ===================================================== */
+
+    const GREEN_ROOM_Z =
+        72;
+
+    addWall(
+        1,
+        H,
+        20,
+        HOLE_ROOM_X - 10,
+        H/2,
+        GREEN_ROOM_Z
+    );
+
+    addWall(
+        1,
+        H,
+        20,
+        HOLE_ROOM_X + 10,
+        H/2,
+        GREEN_ROOM_Z
+    );
+
+    addWall(
+        20,
+        H,
+        1,
+        HOLE_ROOM_X,
+        H/2,
+        GREEN_ROOM_Z + 10
+    );
+
+    /*
+        Green-tinted fixture.
+    */
+
+    const greenFixture =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                2,
+                .05,
+                2
+            ),
+
+            new THREE.MeshBasicMaterial({
+
+                color:
+                    0x77a978,
+
+                side:
+                    THREE.DoubleSide
+
+            })
+
+        );
+
+    greenFixture.position.set(
+        HOLE_ROOM_X,
+        3.02,
+        GREEN_ROOM_Z
+    );
+
+    addObject(
+        greenFixture
+    );
+
+    const greenLight =
+        new THREE.PointLight(
+            0x70a878,
+            7,
+            16,
+            1.8
+        );
+
+    greenLight.position.set(
+        HOLE_ROOM_X,
+        2.8,
+        GREEN_ROOM_Z
+    );
+
+    scene.add(
+        greenLight
+    );
+
+    /* =====================================================
+       LIGHTS
+
+       Less perfectly regular than before.
+    ===================================================== */
+
+    const lights = [
+
+        [-78,-68],
+        [-58,-68],
+        [-36,-68],
+        [-14,-68],
+        [10,-68],
+        [34,-68],
+        [58,-68],
+        [78,-68],
+
+        [-78,-45],
+        [-57,-46],
+        [-34,-45],
+        [-8,-44],
+        [18,-46],
+        [42,-45],
+        [66,-44],
+
+        [-78,-20],
+        [-57,-18],
+        [-34,-19],
+        [-10,-20],
+        [16,-19],
+        [41,-18],
+        [65,-21],
+
+        [-78,4],
+        [-56,5],
+        [-31,3],
+        [-6,5],
+        [18,4],
+        [43,6],
+        [67,4],
+
+        [-78,28],
+        [-58,27],
+        [-34,29],
+        [-9,27],
+        [17,29],
+        [43,28],
+        [66,30],
+
+        [-77,50],
+        [-55,49],
+        [-32,52],
+        [-8,50],
+        [18,51],
+        [42,50],
+        [65,53],
+
+        [-76,70],
+        [-53,69],
+        [-30,71],
+        [-6,69],
+        [18,71],
+        [43,69],
+        [68,71]
+
+    ];
+
+    for(
+        const [x,z]
+        of lights
+    ){
+
+        addLight(
+            x,
+            z,
+            10.5
+        );
+
+    }
+
+    /* =====================================================
+       SPAWN
     ===================================================== */
 
     player.position.set(
         -70,
-        0,
+        18,
         -65
     );
 
@@ -1605,13 +2492,15 @@ function buildLevel(){
     pitch = 0;
 
     velocityY = 0;
-    grounded = true;
+
+    grounded = false;
 
     player.rotation.y =
         yaw;
 
     camera.rotation.x =
         pitch;
+
 }
 
 /* =========================================================
@@ -1631,32 +2520,41 @@ function playerCollides(
         PLAYER_HEIGHT;
 
     for(
-        const wall of walls
+        const wall
+        of walls
     ){
 
         if(
             top <= wall.minY ||
             bottom >= wall.maxY
         ){
+
             continue;
+
         }
 
         const closestX =
             Math.max(
+
                 wall.minX,
+
                 Math.min(
                     x,
                     wall.maxX
                 )
+
             );
 
         const closestZ =
             Math.max(
+
                 wall.minZ,
+
                 Math.min(
                     z,
                     wall.maxZ
                 )
+
             );
 
         const dx =
@@ -1681,6 +2579,7 @@ function playerCollides(
     }
 
     return false;
+
 }
 
 /* =========================================================
@@ -1729,9 +2628,7 @@ async function createEntity(){
 
                             depthWrite:true,
 
-                            fog:false,
-
-                            toneMapped:false
+                            fog:false
 
                         });
 
@@ -1748,9 +2645,9 @@ async function createEntity(){
                         );
 
                     entity.position.set(
-                        35,
+                        30,
                         ENTITY_HEIGHT/2,
-                        35
+                        30
                     );
 
                     addObject(
@@ -1767,11 +2664,6 @@ async function createEntity(){
                         0
                     );
 
-                    hasLastKnownPosition =
-                        false;
-
-                    lastSeenTimer = 0;
-
                     resolve(true);
 
                 },
@@ -1782,8 +2674,13 @@ async function createEntity(){
 
                     const material =
                         new THREE.MeshBasicMaterial({
-                            color:0x111111,
-                            side:THREE.DoubleSide
+
+                            color:
+                                0x111111,
+
+                            side:
+                                THREE.DoubleSide
+
                         });
 
                     entity =
@@ -1799,9 +2696,9 @@ async function createEntity(){
                         );
 
                     entity.position.set(
-                        35,
+                        30,
                         ENTITY_HEIGHT/2,
-                        35
+                        30
                     );
 
                     addObject(
@@ -1829,25 +2726,32 @@ function entityHitsWall(
 ){
 
     for(
-        const wall of walls
+        const wall
+        of walls
     ){
 
         const closestX =
             Math.max(
+
                 wall.minX,
+
                 Math.min(
                     x,
                     wall.maxX
                 )
+
             );
 
         const closestZ =
             Math.max(
+
                 wall.minZ,
+
                 Math.min(
                     z,
                     wall.maxZ
                 )
+
             );
 
         const dx =
@@ -1872,6 +2776,7 @@ function entityHitsWall(
     }
 
     return false;
+
 }
 
 /* =========================================================
@@ -1886,10 +2791,12 @@ function lineBlocked(
 ){
 
     const dx =
-        x2 - x1;
+        x2 -
+        x1;
 
     const dz =
-        z2 - z1;
+        z2 -
+        z1;
 
     const distance =
         Math.hypot(
@@ -1910,13 +2817,16 @@ function lineBlocked(
     ){
 
         const t =
-            i / steps;
+            i /
+            steps;
 
         const x =
-            x1 + dx*t;
+            x1 +
+            dx*t;
 
         const z =
-            z1 + dz*t;
+            z1 +
+            dz*t;
 
         if(
             entityHitsWall(
@@ -1932,6 +2842,7 @@ function lineBlocked(
     }
 
     return false;
+
 }
 
 /* =========================================================
@@ -1941,7 +2852,9 @@ function lineBlocked(
 function chooseEntityDirection(){
 
     if(!entity){
+
         return null;
+
     }
 
     const dx =
@@ -1972,14 +2885,17 @@ function chooseEntityDirection(){
     if(visible){
 
         lastKnownPlayer.set(
+
             player.position.x,
             player.position.z
+
         );
 
         hasLastKnownPosition =
             true;
 
-        lastSeenTimer = 0;
+        lastSeenTimer =
+            0;
 
         return {
 
@@ -2040,109 +2956,38 @@ function chooseEntityDirection(){
 
     }
 
-    let best = null;
+    wanderTimer -=
+        .016;
 
-    const targetAngle =
-        Math.atan2(
-            dz,
-            dx
-        );
-
-    for(
-        let i = 0;
-        i < 32;
-        i++
+    if(
+        wanderTimer <= 0
     ){
 
-        const angle =
-            i /
-            32 *
+        wanderTimer =
+            1 +
+            Math.random()*3;
+
+        wanderAngle =
+            Math.random() *
             Math.PI *
             2;
 
-        const dirX =
-            Math.cos(
-                angle
-            );
-
-        const dirZ =
-            Math.sin(
-                angle
-            );
-
-        const testDistance =
-            2.4;
-
-        const testX =
-            entity.position.x +
-            dirX *
-            testDistance;
-
-        const testZ =
-            entity.position.z +
-            dirZ *
-            testDistance;
-
-        if(
-            entityHitsWall(
-                testX,
-                testZ
-            )
-        ){
-            continue;
-        }
-
-        let angleDifference =
-            Math.abs(
-                angle -
-                targetAngle
-            );
-
-        if(
-            angleDifference >
-            Math.PI
-        ){
-
-            angleDifference =
-                Math.PI -
-                angleDifference;
-
-        }
-
-        const remaining =
-            Math.hypot(
-
-                player.position.x -
-                testX,
-
-                player.position.z -
-                testZ
-
-            );
-
-        const score =
-            remaining +
-            angleDifference *
-            .55;
-
-        if(
-            best === null ||
-            score < best.score
-        ){
-
-            best = {
-
-                x:dirX,
-                z:dirZ,
-                score:score
-
-            };
-
-        }
-
     }
 
-    return best;
+    return {
+
+        x:
+            Math.cos(
+                wanderAngle
+            ),
+
+        z:
+            Math.sin(
+                wanderAngle
+            )
+
+    };
+
 }
 
 /* =========================================================
@@ -2186,26 +3031,27 @@ function normalizeAngle(
 ){
 
     while(
-        angle > Math.PI
+        angle >
+        Math.PI
     ){
 
         angle -=
-            Math.PI *
-            2;
+            Math.PI*2;
 
     }
 
     while(
-        angle < -Math.PI
+        angle <
+        -Math.PI
     ){
 
         angle +=
-            Math.PI *
-            2;
+            Math.PI*2;
 
     }
 
     return angle;
+
 }
 
 /* =========================================================
@@ -2218,9 +3064,12 @@ function updateEntity(
 
     if(
         !entity ||
-        dead
+        dead ||
+        fallingIntoLevel
     ){
+
         return;
+
     }
 
     const settings =
@@ -2228,51 +3077,11 @@ function updateEntity(
             difficulty
         ];
 
-    lastSeenTimer += dt;
+    lastSeenTimer +=
+        dt;
 
-    let direction = null;
-
-    if(
-        settings.chase
-    ){
-
-        direction =
-            chooseEntityDirection();
-
-    }else{
-
-        wanderTimer -= dt;
-
-        if(
-            wanderTimer <= 0
-        ){
-
-            wanderTimer =
-                1 +
-                Math.random()*4;
-
-            wanderAngle =
-                Math.random() *
-                Math.PI *
-                2;
-
-        }
-
-        direction = {
-
-            x:
-                Math.cos(
-                    wanderAngle
-                ),
-
-            z:
-                Math.sin(
-                    wanderAngle
-                )
-
-        };
-
-    }
+    const direction =
+        chooseEntityDirection();
 
     if(direction){
 
@@ -2290,40 +3099,34 @@ function updateEntity(
 
         let difference =
             normalizeAngle(
+
                 targetAngle -
                 currentAngle
+
             );
 
         const maxTurn =
-            2.2 * dt;
+            2.2 *
+            dt;
 
-        if(
-            Math.abs(
-                difference
-            ) > maxTurn
-        ){
-
-            difference =
-                Math.sign(
+        difference =
+            Math.max(
+                -maxTurn,
+                Math.min(
+                    maxTurn,
                     difference
-                ) *
-                maxTurn;
+                )
+            );
 
-        }
-
-        const newAngle =
+        const angle =
             currentAngle +
             difference;
 
         entityDirection.x =
-            Math.cos(
-                newAngle
-            );
+            Math.cos(angle);
 
         entityDirection.y =
-            Math.sin(
-                newAngle
-            );
+            Math.sin(angle);
 
         const desiredX =
             entityDirection.x *
@@ -2342,7 +3145,7 @@ function updateEntity(
 
                 Math.min(
                     1,
-                    dt * 2.6
+                    dt*2.6
                 )
 
             );
@@ -2356,23 +3159,9 @@ function updateEntity(
 
                 Math.min(
                     1,
-                    dt * 2.6
+                    dt*2.6
                 )
 
-            );
-
-    }else{
-
-        entityVelocity.x *=
-            Math.pow(
-                .08,
-                dt
-            );
-
-        entityVelocity.y *=
-            Math.pow(
-                .08,
-                dt
             );
 
     }
@@ -2421,6 +3210,10 @@ function updateEntity(
 
     }
 
+    /*
+        Billboard the entity toward the player.
+    */
+
     entity.rotation.y =
         Math.atan2(
 
@@ -2444,7 +3237,8 @@ function updateEntity(
         );
 
     if(
-        distance < 1.15
+        distance <
+        1.15
     ){
 
         killPlayer();
@@ -2467,7 +3261,8 @@ const keys = {
 
 };
 
-let jumpPressed = false;
+let jumpPressed =
+    false;
 
 window.addEventListener(
     "keydown",
@@ -2515,7 +3310,8 @@ window.addEventListener(
 
                 if(
                     running &&
-                    !dead
+                    !dead &&
+                    !fallingIntoLevel
                 ){
 
                     togglePause();
@@ -2528,7 +3324,8 @@ window.addEventListener(
 
                 if(
                     running &&
-                    !dead
+                    !dead &&
+                    !fallingIntoLevel
                 ){
 
                     togglePause();
@@ -2587,16 +3384,21 @@ document.addEventListener(
         if(
             !running ||
             paused ||
-            dead
+            dead ||
+            fallingIntoLevel
         ){
+
             return;
+
         }
 
         if(
             document.pointerLockElement !==
             document.body
         ){
+
             return;
+
         }
 
         const sensitivity =
@@ -2616,11 +3418,14 @@ document.addEventListener(
 
         pitch =
             Math.max(
+
                 -limit,
+
                 Math.min(
                     limit,
                     pitch
                 )
+
             );
 
         player.rotation.y =
@@ -2633,12 +3438,28 @@ document.addEventListener(
 );
 
 /* =========================================================
-   PLAYER
+   PLAYER UPDATE
 ========================================================= */
 
 function updatePlayer(
     dt
 ){
+
+    /*
+        The opening sequence takes control of the player.
+    */
+
+    if(
+        fallingIntoLevel
+    ){
+
+        updateFallSequence(
+            dt
+        );
+
+        return;
+
+    }
 
     const direction =
         new THREE.Vector3();
@@ -2680,7 +3501,8 @@ function updatePlayer(
                 : WALK_SPEED;
 
         const amount =
-            speed * dt;
+            speed *
+            dt;
 
         const nx =
             player.position.x +
@@ -2718,6 +3540,10 @@ function updatePlayer(
 
     }
 
+    /*
+        Jump.
+    */
+
     if(
         jumpPressed &&
         grounded
@@ -2734,6 +3560,10 @@ function updatePlayer(
     jumpPressed =
         false;
 
+    /*
+        Gravity.
+    */
+
     velocityY -=
         GRAVITY *
         dt;
@@ -2741,6 +3571,43 @@ function updatePlayer(
     player.position.y +=
         velocityY *
         dt;
+
+    /*
+        Actual hole fall.
+    */
+
+    if(
+        isInsideDeathHole(
+
+            player.position.x,
+            player.position.z
+
+        )
+    ){
+
+        grounded =
+            false;
+
+        /*
+            Don't snap back onto the normal floor.
+        */
+
+        if(
+            player.position.y <
+            -2.5
+        ){
+
+            killPlayer();
+
+        }
+
+        return;
+
+    }
+
+    /*
+        Normal floor.
+    */
 
     if(
         player.position.y <= 0
@@ -2760,16 +3627,177 @@ function updatePlayer(
 }
 
 /* =========================================================
+   FALLING INTO BACKROOMS
+========================================================= */
+
+function updateFallSequence(
+    dt
+){
+
+    fallTimer +=
+        dt;
+
+    const raw =
+        Math.min(
+
+            fallTimer /
+            FALL_DURATION,
+
+            1
+
+        );
+
+    /*
+        Smooth acceleration at first,
+        then a fast drop.
+    */
+
+    const eased =
+        raw * raw *
+        (3 - 2 * raw);
+
+    const startY =
+        18;
+
+    const endY =
+        0;
+
+    player.position.y =
+        THREE.MathUtils.lerp(
+
+            startY,
+            endY,
+            eased
+
+        );
+
+    /*
+        Slight camera movement during the fall.
+    */
+
+    const shake =
+        Math.sin(
+            fallTimer * 31
+        ) *
+        .025 *
+        (1 - raw);
+
+    camera.position.x =
+        shake;
+
+    camera.position.y =
+        EYE_HEIGHT +
+        shake;
+
+    /*
+        The camera pitches slightly downward
+        as the player realizes where they are.
+    */
+
+    camera.rotation.x =
+        THREE.MathUtils.lerp(
+
+            -0.28,
+            0,
+
+            Math.min(
+                raw * 1.3,
+                1
+            )
+
+        );
+
+    /*
+        Slight uncontrolled rotation.
+    */
+
+    player.rotation.y =
+        yaw +
+        Math.sin(
+            fallTimer * 3.5
+        ) *
+        .025 *
+        (1 - raw);
+
+    /*
+        Fade the world in near the end.
+    */
+
+    const fade =
+        document.getElementById(
+            "fallFade"
+        );
+
+    if(
+        raw > .12
+    ){
+
+        fade.style.opacity =
+            String(
+                1 -
+                Math.min(
+                    1,
+                    (raw-.12)/.55
+                )
+            );
+
+    }
+
+    if(
+        raw >= 1
+    ){
+
+        fallingIntoLevel =
+            false;
+
+        player.position.y =
+            0;
+
+        velocityY =
+            0;
+
+        grounded =
+            true;
+
+        camera.position.x =
+            0;
+
+        camera.position.y =
+            EYE_HEIGHT;
+
+        camera.rotation.x =
+            0;
+
+        player.rotation.y =
+            yaw;
+
+        document.body.requestPointerLock();
+
+    }
+
+}
+
+/* =========================================================
    CAMERA
 ========================================================= */
 
-let cameraTime = 0;
+let cameraTime =
+    0;
 
 function updateCamera(
     dt
 ){
 
-    cameraTime += dt;
+    if(
+        fallingIntoLevel
+    ){
+
+        return;
+
+    }
+
+    cameraTime +=
+        dt;
 
     const moving =
         keys.w ||
@@ -2777,29 +3805,37 @@ function updateCamera(
         keys.s ||
         keys.d;
 
-    const strength =
+    /*
+        Very subtle handheld-camera movement.
+
+        It should feel like a person holding a camera,
+        not like a head-bob videogame effect.
+    */
+
+    const movementAmount =
         moving
-            ? .005
-            : .0015;
+            ? .004
+            : .0012;
 
     camera.position.x =
         Math.sin(
             cameraTime * 3
         ) *
-        strength;
+        movementAmount;
 
     camera.position.y =
         EYE_HEIGHT +
+
         Math.sin(
-            cameraTime * 4
+            cameraTime * 3.7
         ) *
-        strength;
+        movementAmount;
 
     camera.rotation.z =
         Math.sin(
-            cameraTime * 1.3
+            cameraTime * 1.25
         ) *
-        .0012;
+        .0015;
 
 }
 
@@ -2824,7 +3860,8 @@ function updateEntityAudio(){
         !entity ||
         !running ||
         paused ||
-        dead
+        dead ||
+        fallingIntoLevel
     ){
 
         entityAudio.volume =
@@ -2839,6 +3876,7 @@ function updateEntityAudio(){
         }
 
         return;
+
     }
 
     const distance =
@@ -2906,9 +3944,11 @@ function updateEntityAudio(){
 
     entityAudio.volume =
         THREE.MathUtils.clamp(
+
             volume,
             0,
             .85
+
         );
 
     if(
@@ -2927,7 +3967,7 @@ function updateEntityAudio(){
 }
 
 /* =========================================================
-   START
+   START GAME
 ========================================================= */
 
 async function startGame(){
@@ -2955,6 +3995,48 @@ async function startGame(){
     dead =
         false;
 
+    fallingIntoLevel =
+        true;
+
+    fallTimer =
+        0;
+
+    /*
+        Spawn high above the Backrooms.
+    */
+
+    player.position.set(
+
+        -70,
+        18,
+        -65
+
+    );
+
+    yaw =
+        0;
+
+    pitch =
+        -0.28;
+
+    velocityY =
+        0;
+
+    grounded =
+        false;
+
+    player.rotation.y =
+        yaw;
+
+    camera.rotation.x =
+        pitch;
+
+    camera.position.set(
+        0,
+        EYE_HEIGHT,
+        0
+    );
+
     document.getElementById(
         "menu"
     ).style.display =
@@ -2969,6 +4051,16 @@ async function startGame(){
         "death"
     ).style.display =
         "none";
+
+    document.getElementById(
+        "fallFade"
+    ).style.opacity =
+        "1";
+
+    /*
+        Pointer lock immediately lets the falling sequence
+        behave like the opening camera shot.
+    */
 
     document.body.requestPointerLock();
 
@@ -2992,6 +4084,9 @@ function killPlayer(){
     dead =
         true;
 
+    fallingIntoLevel =
+        false;
+
     entityAudio.pause();
 
     entityAudio.volume =
@@ -3004,6 +4099,11 @@ function killPlayer(){
         document.exitPointerLock();
 
     }
+
+    document.getElementById(
+        "deathText"
+    ).textContent =
+        "THE BACKROOMS GOT YOU";
 
     document.getElementById(
         "death"
@@ -3020,7 +4120,8 @@ function togglePause(){
 
     if(
         !running ||
-        dead
+        dead ||
+        fallingIntoLevel
     ){
 
         return;
@@ -3056,7 +4157,7 @@ function togglePause(){
 }
 
 /* =========================================================
-   MENU
+   RETURN MENU
 ========================================================= */
 
 function returnToMenu(){
@@ -3068,6 +4169,9 @@ function returnToMenu(){
         false;
 
     dead =
+        false;
+
+    fallingIntoLevel =
         false;
 
     entityAudio.pause();
@@ -3128,7 +4232,8 @@ function setDifficulty(
         );
 
     document.getElementById(
-        value + "Btn"
+        value +
+        "Btn"
     ).classList.add(
         "selected"
     );
@@ -3205,7 +4310,7 @@ document.getElementById(
     () => returnToMenu();
 
 /* =========================================================
-   CLICK TO RELOCK
+   POINTER LOCK
 ========================================================= */
 
 document.addEventListener(
@@ -3216,6 +4321,7 @@ document.addEventListener(
             running &&
             !paused &&
             !dead &&
+            !fallingIntoLevel &&
             document.pointerLockElement !==
             document.body
         ){
@@ -3250,7 +4356,7 @@ window.addEventListener(
 );
 
 /* =========================================================
-   INITIALIZE
+   INITIAL LOAD
 ========================================================= */
 
 loadEnvironmentTextures();
@@ -3280,13 +4386,19 @@ function animate(){
         !dead
     ){
 
-        updatePlayer(dt);
+        updatePlayer(
+            dt
+        );
 
-        updateEntity(dt);
+        updateEntity(
+            dt
+        );
 
         updateEntityAudio();
 
-        updateCamera(dt);
+        updateCamera(
+            dt
+        );
 
     }else{
 
