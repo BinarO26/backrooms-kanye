@@ -1,514 +1,341 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>THE BACKROOMS — LEVEL 0</title>
 
 <style>
-*{
-    box-sizing:border-box;
+* {
+    box-sizing: border-box;
+    user-select: none;
 }
 
-html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#000;
-    font-family:Arial,Helvetica,sans-serif;
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-canvas{
-    display:block;
+canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
-/* =========================================================
-   MENU
-========================================================= */
-
-#menu{
-    position:fixed;
-    inset:0;
-    z-index:100;
-    overflow:hidden;
-    background:#050505;
+#menu,
+#pause,
+#death {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
 }
 
-.menuImage{
-    position:absolute;
-    inset:-5%;
-    width:110%;
-    height:110%;
-    object-fit:cover;
-    opacity:0;
-    filter:
-        brightness(.4)
-        contrast(1.35)
-        saturate(.45)
-        sepia(.12);
-    transform:scale(1.05);
-    transition:
-        opacity 1.8s ease,
-        transform 14s ease;
+#menu {
+    display: block;
+    overflow: hidden;
+    background: #111;
 }
 
-.menuImage.active{
-    opacity:1;
-    transform:scale(1);
+.menuImage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 2s ease;
 }
 
-.menuDark{
-    position:absolute;
-    inset:0;
+.menuImage.active {
+    opacity: 1;
+}
+
+.menuDark {
+    position: absolute;
+    inset: 0;
     background:
         linear-gradient(
-            90deg,
-            rgba(0,0,0,.84),
-            rgba(0,0,0,.18) 62%,
-            rgba(0,0,0,.76)
-        ),
-        linear-gradient(
-            0deg,
-            rgba(0,0,0,.94),
-            transparent 65%
+            rgba(0,0,0,.28),
+            rgba(0,0,0,.72)
         );
 }
 
-.menuNoise{
-    position:absolute;
-    inset:-20%;
-    pointer-events:none;
-    opacity:.11;
-    background:
+.menuNoise {
+    position: absolute;
+    inset: 0;
+    opacity: .09;
+    pointer-events: none;
+    background-image:
         repeating-radial-gradient(
             circle at 0 0,
-            rgba(255,255,255,.75) 0,
-            rgba(255,255,255,.1) 1px,
-            transparent 2px,
-            transparent 4px
+            #fff 0,
+            #fff 1px,
+            transparent 1px,
+            transparent 3px
         );
-    animation:menuNoise .07s steps(3) infinite;
+    background-size: 5px 5px;
 }
 
-@keyframes menuNoise{
-    0%{transform:translate(0,0)}
-    25%{transform:translate(-4px,2px)}
-    50%{transform:translate(3px,-3px)}
-    75%{transform:translate(2px,4px)}
-    100%{transform:translate(0,0)}
-}
-
-.menuScan{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    opacity:.18;
+.menuScan {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
     background:
         repeating-linear-gradient(
             to bottom,
-            rgba(255,255,255,.06) 0,
-            rgba(255,255,255,.06) 1px,
-            transparent 2px,
-            transparent 5px
-        );
-}
-
-.menuContent{
-    position:absolute;
-    left:7%;
-    bottom:11%;
-    color:white;
-    text-shadow:
-        2px 3px 9px #000,
-        0 0 25px #000;
-}
-
-.menuContent h1{
-    margin:0;
-    color:#d7cb70;
-    font-size:clamp(40px,6vw,82px);
-    letter-spacing:clamp(5px,1vw,14px);
-}
-
-.menuSubtitle{
-    margin-top:7px;
-    color:#aaa;
-    font-size:13px;
-    letter-spacing:4px;
-}
-
-.menuHint{
-    margin-top:14px;
-    color:#777;
-    font-size:11px;
-    letter-spacing:2px;
-}
-
-.menuButtons{
-    position:absolute;
-    right:8%;
-    bottom:11%;
-    width:320px;
-}
-
-.menuDifficulty{
-    display:flex;
-    gap:5px;
-    margin-bottom:10px;
-}
-
-.menuDifficulty button,
-.menuButton{
-    border:1px solid rgba(255,255,255,.27);
-    background:rgba(0,0,0,.57);
-    color:#bbb;
-    cursor:pointer;
-}
-
-.menuDifficulty button{
-    flex:1;
-    padding:8px 2px;
-    font-size:11px;
-}
-
-.menuDifficulty button.selected{
-    color:white;
-    border-color:#d9cd6b;
-    background:rgba(100,90,30,.68);
-}
-
-.menuButton{
-    display:block;
-    width:100%;
-    margin:7px 0;
-    padding:14px 18px;
-    font-size:14px;
-    text-align:left;
-    transition:.15s;
-}
-
-.menuButton:hover{
-    padding-left:25px;
-    background:rgba(105,95,35,.75);
-    border-color:#d9cd6b;
-}
-
-/* =========================================================
-   OVERLAYS
-========================================================= */
-
-.overlay{
-    position:fixed;
-    inset:0;
-    z-index:110;
-    display:none;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    color:white;
-    background:
-        radial-gradient(
-            ellipse at center,
-            rgba(70,65,35,.82),
-            rgba(0,0,0,.97)
-        );
-}
-
-.overlay h1{
-    margin:0 0 18px;
-    color:#d8cb60;
-    font-size:52px;
-    letter-spacing:8px;
-}
-
-.overlay button{
-    width:330px;
-    margin:5px;
-    padding:14px;
-    border:1px solid #666;
-    background:#111;
-    color:#eee;
-    cursor:pointer;
-}
-
-.overlay button:hover{
-    background:#423d18;
-    border-color:#d9cc61;
-}
-
-#deathTitle{
-    color:#b40000;
-}
-
-#deathTitle.win{
-    color:#69ff82;
-}
-
-#deathText{
-    margin-bottom:18px;
-    color:#aaa;
-}
-
-/* =========================================================
-   HUD
-========================================================= */
-
-#crosshair{
-    position:fixed;
-    left:50%;
-    top:50%;
-    z-index:25;
-    width:5px;
-    height:5px;
-    margin:-2px;
-    border:1px solid rgba(255,255,255,.7);
-    border-radius:50%;
-    pointer-events:none;
-}
-
-#hud{
-    position:fixed;
-    left:18px;
-    bottom:18px;
-    z-index:50;
-    color:white;
-    font:12px monospace;
-    text-shadow:2px 2px 6px #000;
-}
-
-#difficultyHud{
-    margin-top:5px;
-    color:#aaa;
-}
-
-#message{
-    position:fixed;
-    left:50%;
-    top:45px;
-    transform:translateX(-50%);
-    z-index:50;
-    color:white;
-    font:13px monospace;
-    text-shadow:2px 2px 8px #000;
-}
-
-#rec{
-    position:fixed;
-    right:18px;
-    top:17px;
-    z-index:50;
-    color:#eee;
-    font:13px monospace;
-    text-shadow:2px 2px 6px #000;
-}
-
-#recDot{
-    display:inline-block;
-    width:9px;
-    height:9px;
-    margin-right:6px;
-    border-radius:50%;
-    background:#e00000;
-    animation:recBlink .9s infinite;
-}
-
-@keyframes recBlink{
-    0%,45%{opacity:1}
-    46%,100%{opacity:.15}
-}
-
-#tapeTime{
-    position:fixed;
-    right:18px;
-    top:39px;
-    z-index:50;
-    color:rgba(255,255,255,.75);
-    font:11px monospace;
-    text-shadow:2px 2px 5px #000;
-}
-
-/* =========================================================
-   CAMCORDER
-========================================================= */
-
-#camcorder{
-    position:fixed;
-    inset:0;
-    z-index:40;
-    pointer-events:none;
-    overflow:hidden;
-}
-
-.camScanlines{
-    position:absolute;
-    inset:-10%;
-    background:
-        repeating-linear-gradient(
-            to bottom,
-            rgba(255,255,255,.11) 0,
-            rgba(255,255,255,.11) 1px,
-            rgba(0,0,0,.08) 2px,
-            transparent 4px,
-            transparent 6px
-        );
-    opacity:.24;
-    animation:scan .15s linear infinite;
-}
-
-@keyframes scan{
-    to{transform:translateY(6px)}
-}
-
-.camGrain{
-    position:absolute;
-    inset:-15%;
-    opacity:.15;
-    background:
-        repeating-radial-gradient(
-            circle at 0 0,
-            rgba(255,255,255,.75) 0,
-            rgba(255,255,255,.1) 1px,
-            transparent 2px,
-            transparent 4px
-        );
-    animation:grain .06s steps(3) infinite;
-}
-
-@keyframes grain{
-    0%{transform:translate(0,0)}
-    25%{transform:translate(-4px,2px)}
-    50%{transform:translate(3px,-4px)}
-    75%{transform:translate(4px,3px)}
-    100%{transform:translate(0,0)}
-}
-
-.camTracking{
-    position:absolute;
-    left:-10%;
-    width:120%;
-    height:9%;
-    top:-15%;
-    opacity:.09;
-    background:
-        repeating-linear-gradient(
-            to bottom,
-            transparent,
+            transparent 0,
             transparent 3px,
-            rgba(255,255,255,.8) 4px,
-            transparent 7px
+            rgba(0,0,0,.11) 4px
         );
-    animation:tracking 7s linear infinite;
 }
 
-@keyframes tracking{
-    0%{top:-15%}
-    45%{top:45%}
-    48%{top:51%}
-    100%{top:115%}
+.menuContent {
+    position: absolute;
+    top: 18%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: white;
+    width: 90%;
+    text-shadow: 0 3px 10px #000;
 }
 
-.camVignette{
-    position:absolute;
-    inset:0;
+.menuContent h1 {
+    margin: 0;
+    font-size: clamp(42px, 7vw, 92px);
+    letter-spacing: .12em;
+    font-weight: 900;
+}
+
+.menuSubtitle {
+    margin-top: 12px;
+    font-size: clamp(14px, 2vw, 23px);
+    letter-spacing: .3em;
+}
+
+.menuHint {
+    margin-top: 32px;
+    font-size: 12px;
+    letter-spacing: .25em;
+    opacity: .7;
+}
+
+.menuButtons {
+    position: absolute;
+    left: 50%;
+    bottom: 11%;
+    transform: translateX(-50%);
+    width: min(500px, 88vw);
+    text-align: center;
+}
+
+.menuDifficulty {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 18px;
+}
+
+button {
+    border: 1px solid rgba(255,255,255,.5);
+    background: rgba(0,0,0,.58);
+    color: white;
+    padding: 12px 17px;
+    font-weight: bold;
+    letter-spacing: .12em;
+    cursor: pointer;
+    transition: .15s;
+}
+
+button:hover {
+    background: rgba(255,255,255,.18);
+}
+
+.menuDifficulty button.selected {
+    background: rgba(220,210,120,.38);
+    border-color: #e7db83;
+}
+
+.menuButton {
+    width: 100%;
+    font-size: 18px;
+    padding: 17px;
+    background: rgba(0,0,0,.72);
+}
+
+#pause,
+#death {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: rgba(0,0,0,.78);
+    color: white;
+    text-align: center;
+}
+
+#pause h1 {
+    font-size: 60px;
+    letter-spacing: .15em;
+    margin: 0 0 30px;
+}
+
+#pause button,
+#death button {
+    width: min(300px, 80vw);
+    margin: 6px;
+    font-size: 16px;
+}
+
+#deathTitle {
+    font-size: clamp(48px, 8vw, 100px);
+    font-weight: 900;
+    letter-spacing: .12em;
+}
+
+#deathTitle.win {
+    color: #5dff72;
+}
+
+#deathText {
+    margin: 15px 0 30px;
+    font-size: 14px;
+    letter-spacing: .2em;
+}
+
+#hud {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+#difficultyHud {
+    position: absolute;
+    top: 18px;
+    left: 20px;
+    color: rgba(255,255,255,.7);
+    font-size: 12px;
+    letter-spacing: .18em;
+}
+
+#tapeTime {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    color: rgba(255,255,255,.7);
+    font-family: monospace;
+    font-size: 13px;
+}
+
+#message {
+    position: absolute;
+    left: 50%;
+    bottom: 15%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 13px;
+    letter-spacing: .18em;
+    text-align: center;
+    text-shadow: 0 2px 7px #000;
+}
+
+#error {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    padding: 18px;
+    color: #fff;
+    background: rgba(120,0,0,.9);
+    border: 1px solid #f66;
+    white-space: pre-wrap;
+    font-family: monospace;
+}
+
+.camScanlines,
+.camTracking,
+.camGrain,
+.camVignette,
+.camBleed {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.camScanlines {
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent 3px,
+            rgba(255,255,255,.025) 4px
+        );
+}
+
+.camTracking {
+    opacity: .035;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent 9px,
+            rgba(255,255,255,.2) 10px
+        );
+}
+
+.camGrain {
+    opacity: .035;
+    background-image:
+        repeating-radial-gradient(
+            circle at 0 0,
+            #fff 0,
+            #fff 1px,
+            transparent 1px,
+            transparent 4px
+        );
+    background-size: 6px 6px;
+}
+
+.camVignette {
     background:
         radial-gradient(
             ellipse at center,
-            transparent 25%,
-            rgba(0,0,0,.08) 48%,
-            rgba(0,0,0,.7) 100%
+            transparent 42%,
+            rgba(0,0,0,.45) 100%
         );
 }
 
-.camBleed{
-    position:absolute;
-    inset:0;
-    box-shadow:
-        inset 5px 0 rgba(255,0,0,.12),
-        inset -5px 0 rgba(0,80,255,.12);
-}
-
-.camExposure{
-    position:absolute;
-    inset:0;
-    background:
-        radial-gradient(
-            ellipse at center,
-            rgba(255,255,210,.04),
-            transparent 60%
-        );
-    mix-blend-mode:screen;
-}
-
-.camDamage{
-    position:absolute;
-    inset:0;
-    opacity:.08;
+.camBleed {
     background:
         linear-gradient(
             90deg,
-            transparent 0%,
-            rgba(255,255,255,.12) 48%,
-            transparent 52%
+            rgba(255,0,0,.025),
+            transparent 20%,
+            transparent 80%,
+            rgba(0,80,255,.025)
         );
-    animation:damage 11s infinite;
 }
 
-@keyframes damage{
-    0%,93%,100%{
-        opacity:.03;
-        transform:translateX(0);
-    }
-    94%{
-        opacity:.16;
-        transform:translateX(-2%);
-    }
-    96%{
-        opacity:.08;
-        transform:translateX(3%);
-    }
-}
-
-/* =========================================================
-   FALLING INTRO
-========================================================= */
-
-#fallOverlay{
-    position:fixed;
-    inset:0;
-    z-index:105;
-    background:#020202;
-    pointer-events:none;
-}
-
-#fallText{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    color:#666;
-    font:11px monospace;
-    text-align:center;
-    letter-spacing:4px;
-}
-
-/* =========================================================
-   ERROR
-========================================================= */
-
-#error{
-    display:none;
-    position:fixed;
-    left:10px;
-    right:10px;
-    bottom:10px;
-    z-index:999;
-    padding:15px;
-    background:#450000;
-    border:1px solid red;
-    color:white;
-    font:13px monospace;
-    white-space:pre-wrap;
+#crosshair {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    transform: translate(-50%, -50%);
+    background: rgba(255,255,255,.45);
 }
 </style>
 </head>
@@ -516,34 +343,30 @@ canvas{
 <body>
 
 <!-- =========================================================
-     MENU
+     MAIN MENU
 ========================================================= -->
 
 <div id="menu">
 
-    <img
-        class="menuImage active"
-        src="./textures/menu1.jpg"
-        onerror="this.style.display='none'"
-    >
+    <img class="menuImage active"
+         src="./textures/menu.jpg"
+         onerror="this.style.display='none'">
 
-    <img
-        class="menuImage"
-        src="./textures/menu2.jpg"
-        onerror="this.style.display='none'"
-    >
+    <img class="menuImage"
+         src="./textures/menu2.jpg"
+         onerror="this.style.display='none'">
 
-    <img
-        class="menuImage"
-        src="./textures/menu3.jpg"
-        onerror="this.style.display='none'"
-    >
+    <img class="menuImage"
+         src="./textures/menu3.jpg"
+         onerror="this.style.display='none'">
 
-    <img
-        class="menuImage"
-        src="./textures/menu4.jpg"
-        onerror="this.style.display='none'"
-    >
+    <img class="menuImage"
+         src="./textures/menu4.jpg"
+         onerror="this.style.display='none'">
+
+    <img class="menuImage"
+         src="./textures/menu5.jpg"
+         onerror="this.style.display='none'">
 
     <div class="menuDark"></div>
     <div class="menuNoise"></div>
@@ -565,20 +388,14 @@ canvas{
 
         <div class="menuDifficulty">
 
-            <button id="easyBtn">
-                EASY
-            </button>
+            <button id="easyBtn">EASY</button>
 
-            <button
-                id="normalBtn"
-                class="selected"
-            >
+            <button id="normalBtn"
+                    class="selected">
                 NORMAL
             </button>
 
-            <button id="hardBtn">
-                HARD
-            </button>
+            <button id="hardBtn">HARD</button>
 
             <button id="nightmareBtn">
                 NIGHTMARE
@@ -586,22 +403,19 @@ canvas{
 
         </div>
 
-        <button
-            class="menuButton"
-            id="startBtn"
-        >
+        <button class="menuButton"
+                id="startBtn">
             ENTER LEVEL 0
         </button>
 
     </div>
-
 </div>
 
 <!-- =========================================================
      PAUSE
 ========================================================= -->
 
-<div id="pause" class="overlay">
+<div id="pause">
 
     <h1>PAUSED</h1>
 
@@ -623,7 +437,7 @@ canvas{
      DEATH / WIN
 ========================================================= -->
 
-<div id="death" class="overlay">
+<div id="death">
 
     <div id="deathTitle">
         YOU DIED
@@ -643,98 +457,100 @@ canvas{
 
 </div>
 
-<div id="crosshair"></div>
+<!-- =========================================================
+     HUD
+========================================================= -->
 
 <div id="hud">
-    LEVEL 0
 
     <div id="difficultyHud">
         NORMAL
     </div>
-</div>
 
-<div id="message"></div>
+    <div id="tapeTime">
+        00:00:00
+    </div>
 
-<div id="rec">
-    <span id="recDot"></span>
-    REC
-</div>
+    <div id="message"></div>
 
-<div id="tapeTime">
-    00:00:00
-</div>
-
-<div id="camcorder">
+    <div id="crosshair"></div>
 
     <div class="camScanlines"></div>
     <div class="camTracking"></div>
     <div class="camGrain"></div>
     <div class="camVignette"></div>
     <div class="camBleed"></div>
-    <img
-    class="menuImage active"
-    src="./textures/menu.jpg"
-    onerror="this.style.display='none'"
->
 
-<img
-    class="menuImage"
-    src="./textures/menu2.jpg"
-    onerror="this.style.display='none'"
->
+</div>
 
-<img
-    class="menuImage"
-    src="./textures/menu3.jpg"
-    onerror="this.style.display='none'"
->
+<div id="error"></div>
 
-<img
-    class="menuImage"
-    src="./textures/menu4.jpg"
-    onerror="this.style.display='none'"
->
+<!-- =========================================================
+     THREE.JS
+========================================================= -->
 
-<img
-    class="menuImage"
-    src="./textures/menu5.jpg"
-    onerror="this.style.display='none'"
->    error.style.display="block";
+<script src="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.min.js"></script>
 
-    error.textContent=
-        "ERROR: three.min.js could not be loaded.";
+<script>
+"use strict";
 
-    throw new Error(
-        "Three.js missing"
-    );
+/* =========================================================
+   THREE.JS CHECK
+========================================================= */
+
+if (!window.THREE) {
+
+    const error = document.getElementById("error");
+
+    error.style.display = "block";
+
+    error.textContent =
+        "ERROR: Three.js could not be loaded.\\n\\n" +
+        "Make sure you are connected to the internet.";
+
+    throw new Error("Three.js missing");
 }
 
-const scene=
-    new THREE.Scene();
 
-scene.background=
+/* =========================================================
+   SCENE
+========================================================= */
+
+const scene = new THREE.Scene();
+
+scene.background =
     new THREE.Color(0x706a43);
 
-scene.fog=
+scene.fog =
     new THREE.FogExp2(
         0x706a43,
-        .0092
+        0.008
     );
 
-const camera=
+
+/* =========================================================
+   CAMERA
+========================================================= */
+
+const camera =
     new THREE.PerspectiveCamera(
         78,
-        innerWidth/innerHeight,
-        .025,
+        innerWidth / innerHeight,
+        0.025,
         500
     );
 
-camera.rotation.order="YXZ";
+camera.rotation.order = "YXZ";
 
-const renderer=
+
+/* =========================================================
+   RENDERER
+========================================================= */
+
+const renderer =
     new THREE.WebGLRenderer({
-        antialias:false,
-        powerPreference:"high-performance"
+        antialias: false,
+        powerPreference: "high-performance"
     });
 
 renderer.setSize(
@@ -744,90 +560,113 @@ renderer.setSize(
 
 renderer.setPixelRatio(
     Math.min(
-        devicePixelRatio,
+        window.devicePixelRatio || 1,
         1.35
     )
 );
 
-if(
-    "outputColorSpace"
-    in renderer
-){
-    renderer.outputColorSpace=
+if ("outputColorSpace" in renderer) {
+
+    renderer.outputColorSpace =
         THREE.SRGBColorSpace;
 }
 
-renderer.toneMapping=
-    THREE.ACESFilmicToneMapping;
+renderer.toneMapping =
+    THREE.NoToneMapping;
 
-renderer.toneMappingExposure=
-    .72;
+renderer.toneMappingExposure = 1;
 
 document.body.appendChild(
     renderer.domElement
 );
 
+
 /* =========================================================
-   BASE LIGHTING
+   LIGHTING
 ========================================================= */
 
 scene.add(
     new THREE.AmbientLight(
-        0x6c653f,
-        .20
+        0xffffff,
+        0.28
     )
 );
 
 scene.add(
     new THREE.HemisphereLight(
-        0xd7c978,
-        0x11100c,
-        .36
+        0xfff1a0,
+        0x16140d,
+        0.35
     )
 );
+
 
 /* =========================================================
    TEXTURES
 ========================================================= */
 
-const textureLoader=
+const textureLoader =
     new THREE.TextureLoader();
 
-let wallTexture=null;
-let floorTexture=null;
-let ceilingTexture=null;
+let wallTexture = null;
+let floorTexture = null;
+let ceilingTexture = null;
 
-function prepareTexture(texture){
 
-    texture.colorSpace=
+/*
+   IMPORTANT:
+
+   These textures are intentionally NOT given
+   color tinting, ACES tone mapping, or other
+   shader-style effects.
+
+   The PNG itself is what determines the color.
+*/
+
+function prepareTexture(texture) {
+
+    texture.colorSpace =
         THREE.SRGBColorSpace;
 
-    texture.magFilter=
+    texture.wrapS =
+        THREE.RepeatWrapping;
+
+    texture.wrapT =
+        THREE.RepeatWrapping;
+
+    texture.magFilter =
         THREE.LinearFilter;
 
-    texture.minFilter=
+    texture.minFilter =
         THREE.LinearMipmapLinearFilter;
 
-    texture.anisotropy=
+    texture.anisotropy =
         Math.min(
-            renderer.capabilities
-                .getMaxAnisotropy(),
+            renderer.capabilities.getMaxAnisotropy(),
             8
         );
 
-    texture.needsUpdate=true;
+    texture.needsUpdate = true;
 
     return texture;
 }
 
-function loadTexture(path){
 
-    return new Promise(resolve=>{
+function loadTexture(path) {
+
+    return new Promise(resolve => {
 
         textureLoader.load(
+
             path,
 
-            texture=>{
+            texture => {
+
+                console.log(
+                    "Loaded texture:",
+                    path
+                );
+
                 resolve(
                     prepareTexture(texture)
                 );
@@ -835,10 +674,12 @@ function loadTexture(path){
 
             undefined,
 
-            ()=>{
+            error => {
+
                 console.warn(
-                    "Texture missing:",
-                    path
+                    "Texture failed:",
+                    path,
+                    error
                 );
 
                 resolve(null);
@@ -848,86 +689,96 @@ function loadTexture(path){
     });
 }
 
-async function loadTextures(){
 
-    wallTexture=
+async function loadTextures() {
+
+    wallTexture =
         await loadTexture(
             "./textures/wall.png"
         );
 
-    floorTexture=
+    floorTexture =
         await loadTexture(
             "./textures/floor.png"
         );
 
-    ceilingTexture=
+    ceilingTexture =
         await loadTexture(
             "./textures/ceiling.png"
         );
 
-    if(
-        !wallTexture ||
-        !floorTexture ||
-        !ceilingTexture
-    ){
+    const missing = [];
 
-        const error=
+    if (!wallTexture)
+        missing.push("./textures/wall.png");
+
+    if (!floorTexture)
+        missing.push("./textures/floor.png");
+
+    if (!ceilingTexture)
+        missing.push("./textures/ceiling.png");
+
+    if (missing.length) {
+
+        const error =
             document.getElementById("error");
 
-        error.style.display="block";
+        error.style.display = "block";
 
-        error.textContent=
-            "ONE OR MORE TEXTURES COULD NOT LOAD.\n\n"+
-            "Required files:\n"+
-            "./textures/wall.png\n"+
-            "./textures/floor.png\n"+
-            "./textures/ceiling.png";
+        error.textContent =
+            "TEXTURE ERROR\\n\\n" +
+            "The following texture(s) could not be loaded:\\n\\n" +
+            missing.join("\\n") +
+            "\\n\\n" +
+            "Make sure the files are inside the textures folder.";
     }
 }
+
 
 /* =========================================================
    PLAYER
 ========================================================= */
 
-const player=
+const player =
     new THREE.Object3D();
 
 scene.add(player);
 
 player.add(camera);
 
-const EYE_HEIGHT=1.18;
-const PLAYER_HEIGHT=1.55;
-const PLAYER_RADIUS=.28;
+const EYE_HEIGHT = 1.18;
+const PLAYER_HEIGHT = 1.55;
+const PLAYER_RADIUS = 0.28;
 
-let yaw=0;
-let pitch=0;
+let yaw = 0;
+let pitch = 0;
 
-let velocityY=0;
+let velocityY = 0;
 
-let grounded=false;
+let grounded = false;
 
-let running=false;
-let paused=false;
-let dead=false;
+let running = false;
+let paused = false;
+let dead = false;
 
-let fallingIntoLevel=false;
-let fallTimer=0;
+let fallingIntoLevel = false;
+let fallTimer = 0;
 
-const FALL_DURATION=2.25;
+const FALL_DURATION = 2.25;
 
-let difficulty="normal";
+let difficulty = "normal";
+
 
 /* =========================================================
    WORLD
 ========================================================= */
 
-let worldObjects=[];
-let wallColliders=[];
-let deathHoles=[];
-let lights=[];
+let worldObjects = [];
+let wallColliders = [];
+let deathHoles = [];
+let lights = [];
 
-function addWorldObject(object){
+function addWorldObject(object) {
 
     scene.add(object);
 
@@ -936,56 +787,79 @@ function addWorldObject(object){
     return object;
 }
 
-function clearWorld(){
 
-    for(
-        const object
-        of worldObjects
-    ){
+function disposeMaterial(material) {
+
+    if (!material)
+        return;
+
+    if (Array.isArray(material)) {
+
+        material.forEach(
+            disposeMaterial
+        );
+
+        return;
+    }
+
+    if (material.map)
+        material.map.dispose();
+
+    material.dispose();
+}
+
+
+function clearWorld() {
+
+    for (
+        const object of worldObjects
+    ) {
 
         scene.remove(object);
 
-        if(object.geometry){
-            object.geometry.dispose();
-        }
+        if (object.traverse) {
 
-        if(object.material){
+            object.traverse(child => {
 
-            if(
-                Array.isArray(
+                if (child.geometry)
+                    child.geometry.dispose();
+
+                if (child.material)
+                    disposeMaterial(
+                        child.material
+                    );
+            });
+
+        } else {
+
+            if (object.geometry)
+                object.geometry.dispose();
+
+            if (object.material)
+                disposeMaterial(
                     object.material
-                )
-            ){
-
-                object.material.forEach(
-                    m=>m.dispose()
                 );
-
-            }else{
-
-                object.material.dispose();
-            }
         }
     }
 
-    worldObjects=[];
+    worldObjects = [];
+    wallColliders = [];
+    deathHoles = [];
+    lights = [];
 
-    wallColliders=[];
-    deathHoles=[];
-    lights=[];
-
-    if(exitLight){
+    if (exitLight) {
 
         scene.remove(
             exitLight
         );
 
-        exitLight=null;
+        exitLight = null;
     }
 
-    exitObject=null;
-    entity=null;
+    exitObject = null;
+    entity = null;
 }
+
 
 /* =========================================================
    WALL MATERIAL
@@ -994,73 +868,70 @@ function clearWorld(){
 function makeWallMaterial(
     width,
     height
-){
+) {
 
-    if(!wallTexture){
+    if (!wallTexture) {
 
-        return new THREE.MeshStandardMaterial({
-            color:0xb3a94e,
-            roughness:1,
-            side:THREE.DoubleSide
+        return new THREE.MeshBasicMaterial({
+            color: 0xb3a94e,
+            side: THREE.DoubleSide
         });
     }
 
-    const texture=
+    const texture =
         wallTexture.clone();
 
-    texture.wrapS=
+    texture.wrapS =
         THREE.RepeatWrapping;
 
-    /*
-       DO NOT repeat vertically.
-
-       The complete image height occupies
-       the entire 3.1 unit wall.
-
-       Horizontally, the image keeps its
-       natural aspect ratio and repeats.
-    */
-
-    texture.wrapT=
+    texture.wrapT =
         THREE.ClampToEdgeWrapping;
 
-    const imageWidth=
-        texture.image.width || 1;
+    const imageWidth =
+        texture.image?.width || 1;
 
-    const imageHeight=
-        texture.image.height || 1;
+    const imageHeight =
+        texture.image?.height || 1;
 
-    const aspect=
-        imageWidth/
+    const aspect =
+        imageWidth /
         imageHeight;
 
-    const naturalWorldWidth=
-        height*aspect;
+    const naturalWorldWidth =
+        height * aspect;
 
     texture.repeat.set(
         Math.max(
-            width/
+            width /
             naturalWorldWidth,
-            .001
+            0.001
         ),
         1
     );
 
-    texture.offset.set(
-        0,
-        0
-    );
+    texture.offset.set(0, 0);
 
-    texture.needsUpdate=true;
+    texture.needsUpdate = true;
 
-    return new THREE.MeshStandardMaterial({
-        map:texture,
-        color:0xffffff,
-        roughness:.98,
-        metalness:0,
-        side:THREE.DoubleSide
+    /*
+       MeshBasicMaterial is deliberate.
+
+       This means wall.png is displayed directly
+       instead of having lighting alter its colors.
+    */
+
+    return new THREE.MeshBasicMaterial({
+
+        map: texture,
+
+        color: 0xffffff,
+
+        side: THREE.DoubleSide,
+
+        transparent: false
     });
 }
+
 
 /* =========================================================
    WALL
@@ -1070,34 +941,28 @@ function createWall(
     x,
     z,
     width,
-    depth=.32
-){
+    depth = 0.32
+) {
 
-    const height=3.1;
+    const height = 3.1;
 
     wallColliders.push({
 
-        minX:
-            x-width/2,
+        minX: x - width / 2,
+        maxX: x + width / 2,
 
-        maxX:
-            x+width/2,
+        minZ: z - depth / 2,
+        maxZ: z + depth / 2,
 
-        minZ:
-            z-depth/2,
-
-        maxZ:
-            z+depth/2,
-
-        minY:0,
-
-        maxY:height
+        minY: 0,
+        maxY: height
     });
 
-    const group=
+    const group =
         new THREE.Group();
 
-    const front=
+
+    const front =
         new THREE.Mesh(
             new THREE.PlaneGeometry(
                 width,
@@ -1111,13 +976,14 @@ function createWall(
 
     front.position.set(
         0,
-        height/2,
-        depth/2
+        height / 2,
+        depth / 2
     );
 
     group.add(front);
 
-    const back=
+
+    const back =
         new THREE.Mesh(
             new THREE.PlaneGeometry(
                 width,
@@ -1129,18 +995,19 @@ function createWall(
             )
         );
 
-    back.rotation.y=
+    back.rotation.y =
         Math.PI;
 
     back.position.set(
         0,
-        height/2,
-        -depth/2
+        height / 2,
+        -depth / 2
     );
 
     group.add(back);
 
-    const left=
+
+    const left =
         new THREE.Mesh(
             new THREE.PlaneGeometry(
                 depth,
@@ -1152,18 +1019,19 @@ function createWall(
             )
         );
 
-    left.rotation.y=
-        Math.PI/2;
+    left.rotation.y =
+        Math.PI / 2;
 
     left.position.set(
-        -width/2,
-        height/2,
+        -width / 2,
+        height / 2,
         0
     );
 
     group.add(left);
 
-    const right=
+
+    const right =
         new THREE.Mesh(
             new THREE.PlaneGeometry(
                 depth,
@@ -1175,16 +1043,17 @@ function createWall(
             )
         );
 
-    right.rotation.y=
-        -Math.PI/2;
+    right.rotation.y =
+        -Math.PI / 2;
 
     right.position.set(
-        width/2,
-        height/2,
+        width / 2,
+        height / 2,
         0
     );
 
     group.add(right);
+
 
     group.position.set(
         x,
@@ -1195,28 +1064,93 @@ function createWall(
     addWorldObject(group);
 }
 
+
 /* =========================================================
    FLOOR
 ========================================================= */
 
-function createFloor(){
+function createFloor() {
 
     let material;
 
-    if(floorTexture){
+    if (floorTexture) {
 
-        const texture=
+        const texture =
             floorTexture.clone();
 
-        texture.wrapS=
+        texture.wrapS =
             THREE.RepeatWrapping;
 
-        texture.wrapT=
+        texture.wrapT =
+            THREE.RepeatWrapping;
+
+        texture.repeat.set(
+            120,
+            105
+        );
+
+        texture.needsUpdate = true;
+
+        material =
+            new THREE.MeshBasicMaterial({
+
+                map: texture,
+
+                color: 0xffffff
+            });
+
+    } else {
+
+        material =
+            new THREE.MeshBasicMaterial({
+
+                color: 0x968b43
+            });
+    }
+
+
+    const floor =
+        new THREE.Mesh(
+            new THREE.PlaneGeometry(
+                300,
+                270
+            ),
+            material
+        );
+
+    floor.rotation.x =
+        -Math.PI / 2;
+
+    floor.position.y = 0;
+
+    addWorldObject(floor);
+}
+
+
+/* =========================================================
+   CEILING
+========================================================= */
+
+function createCeiling() {
+
+    let material;
+
+    if (ceilingTexture) {
+
+        const texture =
+            ceilingTexture.clone();
+
+        texture.wrapS =
+            THREE.RepeatWrapping;
+
+        texture.wrapT =
             THREE.RepeatWrapping;
 
         /*
-           Repeated grid rather than one giant
-           stretched image.
+           Small square ceiling tiles.
+
+           The texture is repeated instead of being
+           stretched across the entire ceiling.
         */
 
         texture.repeat.set(
@@ -1224,25 +1158,31 @@ function createFloor(){
             105
         );
 
-        texture.needsUpdate=true;
+        texture.needsUpdate = true;
 
-        material=
-            new THREE.MeshStandardMaterial({
-                map:texture,
-                roughness:1,
-                metalness:0
+        material =
+            new THREE.MeshBasicMaterial({
+
+                map: texture,
+
+                color: 0xffffff,
+
+                side: THREE.DoubleSide
             });
 
-    }else{
+    } else {
 
-        material=
-            new THREE.MeshStandardMaterial({
-                color:0x968b43,
-                roughness:1
+        material =
+            new THREE.MeshBasicMaterial({
+
+                color: 0x888047,
+
+                side: THREE.DoubleSide
             });
     }
 
-    const floor=
+
+    const ceiling =
         new THREE.Mesh(
             new THREE.PlaneGeometry(
                 300,
@@ -1251,97 +1191,22 @@ function createFloor(){
             material
         );
 
-    floor.rotation.x=
-        -Math.PI/2;
+    ceiling.rotation.x =
+        Math.PI / 2;
 
-    addWorldObject(floor);
-}
-
-/* =========================================================
-   CEILING
-========================================================= */
-
-function createCeiling(){
-
-    let material;
-
-    if(ceilingTexture){
-
-        const texture=
-            ceilingTexture.clone();
-
-        texture.wrapS=
-            THREE.RepeatWrapping;
-
-        texture.wrapT=
-            THREE.RepeatWrapping;
-
-        texture.repeat.set(
-            120,
-            105
-        );
-
-        texture.needsUpdate=true;
-
-        material=
-            new THREE.MeshStandardMaterial({
-                map:texture,
-                roughness:1,
-                side:THREE.DoubleSide
-            });
-
-    }else{
-
-        material=
-            new THREE.MeshStandardMaterial({
-                color:0x888047,
-                roughness:1,
-                side:THREE.DoubleSide
-            });
-    }
-
-    const ceiling=
-        new THREE.Mesh(
-            new THREE.PlaneGeometry(
-                300,
-                270
-            ),
-            material
-        );
-
-    ceiling.rotation.x=
-        Math.PI/2;
-
-    ceiling.position.y=3.1;
+    ceiling.position.y = 3.1;
 
     addWorldObject(ceiling);
 }
 
+
 /* =========================================================
-   FLOOR-PLAN STYLE MAP
+   FLOOR PLAN
 ========================================================= */
 
-function buildFloorPlan(){
+function buildFloorPlan() {
 
-    /*
-       LARGE OUTER STRUCTURE
-
-       The layout intentionally has:
-       - long outer corridors
-       - irregular branches
-       - large open center
-       - cramped upper-left section
-       - right-side rooms
-       - lower extensions
-       - repeated landmarks
-
-       It is designed to produce the
-       "I've already been here" feeling.
-    */
-
-    /* -----------------------------------------------------
-       UPPER LEFT DENSE MAZE
-    ----------------------------------------------------- */
+    /* UPPER LEFT */
 
     createWall(-105,-78,26);
     createWall(-82,-90,20);
@@ -1371,9 +1236,8 @@ function buildFloorPlan(){
     createWall(-24,-28,13);
     createWall(-10,-20,16);
 
-    /* -----------------------------------------------------
-       UPPER CENTER
-    ----------------------------------------------------- */
+
+    /* UPPER CENTER */
 
     createWall(5,-86,16);
     createWall(23,-91,17);
@@ -1390,15 +1254,8 @@ function buildFloorPlan(){
     createWall(45,-49,18);
     createWall(64,-56,13);
 
-    /* -----------------------------------------------------
-       CENTRAL LARGE OPEN SECTION
-    ----------------------------------------------------- */
 
-    /*
-       Instead of making a boring rectangle,
-       the central space has broken walls and
-       overlapping sightlines.
-    */
+    /* CENTRAL AREA */
 
     createWall(-71,-5,30);
     createWall(-38,-5,25);
@@ -1416,10 +1273,6 @@ function buildFloorPlan(){
 
     createWall(-81,17,.35,47);
     createWall(80,18,.35,48);
-
-    /*
-       Broken interior partitions.
-    */
 
     createWall(-66,10,.35,18);
     createWall(-66,35,.35,12);
@@ -1439,9 +1292,8 @@ function buildFloorPlan(){
     createWall(57,11,12,.35);
     createWall(62,31,18,.35);
 
-    /* -----------------------------------------------------
-       LONG LOOPING CORRIDORS
-    ----------------------------------------------------- */
+
+    /* LONG CORRIDORS */
 
     createWall(-74,55,15);
     createWall(-55,56,20);
@@ -1467,9 +1319,8 @@ function buildFloorPlan(){
     createWall(11,84,20);
     createWall(33,88,16);
 
-    /* -----------------------------------------------------
-       RIGHT SIDE COMPLEX
-    ----------------------------------------------------- */
+
+    /* RIGHT SIDE */
 
     createWall(91,-75,22);
     createWall(105,-61,.35,28);
@@ -1486,10 +1337,6 @@ function buildFloorPlan(){
     createWall(88,45,22);
     createWall(106,60,.35,29);
 
-    /*
-       Right-side rooms.
-    */
-
     createWall(68,-26,18);
     createWall(78,-17,.35,17);
 
@@ -1502,9 +1349,8 @@ function buildFloorPlan(){
     createWall(66,54,15);
     createWall(79,65,.35,18);
 
-    /* -----------------------------------------------------
-       LOWER LEFT EXTENSIONS
-    ----------------------------------------------------- */
+
+    /* LOWER LEFT */
 
     createWall(-109,5,17);
     createWall(-116,19,.35,29);
@@ -1515,9 +1361,8 @@ function buildFloorPlan(){
     createWall(-105,67,18);
     createWall(-113,80,.35,23);
 
-    /* -----------------------------------------------------
-       STRANGE DEAD-END ROOMS
-    ----------------------------------------------------- */
+
+    /* DEAD ENDS */
 
     createWall(-100,95,28);
     createWall(-75,105,.35,20);
@@ -1531,9 +1376,8 @@ function buildFloorPlan(){
     createWall(92,91,27);
     createWall(105,102,.35,22);
 
-    /* -----------------------------------------------------
-       SMALL VISUAL LANDMARKS
-    ----------------------------------------------------- */
+
+    /* LANDMARKS */
 
     createWall(-2,-91,7);
     createWall(70,-83,9);
@@ -1545,123 +1389,121 @@ function buildFloorPlan(){
     createWall(84,52,8);
 }
 
+
 /* =========================================================
    HOLE ROOM
 ========================================================= */
 
-function createHoleRoom(){
+function createHoleRoom() {
 
-    /*
-       Large dangerous grid section.
+    const startX = -57;
+    const startZ = 53;
 
-       The player can move around the holes,
-       but entering a hole immediately kills
-       the run.
-    */
+    const columns = 18;
+    const rows = 8;
 
-    const startX=-57;
-    const startZ=53;
+    const spacing = 3.5;
 
-    const columns=18;
-    const rows=8;
-
-    const spacing=3.5;
-
-    for(
-        let z=0;
-        z<rows;
+    for (
+        let z = 0;
+        z < rows;
         z++
-    ){
+    ) {
 
-        for(
-            let x=0;
-            x<columns;
+        for (
+            let x = 0;
+            x < columns;
             x++
-        ){
+        ) {
 
-            const px=
-                startX+
-                x*spacing;
+            const px =
+                startX +
+                x * spacing;
 
-            const pz=
-                startZ+
-                z*spacing;
+            const pz =
+                startZ +
+                z * spacing;
 
-            /*
-               Leave occasional solid squares,
-               creating the grid/maze feeling.
-            */
-
-            if(
-                (x+z)%5===0
-            ){
+            if ((x + z) % 5 === 0)
                 continue;
-            }
 
-            const hole=
+            const hole =
                 new THREE.Mesh(
+
                     new THREE.PlaneGeometry(
                         2.7,
                         2.7
                     ),
+
                     new THREE.MeshBasicMaterial({
-                        color:0x020202,
-                        side:THREE.DoubleSide
+                        color: 0x020202,
+                        side: THREE.DoubleSide
                     })
                 );
 
-            hole.rotation.x=
-                -Math.PI/2;
+            hole.rotation.x =
+                -Math.PI / 2;
 
             hole.position.set(
                 px,
-                .006,
+                0.006,
                 pz
             );
 
             addWorldObject(hole);
 
             deathHoles.push({
-                x:px,
-                z:pz,
-                radius:1.28
+                x: px,
+                z: pz,
+                radius: 1.28
             });
         }
     }
 }
 
+
 /* =========================================================
-   LIGHTING
+   LIGHTS
 ========================================================= */
 
 function addLight(
     x,
     z,
-    intensity=4,
-    flicker=false
-){
+    intensity = 4,
+    flicker = false
+) {
 
-    const fixture=
+    /*
+       Square ceiling light.
+
+       It is deliberately small compared to
+       the ceiling tile.
+    */
+
+    const fixture =
         new THREE.Mesh(
+
             new THREE.BoxGeometry(
-                2.1,
-                .045,
-                .58
+                1.15,
+                0.055,
+                1.15
             ),
+
             new THREE.MeshBasicMaterial({
-                color:0xfff0b7
+                color: 0xfff0b7
             })
         );
 
     fixture.position.set(
         x,
-        3.03,
+        3.045,
         z
     );
 
     addWorldObject(fixture);
 
-    const light=
+
+    const light =
         new THREE.PointLight(
             0xffe8a5,
             intensity,
@@ -1678,167 +1520,154 @@ function addLight(
     scene.add(light);
 
     lights.push({
+
         light,
         fixture,
         flicker,
+
         timer:
-            Math.random()*
-            2,
-        base:intensity
+            Math.random() * 2,
+
+        base: intensity
     });
 }
 
-function buildLighting(){
 
-    /*
-       Irregular light distribution.
-       Some sections are brighter,
-       some are almost dead.
-    */
+function buildLighting() {
 
-    const positions=[];
+    const positions = [];
 
-    for(
-        let x=-95;
-        x<=95;
-        x+=12
-    ){
+    for (
+        let x = -95;
+        x <= 95;
+        x += 12
+    ) {
 
-        for(
-            let z=-83;
-            z<=88;
-            z+=11
-        ){
+        for (
+            let z = -83;
+            z <= 88;
+            z += 11
+        ) {
 
-            if(
-                Math.random()<.18
-            ){
+            if (
+                Math.random() < 0.18
+            ) {
                 continue;
             }
 
             positions.push([
-                x+
-                (Math.random()-.5)*3,
 
-                z+
-                (Math.random()-.5)*3
+                x +
+                (Math.random() - .5) * 3,
+
+                z +
+                (Math.random() - .5) * 3
+
             ]);
         }
     }
 
-    positions.forEach(
-        p=>{
+    positions.forEach(p => {
 
-            const roll=
-                Math.random();
+        const roll =
+            Math.random();
 
-            addLight(
-                p[0],
-                p[1],
-                roll<.3
-                    ?2.1
-                    :4.0+
-                     Math.random()*1.8,
-                roll<.36
-            );
-        }
-    );
+        addLight(
 
-    /*
-       Recognizable bright areas.
-    */
+            p[0],
+            p[1],
+
+            roll < .3
+                ? 2.1
+                : 4.0 +
+                  Math.random() * 1.8,
+
+            roll < .36
+        );
+    });
+
 
     addLight(-18,-64,5.4);
     addLight(-7,-64,5.2);
-
     addLight(27,-9,5.2);
-
     addLight(6,19,5.3);
-
     addLight(31,59,5.4);
-
-    /*
-       Hole room intentionally darker.
-    */
 
     addLight(-55,57,1.8,true);
     addLight(-32,67,2.0,true);
     addLight(-15,57,1.7,true);
 }
 
-function updateLights(dt){
 
-    for(
+function updateLights(dt) {
+
+    for (
         const item
         of lights
-    ){
+    ) {
 
-        if(!item.flicker){
+        if (!item.flicker)
             continue;
-        }
 
-        item.timer-=dt;
+        item.timer -= dt;
 
-        if(
-            item.timer<=0
-        ){
+        if (
+            item.timer <= 0
+        ) {
 
-            item.timer=
-                .06+
-                Math.random()*.65;
+            item.timer =
+                .06 +
+                Math.random() * .65;
 
-            if(
-                Math.random()<.22
-            ){
+            if (
+                Math.random() < .22
+            ) {
 
-                item.light.intensity=0;
+                item.light.intensity = 0;
+                item.fixture.visible = false;
 
-                item.fixture.visible=false;
+            } else {
 
-            }else{
+                item.fixture.visible = true;
 
-                item.fixture.visible=true;
-
-                item.light.intensity=
-                    item.base*
+                item.light.intensity =
+                    item.base *
                     (
-                        .65+
-                        Math.random()*.4
+                        .65 +
+                        Math.random() * .4
                     );
             }
         }
     }
 }
 
+
 /* =========================================================
    COLLISION
 ========================================================= */
 
-function collides(
-    x,
-    z
-){
+function collides(x, z) {
 
-    const bottom=
+    const bottom =
         player.position.y;
 
-    const top=
-        bottom+
+    const top =
+        bottom +
         PLAYER_HEIGHT;
 
-    for(
+    for (
         const wall
         of wallColliders
-    ){
+    ) {
 
-        if(
-            top<=wall.minY ||
-            bottom>=wall.maxY
-        ){
+        if (
+            top <= wall.minY ||
+            bottom >= wall.maxY
+        ) {
             continue;
         }
 
-        const closestX=
+        const closestX =
             Math.max(
                 wall.minX,
                 Math.min(
@@ -1847,7 +1676,7 @@ function collides(
                 )
             );
 
-        const closestZ=
+        const closestZ =
             Math.max(
                 wall.minZ,
                 Math.min(
@@ -1856,19 +1685,18 @@ function collides(
                 )
             );
 
-        const dx=
-            x-closestX;
+        const dx =
+            x - closestX;
 
-        const dz=
-            z-closestZ;
+        const dz =
+            z - closestZ;
 
-        if(
-            dx*dx+
-            dz*dz
-            <
-            PLAYER_RADIUS*
+        if (
+            dx * dx +
+            dz * dz <
+            PLAYER_RADIUS *
             PLAYER_RADIUS
-        ){
+        ) {
             return true;
         }
     }
@@ -1876,17 +1704,15 @@ function collides(
     return false;
 }
 
-function entityHitsWall(
-    x,
-    z
-){
 
-    for(
+function entityHitsWall(x, z) {
+
+    for (
         const wall
         of wallColliders
-    ){
+    ) {
 
-        const closestX=
+        const closestX =
             Math.max(
                 wall.minX,
                 Math.min(
@@ -1895,7 +1721,7 @@ function entityHitsWall(
                 )
             );
 
-        const closestZ=
+        const closestZ =
             Math.max(
                 wall.minZ,
                 Math.min(
@@ -1904,98 +1730,97 @@ function entityHitsWall(
                 )
             );
 
-        const dx=
-            x-closestX;
+        const dx =
+            x - closestX;
 
-        const dz=
-            z-closestZ;
+        const dz =
+            z - closestZ;
 
-        if(
-            dx*dx+
-            dz*dz
-            <
-            .43*.43
-        ){
+        if (
+            dx * dx +
+            dz * dz <
+            .43 * .43
+        ) {
             return true;
         }
     }
 
     return false;
 }
+
 
 function blocked(
     x1,
     z1,
     x2,
     z2
-){
+) {
 
-    const dx=
-        x2-x1;
+    const dx =
+        x2 - x1;
 
-    const dz=
-        z2-z1;
+    const dz =
+        z2 - z1;
 
-    const distance=
+    const distance =
         Math.hypot(
             dx,
             dz
         );
 
-    const steps=
+    const steps =
         Math.ceil(
-            distance/.35
+            distance / .35
         );
 
-    for(
-        let i=1;
-        i<steps;
+    for (
+        let i = 1;
+        i < steps;
         i++
-    ){
+    ) {
 
-        const t=
-            i/steps;
+        const t =
+            i / steps;
 
-        if(
+        if (
             entityHitsWall(
-                x1+dx*t,
-                z1+dz*t
+                x1 + dx * t,
+                z1 + dz * t
             )
-        ){
+        ) {
             return true;
         }
     }
 
     return false;
 }
+
 
 /* =========================================================
    HOLES
 ========================================================= */
 
-function playerInHole(){
+function playerInHole() {
 
-    for(
+    for (
         const hole
         of deathHoles
-    ){
+    ) {
 
-        const dx=
-            player.position.x-
+        const dx =
+            player.position.x -
             hole.x;
 
-        const dz=
-            player.position.z-
+        const dz =
+            player.position.z -
             hole.z;
 
-        if(
-            dx*dx+
-            dz*dz
-            <
-            hole.radius*
+        if (
+            dx * dx +
+            dz * dz <
+            hole.radius *
             hole.radius
-        ){
-
+        ) {
             return true;
         }
     }
@@ -2003,26 +1828,21 @@ function playerInHole(){
     return false;
 }
 
+
 /* =========================================================
    EXIT
 ========================================================= */
 
-let exitObject=null;
-let exitLight=null;
-let exitX=0;
-let exitZ=0;
+let exitObject = null;
+let exitLight = null;
 
-function createExit(){
+let exitX = 0;
+let exitZ = 0;
 
-    /*
-       These locations are deliberately spread
-       around the map.
 
-       A different valid-looking location is
-       selected every run.
-    */
+function createExit() {
 
-    const locations=[
+    const locations = [
 
         [-96,-70],
         [-73,-47],
@@ -2055,27 +1875,29 @@ function createExit(){
         [94,-25]
     ];
 
-    const selected=
+    const selected =
         locations[
             Math.floor(
-                Math.random()*
+                Math.random() *
                 locations.length
             )
         ];
 
-    exitX=selected[0];
-    exitZ=selected[1];
+    exitX = selected[0];
+    exitZ = selected[1];
 
-    const group=
+
+    const group =
         new THREE.Group();
 
-    const frameMaterial=
-        new THREE.MeshStandardMaterial({
-            color:0x34342d,
-            roughness:1
+
+    const frameMaterial =
+        new THREE.MeshBasicMaterial({
+            color: 0x34342d
         });
 
-    const left=
+
+    const left =
         new THREE.Mesh(
             new THREE.BoxGeometry(
                 .28,
@@ -2093,7 +1915,8 @@ function createExit(){
 
     group.add(left);
 
-    const right=
+
+    const right =
         new THREE.Mesh(
             new THREE.BoxGeometry(
                 .28,
@@ -2111,7 +1934,8 @@ function createExit(){
 
     group.add(right);
 
-    const top=
+
+    const top =
         new THREE.Mesh(
             new THREE.BoxGeometry(
                 2.5,
@@ -2121,27 +1945,35 @@ function createExit(){
             frameMaterial
         );
 
-    top.position.y=2.7;
+    top.position.y = 2.7;
 
     group.add(top);
 
-    const green=
+
+    const green =
         new THREE.Mesh(
+
             new THREE.PlaneGeometry(
                 1.9,
                 2.35
             ),
+
             new THREE.MeshBasicMaterial({
-                color:0x35b952,
-                transparent:true,
-                opacity:.85,
-                side:THREE.DoubleSide
+
+                color: 0x35b952,
+
+                transparent: true,
+
+                opacity: .85,
+
+                side: THREE.DoubleSide
             })
         );
 
-    green.position.y=1.25;
+    green.position.y = 1.25;
 
     group.add(green);
+
 
     group.position.set(
         exitX,
@@ -2151,9 +1983,10 @@ function createExit(){
 
     addWorldObject(group);
 
-    exitObject=group;
+    exitObject = group;
 
-    exitLight=
+
+    exitLight =
         new THREE.PointLight(
             0x35ff5c,
             8,
@@ -2170,213 +2003,247 @@ function createExit(){
     scene.add(exitLight);
 }
 
+
 /* =========================================================
    ENTITY
 ========================================================= */
 
 /*
-   IMPORTANT:
+   ENTITY FILES ARE IN THE ROOT FOLDER:
 
-   These are the files already in your repository:
-
-       ./entity.png
-       ./entity.mp3
+   ./entity.png
+   ./entity.mp3
 */
 
-const entityAudio=
+const entityAudio =
     new Audio(
         "./entity.mp3"
     );
 
-entityAudio.loop=true;
-entityAudio.volume=0;
-entityAudio.preload="auto";
+entityAudio.loop = true;
+entityAudio.volume = 0;
+entityAudio.preload = "auto";
 
-const SETTINGS={
 
-    easy:{
-        speed:3.7,
-        detection:20
+const SETTINGS = {
+
+    easy: {
+        speed: 3.7,
+        detection: 20
     },
 
-    normal:{
-        speed:5.2,
-        detection:29
+    normal: {
+        speed: 5.2,
+        detection: 29
     },
 
-    hard:{
-        speed:6.5,
-        detection:38
+    hard: {
+        speed: 6.5,
+        detection: 38
     },
 
-    nightmare:{
-        speed:8.0,
-        detection:52
+    nightmare: {
+        speed: 8.0,
+        detection: 52
     }
 };
 
-let entity=null;
 
-let entityDirection=
+let entity = null;
+
+let entityDirection =
     new THREE.Vector2(
         1,
         0
     );
 
-let entityVelocity=
+let entityVelocity =
     new THREE.Vector2(
         0,
         0
     );
 
-let lastKnown=
+let lastKnown =
     new THREE.Vector2();
 
-let lastSeen=99;
+let lastSeen = 99;
 
-let wanderTimer=0;
-let wanderAngle=0;
+let wanderTimer = 0;
+let wanderAngle = 0;
 
-function createEntity(){
 
-    return new Promise(
-        resolve=>{
+function createEntity() {
 
-            textureLoader.load(
+    return new Promise(resolve => {
 
-                "./entity.png",
+        textureLoader.load(
 
-                texture=>{
+            "./entity.png",
 
-                    texture.colorSpace=
-                        THREE.SRGBColorSpace;
+            texture => {
 
-                    const aspect=
-                        texture.image.width/
-                        texture.image.height;
+                /*
+                   IMPORTANT:
 
-                    const height=1.55;
+                   entity.png uses MeshBasicMaterial.
+                   No lighting is applied to the PNG.
+                */
 
-                    const width=
-                        height*
-                        aspect;
+                texture.colorSpace =
+                    THREE.SRGBColorSpace;
 
-                    const material=
+                texture.magFilter =
+                    THREE.LinearFilter;
+
+                texture.minFilter =
+                    THREE.LinearMipmapLinearFilter;
+
+                const aspect =
+                    (
+                        texture.image.width || 1
+                    ) /
+                    (
+                        texture.image.height || 1
+                    );
+
+                const height = 1.55;
+
+                const width =
+                    height * aspect;
+
+
+                const material =
+                    new THREE.MeshBasicMaterial({
+
+                        map: texture,
+
+                        transparent: true,
+
+                        alphaTest: .01,
+
+                        side: THREE.DoubleSide,
+
+                        fog: false,
+
+                        color: 0xffffff
+                    });
+
+
+                entity =
+                    new THREE.Mesh(
+
+                        new THREE.PlaneGeometry(
+                            width,
+                            height
+                        ),
+
+                        material
+                    );
+
+
+                entity.position.set(
+                    55,
+                    .775,
+                    -48
+                );
+
+
+                addWorldObject(
+                    entity
+                );
+
+                resolve();
+            },
+
+            undefined,
+
+            error => {
+
+                console.warn(
+                    "entity.png failed:",
+                    error
+                );
+
+                /*
+                   Fallback so the game doesn't
+                   crash if the PNG is missing.
+                */
+
+                entity =
+                    new THREE.Mesh(
+
+                        new THREE.PlaneGeometry(
+                            1,
+                            1.55
+                        ),
+
                         new THREE.MeshBasicMaterial({
 
-                            map:texture,
+                            color: 0x020202,
 
-                            transparent:true,
+                            transparent: true,
 
-                            alphaTest:.01,
-
-                            side:
-                                THREE.DoubleSide,
-
-                            fog:false
-                        });
-
-                    entity=
-                        new THREE.Mesh(
-                            new THREE.PlaneGeometry(
-                                width,
-                                height
-                            ),
-                            material
-                        );
-
-                    entity.position.set(
-                        55,
-                        .775,
-                        -48
+                            opacity: .95
+                        })
                     );
 
-                    addWorldObject(
-                        entity
-                    );
+                entity.position.set(
+                    55,
+                    .775,
+                    -48
+                );
 
-                    resolve();
+                addWorldObject(
+                    entity
+                );
 
-                },
-
-                undefined,
-
-                ()=>{
-
-                    /*
-                       If entity.png cannot be loaded,
-                       the game still starts instead of
-                       crashing.
-                    */
-
-                    entity=
-                        new THREE.Mesh(
-
-                            new THREE.PlaneGeometry(
-                                1,
-                                1.55
-                            ),
-
-                            new THREE.MeshBasicMaterial({
-                                color:0x030303,
-                                transparent:true
-                            })
-                        );
-
-                    entity.position.set(
-                        55,
-                        .775,
-                        -48
-                    );
-
-                    addWorldObject(
-                        entity
-                    );
-
-                    resolve();
-                }
-            );
-        }
-    );
+                resolve();
+            }
+        );
+    });
 }
+
 
 /* =========================================================
    ENTITY AI
 ========================================================= */
 
-function updateEntity(dt){
+function updateEntity(dt) {
 
-    if(
+    if (
         !entity ||
         !running ||
         paused ||
         dead ||
         fallingIntoLevel
-    ){
+    ) {
         return;
     }
 
-    const settings=
+    const settings =
         SETTINGS[difficulty];
 
-    const dx=
-        player.position.x-
+
+    const dx =
+        player.position.x -
         entity.position.x;
 
-    const dz=
-        player.position.z-
+    const dz =
+        player.position.z -
         entity.position.z;
 
-    const distance=
+    const distance =
         Math.hypot(
             dx,
             dz
         );
 
-    lastSeen+=dt;
 
-    const visible=
-        distance<
+    lastSeen += dt;
+
+
+    const visible =
+        distance <
         settings.detection &&
         !blocked(
             entity.position.x,
@@ -2385,398 +2252,456 @@ function updateEntity(dt){
             player.position.z
         );
 
-    let dx2=0;
-    let dz2=0;
 
-    if(visible){
+    let dx2 = 0;
+    let dz2 = 0;
+
+
+    if (visible) {
 
         lastKnown.set(
             player.position.x,
             player.position.z
         );
 
-        lastSeen=0;
+        lastSeen = 0;
 
-        dx2=
-            dx/
+
+        dx2 =
+            dx /
             Math.max(
                 distance,
                 .001
             );
 
-        dz2=
-            dz/
+        dz2 =
+            dz /
             Math.max(
                 distance,
                 .001
             );
 
-    }else if(
-        lastSeen<3.2
-    ){
+    } else if (
+        lastSeen < 3.2
+    ) {
 
-        const lx=
-            lastKnown.x-
+        const lx =
+            lastKnown.x -
             entity.position.x;
 
-        const lz=
-            lastKnown.y-
+        const lz =
+            lastKnown.y -
             entity.position.z;
 
-        const len=
+        const len =
             Math.hypot(
                 lx,
                 lz
             );
 
-        if(len>.1){
+        if (len > .1) {
 
-            dx2=lx/len;
-            dz2=lz/len;
+            dx2 = lx / len;
+            dz2 = lz / len;
         }
 
-    }else{
+    } else {
 
-        wanderTimer-=dt;
+        wanderTimer -= dt;
 
-        if(
-            wanderTimer<=0
-        ){
+        if (
+            wanderTimer <= 0
+        ) {
 
-            wanderTimer=
-                .5+
-                Math.random()*
-                1.8;
+            wanderTimer =
+                .5 +
+                Math.random() * 1.8;
 
-            wanderAngle=
-                Math.random()*
-                Math.PI*
+            wanderAngle =
+                Math.random() *
+                Math.PI *
                 2;
         }
 
-        dx2=
+        dx2 =
             Math.cos(
                 wanderAngle
             );
 
-        dz2=
+        dz2 =
             Math.sin(
                 wanderAngle
             );
     }
 
-    const targetAngle=
+
+    /*
+       Small random steering helps the entity
+       avoid looking robotic.
+    */
+
+    const targetAngle =
         Math.atan2(
             dz2,
             dx2
         );
 
-    const currentAngle=
+    const currentAngle =
         Math.atan2(
             entityDirection.y,
             entityDirection.x
         );
 
-    let difference=
-        targetAngle-
+    let difference =
+        targetAngle -
         currentAngle;
 
-    while(
-        difference>
-        Math.PI
-    ){
-        difference-=
-            Math.PI*2;
+
+    while (
+        difference > Math.PI
+    ) {
+        difference -=
+            Math.PI * 2;
     }
 
-    while(
-        difference<
-        -Math.PI
-    ){
-        difference+=
-            Math.PI*2;
+    while (
+        difference < -Math.PI
+    ) {
+        difference +=
+            Math.PI * 2;
     }
 
-    difference=
+
+    difference =
         Math.max(
-            -3.4*dt,
+            -3.4 * dt,
             Math.min(
-                3.4*dt,
+                3.4 * dt,
                 difference
             )
         );
 
-    const angle=
-        currentAngle+
+
+    const angle =
+        currentAngle +
         difference;
 
-    entityDirection.x=
+
+    entityDirection.x =
         Math.cos(angle);
 
-    entityDirection.y=
+    entityDirection.y =
         Math.sin(angle);
 
-    entityVelocity.x=
+
+    entityVelocity.x =
         THREE.MathUtils.lerp(
             entityVelocity.x,
-            entityDirection.x*
+            entityDirection.x *
             settings.speed,
             Math.min(
                 1,
-                dt*4
+                dt * 4
             )
         );
 
-    entityVelocity.y=
+
+    entityVelocity.y =
         THREE.MathUtils.lerp(
             entityVelocity.y,
-            entityDirection.y*
+            entityDirection.y *
             settings.speed,
             Math.min(
                 1,
-                dt*4
+                dt * 4
             )
         );
 
-    const nextX=
-        entity.position.x+
-        entityVelocity.x*
-        dt;
 
-    const nextZ=
-        entity.position.z+
-        entityVelocity.y*
-        dt;
+    /*
+       JUKING / WALL AVOIDANCE
 
-    if(
+       The entity checks its future position
+       before moving.
+
+       If blocked, it tries alternate directions
+       instead of simply getting stuck.
+    */
+
+    const moveX =
+        entityVelocity.x * dt;
+
+    const moveZ =
+        entityVelocity.y * dt;
+
+
+    const nextX =
+        entity.position.x +
+        moveX;
+
+    const nextZ =
+        entity.position.z +
+        moveZ;
+
+
+    if (
         !entityHitsWall(
             nextX,
             entity.position.z
         )
-    ){
+    ) {
 
-        entity.position.x=
+        entity.position.x =
             nextX;
 
-    }else{
+    } else {
 
-        entityVelocity.x=0;
+        entityVelocity.x = 0;
 
-        wanderAngle+=
-            Math.PI/2;
+        wanderAngle +=
+            Math.PI / 2;
+
+        entityDirection.set(
+            Math.cos(wanderAngle),
+            Math.sin(wanderAngle)
+        );
     }
 
-    if(
+
+    if (
         !entityHitsWall(
             entity.position.x,
             nextZ
         )
-    ){
+    ) {
 
-        entity.position.z=
+        entity.position.z =
             nextZ;
 
-    }else{
+    } else {
 
-        entityVelocity.y=0;
+        entityVelocity.y = 0;
 
-        wanderAngle+=
-            Math.PI/2;
+        wanderAngle +=
+            Math.PI / 2;
+
+        entityDirection.set(
+            Math.cos(wanderAngle),
+            Math.sin(wanderAngle)
+        );
     }
 
-    /*
-       Billboard the PNG toward the player.
 
-       This keeps entity.png visible from
-       every direction.
+    /*
+       Entity always faces the player.
+
+       This makes the PNG readable from
+       the player's direction.
     */
 
-    entity.rotation.y=
+    entity.rotation.y =
         Math.atan2(
-            player.position.x-
+            player.position.x -
             entity.position.x,
 
-            player.position.z-
+            player.position.z -
             entity.position.z
         );
 
-    const killDistance=
-        difficulty==="nightmare"
-        ?1.55
-        :1.25;
 
-    if(
-        distance<
+    const killDistance =
+        difficulty === "nightmare"
+            ? 1.55
+            : 1.25;
+
+
+    if (
+        distance <
         killDistance
-    ){
+    ) {
 
         killPlayer();
     }
 }
 
+
 /* =========================================================
    ENTITY AUDIO
 ========================================================= */
 
-function updateEntityAudio(){
+function updateEntityAudio() {
 
-    if(
+    if (
         !entity ||
         !running ||
         paused ||
         dead ||
         fallingIntoLevel
-    ){
+    ) {
 
-        entityAudio.volume=0;
+        entityAudio.volume = 0;
 
         return;
     }
 
-    const distance=
+
+    const distance =
         Math.hypot(
-            entity.position.x-
+
+            entity.position.x -
             player.position.x,
 
-            entity.position.z-
+            entity.position.z -
             player.position.z
         );
 
-    const maxDistance=34;
 
-    if(
-        distance>=maxDistance
-    ){
+    const maxDistance = 34;
 
-        entityAudio.volume=0;
+
+    if (
+        distance >= maxDistance
+    ) {
+
+        entityAudio.volume = 0;
 
         return;
     }
 
-    let volume=
+
+    let volume =
         Math.pow(
-            1-
-            distance/
+            1 -
+            distance /
             maxDistance,
             1.6
-        )*.9;
+        ) * .9;
 
-    /*
-       Walls dampen the audio.
-    */
 
-    if(
+    if (
         blocked(
             player.position.x,
             player.position.z,
             entity.position.x,
             entity.position.z
         )
-    ){
+    ) {
 
-        volume*=.2;
+        volume *= .2;
     }
 
-    entityAudio.volume=
+
+    entityAudio.volume =
         THREE.MathUtils.clamp(
             volume,
             0,
             .9
         );
 
-    if(
+
+    if (
         entityAudio.paused &&
-        volume>.01
-    ){
+        volume > .01
+    ) {
 
         entityAudio
             .play()
             .catch(
-                ()=>{}
+                () => {}
             );
     }
 }
 
+
 /* =========================================================
-   PLAYER MOVEMENT
+   PLAYER INPUT
 ========================================================= */
 
-const keys={
-    w:false,
-    a:false,
-    s:false,
-    d:false,
-    shift:false
+const keys = {
+
+    w: false,
+    a: false,
+    s: false,
+    d: false,
+    shift: false
 };
 
-let jumpPressed=false;
+let jumpPressed = false;
+
 
 addEventListener(
     "keydown",
-    event=>{
+    event => {
 
-        if(event.code==="KeyW")
-            keys.w=true;
+        if (event.code === "KeyW")
+            keys.w = true;
 
-        if(event.code==="KeyA")
-            keys.a=true;
+        if (event.code === "KeyA")
+            keys.a = true;
 
-        if(event.code==="KeyS")
-            keys.s=true;
+        if (event.code === "KeyS")
+            keys.s = true;
 
-        if(event.code==="KeyD")
-            keys.d=true;
+        if (event.code === "KeyD")
+            keys.d = true;
 
-        if(
-            event.code==="ShiftLeft" ||
-            event.code==="ShiftRight"
-        ){
-            keys.shift=true;
+        if (
+            event.code === "ShiftLeft" ||
+            event.code === "ShiftRight"
+        ) {
+
+            keys.shift = true;
         }
 
-        if(
-            event.code==="Space" &&
+
+        if (
+            event.code === "Space" &&
             !event.repeat
-        ){
-            jumpPressed=true;
+        ) {
+
+            jumpPressed = true;
         }
 
-        if(
-            event.code==="Escape" &&
+
+        if (
+            event.code === "Escape" &&
             running &&
             !dead &&
             !fallingIntoLevel
-        ){
+        ) {
 
             togglePause();
         }
     }
 );
 
+
 addEventListener(
     "keyup",
-    event=>{
+    event => {
 
-        if(event.code==="KeyW")
-            keys.w=false;
+        if (event.code === "KeyW")
+            keys.w = false;
 
-        if(event.code==="KeyA")
-            keys.a=false;
+        if (event.code === "KeyA")
+            keys.a = false;
 
-        if(event.code==="KeyS")
-            keys.s=false;
+        if (event.code === "KeyS")
+            keys.s = false;
 
-        if(event.code==="KeyD")
-            keys.d=false;
+        if (event.code === "KeyD")
+            keys.d = false;
 
-        if(
-            event.code==="ShiftLeft" ||
-            event.code==="ShiftRight"
-        ){
-            keys.shift=false;
+        if (
+            event.code === "ShiftLeft" ||
+            event.code === "ShiftRight"
+        ) {
+
+            keys.shift = false;
         }
     }
 );
+
 
 /* =========================================================
    MOUSE LOOK
@@ -2784,33 +2709,36 @@ addEventListener(
 
 document.addEventListener(
     "mousemove",
-    event=>{
+    event => {
 
-        if(
+        if (
             !running ||
             paused ||
             dead ||
             fallingIntoLevel
-        ){
+        ) {
             return;
         }
 
-        if(
-            document.pointerLockElement!==
+
+        if (
+            document.pointerLockElement !==
             document.body
-        ){
+        ) {
             return;
         }
 
-        yaw-=
-            event.movementX*
+
+        yaw -=
+            event.movementX *
             .0022;
 
-        pitch-=
-            event.movementY*
+        pitch -=
+            event.movementY *
             .0018;
 
-        pitch=
+
+        pitch =
             Math.max(
                 -1.45,
                 Math.min(
@@ -2819,153 +2747,179 @@ document.addEventListener(
                 )
             );
 
-        player.rotation.y=
+
+        player.rotation.y =
             yaw;
 
-        camera.rotation.x=
+        camera.rotation.x =
             pitch;
     }
 );
+
 
 /* =========================================================
    PLAYER UPDATE
 ========================================================= */
 
-function updatePlayer(dt){
+function updatePlayer(dt) {
 
-    if(
+    if (
         fallingIntoLevel
-    ){
+    ) {
 
         updateFall(dt);
 
         return;
     }
 
-    let forward=0;
-    let side=0;
 
-    if(keys.w)
+    let forward = 0;
+    let side = 0;
+
+
+    if (keys.w)
         forward++;
 
-    if(keys.s)
+    if (keys.s)
         forward--;
 
-    if(keys.d)
+    if (keys.d)
         side++;
 
-    if(keys.a)
+    if (keys.a)
         side--;
 
-    const length=
+
+    const length =
         Math.hypot(
             forward,
             side
         );
 
-    if(length){
 
-        forward/=length;
-        side/=length;
+    if (length) {
+
+        forward /= length;
+        side /= length;
     }
 
-    let speed=
+
+    /*
+       No sprint cooldown.
+
+       Hold SHIFT as long as you want.
+    */
+
+    let speed =
         keys.shift
-        ?5.9
-        :3.5;
+            ? 5.9
+            : 3.5;
 
-    if(difficulty==="easy")
-        speed=3.8;
 
-    if(difficulty==="hard")
-        speed=3.4;
+    if (difficulty === "easy")
+        speed = keys.shift ? 6.1 : 3.8;
 
-    if(difficulty==="nightmare")
-        speed=3.25;
+    if (difficulty === "hard")
+        speed = keys.shift ? 6.3 : 3.4;
 
-    const sin=
+    if (difficulty === "nightmare")
+        speed = keys.shift ? 6.5 : 3.25;
+
+
+    const sin =
         Math.sin(yaw);
 
-    const cos=
+    const cos =
         Math.cos(yaw);
 
-    const dx=
+
+    const dx =
         (
-            side*cos+
-            forward*sin
-        )*
-        speed*
+            side * cos +
+            forward * sin
+        ) *
+        speed *
         dt;
 
-    const dz=
+
+    const dz =
         (
-            -side*sin+
-            forward*cos
-        )*
-        speed*
+            -side * sin +
+            forward * cos
+        ) *
+        speed *
         dt;
 
-    const nextX=
-        player.position.x+
+
+    const nextX =
+        player.position.x +
         dx;
 
-    const nextZ=
-        player.position.z+
+    const nextZ =
+        player.position.z +
         dz;
 
-    if(
+
+    if (
         !collides(
             nextX,
             player.position.z
         )
-    ){
+    ) {
 
-        player.position.x=
+        player.position.x =
             nextX;
     }
 
-    if(
+
+    if (
         !collides(
             player.position.x,
             nextZ
         )
-    ){
+    ) {
 
-        player.position.z=
+        player.position.z =
             nextZ;
     }
 
-    if(
+
+    if (
         jumpPressed &&
         grounded
-    ){
+    ) {
 
-        velocityY=6.2;
+        velocityY = 6.2;
 
-        grounded=false;
+        grounded = false;
     }
 
-    jumpPressed=false;
 
-    velocityY-=20*dt;
+    jumpPressed = false;
 
-    player.position.y+=
-        velocityY*dt;
 
-    if(
-        player.position.y<=0
-    ){
+    velocityY -=
+        20 * dt;
 
-        player.position.y=0;
+    player.position.y +=
+        velocityY * dt;
 
-        velocityY=0;
 
-        grounded=true;
+    if (
+        player.position.y <= 0
+    ) {
+
+        player.position.y = 0;
+
+        velocityY = 0;
+
+        grounded = true;
     }
 
-    if(
+
+    if (
         playerInHole()
-    ){
+    ) {
 
         killPlayer(
             "YOU FELL INTO THE FLOOR."
@@ -2974,417 +2928,484 @@ function updatePlayer(dt){
         return;
     }
 
+
     checkExit();
 }
+
 
 /* =========================================================
    FALLING INTRO
 ========================================================= */
 
-function updateFall(dt){
+function updateFall(dt) {
 
-    fallTimer+=dt;
+    fallTimer += dt;
 
-    const progress=
+
+    const progress =
         Math.min(
-            fallTimer/
+            fallTimer /
             FALL_DURATION,
             1
         );
 
-    const eased=
-        1-
+
+    const eased =
+        1 -
         Math.pow(
-            1-progress,
+            1 - progress,
             3
         );
 
-    /*
-       Start high above the room and
-       drop into the level.
-    */
 
-    player.position.y=
-        17-
-        17*eased;
+    player.position.y =
+        17 -
+        17 * eased;
 
-    camera.position.y=
+
+    camera.position.y =
         EYE_HEIGHT;
 
-    camera.rotation.x=
+
+    camera.rotation.x =
         THREE.MathUtils.lerp(
             -.32,
             0,
             Math.min(
-                progress*1.3,
+                progress * 1.3,
                 1
             )
         );
 
-    camera.rotation.z=
+
+    camera.rotation.z =
         Math.sin(
-            progress*
-            Math.PI*
+            progress *
+            Math.PI *
             9
-        )*
+        ) *
         .025;
 
-    if(
-        progress>=1
-    ){
 
-        fallingIntoLevel=false;
+    if (
+        progress >= 1
+    ) {
 
-        player.position.y=0;
+        fallingIntoLevel = false;
 
-        camera.position.x=0;
-        camera.position.y=
+        player.position.y = 0;
+
+        camera.position.x = 0;
+        camera.position.y =
             EYE_HEIGHT;
-        camera.position.z=0;
+        camera.position.z = 0;
 
-        camera.rotation.x=0;
-        camera.rotation.z=0;
+        camera.rotation.x = 0;
+        camera.rotation.z = 0;
 
         document.body.requestPointerLock();
     }
 }
 
+
 /* =========================================================
    CAMERA
 ========================================================= */
 
-let cameraTime=0;
+let cameraTime = 0;
 
-function updateCamera(dt){
 
-    if(fallingIntoLevel)
+function updateCamera(dt) {
+
+    if (fallingIntoLevel)
         return;
 
-    cameraTime+=dt;
 
-    const moving=
+    cameraTime += dt;
+
+
+    const moving =
         keys.w ||
         keys.a ||
         keys.s ||
         keys.d;
 
-    const amount=
+
+    const amount =
         moving
-        ? .009
-        : .0025;
+            ? .009
+            : .0025;
 
-    camera.position.x=
+
+    camera.position.x =
         Math.sin(
-            cameraTime*3.4
-        )*
+            cameraTime * 3.4
+        ) *
         amount;
 
-    camera.position.y=
-        EYE_HEIGHT+
+
+    camera.position.y =
+        EYE_HEIGHT +
         Math.sin(
-            cameraTime*4.1
-        )*
+            cameraTime * 4.1
+        ) *
         amount;
 
-    camera.position.z=
+
+    camera.position.z =
         Math.cos(
-            cameraTime*3.1
-        )*
-        amount*.55;
+            cameraTime * 3.1
+        ) *
+        amount *
+        .55;
 
-    camera.rotation.z=
+
+    camera.rotation.z =
         Math.sin(
-            cameraTime*.9
-        )*
+            cameraTime * .9
+        ) *
         .003;
 
-    /*
-       Occasional VHS/camcorder instability.
-    */
 
-    if(
-        Math.random()<.003
-    ){
+    if (
+        Math.random() < .003
+    ) {
 
-        camera.position.x+=
+        camera.position.x +=
             (
-                Math.random()-.5
-            )*.035;
+                Math.random() -
+                .5
+            ) * .035;
 
-        camera.position.y+=
+        camera.position.y +=
             (
-                Math.random()-.5
-            )*.025;
+                Math.random() -
+                .5
+            ) * .025;
 
-        camera.rotation.z+=
+        camera.rotation.z +=
             (
-                Math.random()-.5
-            )*.025;
+                Math.random() -
+                .5
+            ) * .025;
     }
 }
+
 
 /* =========================================================
    EXIT CHECK
 ========================================================= */
 
-function checkExit(){
+function checkExit() {
 
-    if(
+    if (
         !exitObject ||
         dead
-    ){
+    ) {
         return;
     }
 
-    const distance=
+
+    const distance =
         Math.hypot(
-            player.position.x-
+
+            player.position.x -
             exitX,
 
-            player.position.z-
+            player.position.z -
             exitZ
         );
 
-    if(
-        distance<1.8
-    ){
+
+    if (
+        distance < 1.8
+    ) {
 
         winGame();
     }
 }
 
+
 /* =========================================================
    MESSAGE
 ========================================================= */
 
-let messageTimer=0;
+let messageTimer = 0;
 
-function showMessage(text){
+
+function showMessage(text) {
 
     document.getElementById(
         "message"
-    ).textContent=text;
+    ).textContent = text;
 
-    messageTimer=2.2;
+    messageTimer = 2.2;
 }
 
-function updateMessage(dt){
 
-    if(
-        messageTimer<=0
-    ){
+function updateMessage(dt) {
+
+    if (
+        messageTimer <= 0
+    ) {
         return;
     }
 
-    messageTimer-=dt;
 
-    if(
-        messageTimer<=0
-    ){
+    messageTimer -= dt;
+
+
+    if (
+        messageTimer <= 0
+    ) {
 
         document.getElementById(
             "message"
-        ).textContent="";
+        ).textContent = "";
     }
 }
+
 
 /* =========================================================
    DEATH
 ========================================================= */
 
 function killPlayer(
-    reason="THE BACKROOMS GOT YOU"
-){
+    reason = "THE BACKROOMS GOT YOU"
+) {
 
-    if(
+    if (
         dead ||
         !running
-    ){
+    ) {
         return;
     }
 
-    dead=true;
 
-    fallingIntoLevel=false;
+    dead = true;
+
+    fallingIntoLevel = false;
+
 
     entityAudio.pause();
-    entityAudio.volume=0;
+    entityAudio.volume = 0;
 
-    if(
+
+    if (
         document.pointerLockElement
-    ){
+    ) {
 
         document.exitPointerLock();
     }
 
-    document.getElementById(
-        "deathTitle"
-    ).textContent=
-        "YOU DIED";
 
     document.getElementById(
         "deathTitle"
-    ).className="";
+    ).textContent =
+        "YOU DIED";
+
+
+    document.getElementById(
+        "deathTitle"
+    ).className = "";
+
 
     document.getElementById(
         "deathText"
-    ).textContent=
+    ).textContent =
         reason;
+
 
     document.getElementById(
         "retryBtn"
-    ).textContent=
+    ).textContent =
         "RETRY";
+
 
     document.getElementById(
         "death"
-    ).style.display=
+    ).style.display =
         "flex";
 }
+
 
 /* =========================================================
    WIN
 ========================================================= */
 
-function winGame(){
+function winGame() {
 
-    if(
+    if (
         dead ||
         !running
-    ){
+    ) {
         return;
     }
 
-    dead=true;
+
+    dead = true;
+
 
     entityAudio.pause();
-    entityAudio.volume=0;
+    entityAudio.volume = 0;
 
-    if(
+
+    if (
         document.pointerLockElement
-    ){
+    ) {
+
         document.exitPointerLock();
     }
 
-    document.getElementById(
-        "deathTitle"
-    ).textContent=
-        "YOU ESCAPED";
 
     document.getElementById(
         "deathTitle"
-    ).className="win";
+    ).textContent =
+        "YOU ESCAPED";
+
+
+    document.getElementById(
+        "deathTitle"
+    ).className =
+        "win";
+
 
     document.getElementById(
         "deathText"
-    ).textContent=
+    ).textContent =
         "YOU FOUND THE EXIT";
+
 
     document.getElementById(
         "retryBtn"
-    ).textContent=
+    ).textContent =
         "PLAY AGAIN";
+
 
     document.getElementById(
         "death"
-    ).style.display=
+    ).style.display =
         "flex";
 }
+
 
 /* =========================================================
    PAUSE
 ========================================================= */
 
-function togglePause(){
+function togglePause() {
 
-    if(
+    if (
         !running ||
         dead ||
         fallingIntoLevel
-    ){
+    ) {
         return;
     }
 
-    paused=!paused;
+
+    paused = !paused;
+
 
     document.getElementById(
         "pause"
-    ).style.display=
+    ).style.display =
         paused
-        ?"flex"
-        :"none";
+            ? "flex"
+            : "none";
 
-    if(paused){
 
-        if(
+    if (paused) {
+
+        if (
             document.pointerLockElement
-        ){
+        ) {
+
             document.exitPointerLock();
         }
 
-    }else{
+    } else {
 
         document.body.requestPointerLock();
     }
 }
 
+
 /* =========================================================
-   MAIN MENU
+   RETURN TO MENU
 ========================================================= */
 
-function returnToMenu(){
+function returnToMenu() {
 
-    running=false;
-    paused=false;
-    dead=false;
-    fallingIntoLevel=false;
+    running = false;
+    paused = false;
+    dead = false;
+    fallingIntoLevel = false;
+
 
     entityAudio.pause();
-    entityAudio.volume=0;
+    entityAudio.volume = 0;
 
-    if(
+
+    if (
         document.pointerLockElement
-    ){
+    ) {
+
         document.exitPointerLock();
     }
 
+
     clearWorld();
+
 
     document.getElementById(
         "pause"
-    ).style.display="none";
+    ).style.display =
+        "none";
+
 
     document.getElementById(
         "death"
-    ).style.display="none";
+    ).style.display =
+        "none";
+
 
     document.getElementById(
         "menu"
-    ).style.display="block";
+    ).style.display =
+        "block";
 }
+
 
 /* =========================================================
    START GAME
 ========================================================= */
 
-async function startGame(){
+async function startGame() {
 
-    if(
+    /*
+       Make sure textures have loaded before
+       building the world.
+    */
+
+    if (
         !wallTexture ||
         !floorTexture ||
         !ceilingTexture
-    ){
+    ) {
 
         await loadTextures();
     }
 
+
     clearWorld();
+
 
     /*
        Spawn point.
 
-       This is deliberately inside the
-       upper-left/central part of the map.
+       The player starts high above the map
+       and falls into Level 0.
     */
 
     player.position.set(
@@ -3393,12 +3414,14 @@ async function startGame(){
         -70
     );
 
-    yaw=.25;
-    pitch=-.28;
 
-    velocityY=0;
+    yaw = .25;
+    pitch = -.28;
 
-    grounded=false;
+    velocityY = 0;
+
+    grounded = false;
+
 
     createFloor();
     createCeiling();
@@ -3413,8 +3436,9 @@ async function startGame(){
 
     await createEntity();
 
+
     /*
-       Entity starts far away.
+       Entity begins far away.
     */
 
     entity.position.set(
@@ -3422,6 +3446,7 @@ async function startGame(){
         .775,
         -48
     );
+
 
     entityDirection.set(
         1,
@@ -3433,29 +3458,37 @@ async function startGame(){
         0
     );
 
-    lastSeen=99;
+    lastSeen = 99;
 
-    running=true;
-    paused=false;
-    dead=false;
 
-    fallingIntoLevel=true;
+    running = true;
+    paused = false;
+    dead = false;
 
-    fallTimer=0;
+    fallingIntoLevel = true;
 
-    recordingTime=0;
+    fallTimer = 0;
+
+    recordingTime = 0;
+
 
     document.getElementById(
         "menu"
-    ).style.display="none";
+    ).style.display =
+        "none";
+
 
     document.getElementById(
         "pause"
-    ).style.display="none";
+    ).style.display =
+        "none";
+
 
     document.getElementById(
         "death"
-    ).style.display="none";
+    ).style.display =
+        "none";
+
 
     camera.position.set(
         0,
@@ -3463,82 +3496,122 @@ async function startGame(){
         0
     );
 
-    camera.rotation.x=
+
+    camera.rotation.x =
         pitch;
 
-    camera.rotation.z=0;
+    camera.rotation.z = 0;
 
-    player.rotation.y=
+    player.rotation.y =
         yaw;
 
-    /*
-       Pointer lock will be requested
-       again after the falling sequence.
-    */
+
+    showMessage(
+        "ENTERING LEVEL 0..."
+    );
 }
+
 
 /* =========================================================
    DIFFICULTY
 ========================================================= */
 
-function setDifficulty(value){
+function setDifficulty(value) {
 
-    difficulty=value;
+    difficulty = value;
+
 
     document
         .querySelectorAll(
             ".menuDifficulty button"
         )
         .forEach(
-            button=>
+            button =>
                 button.classList.remove(
                     "selected"
                 )
         );
 
+
+    const id =
+        value === "nightmare"
+            ? "nightmareBtn"
+            : value + "Btn";
+
+
     document.getElementById(
-        value==="nightmare"
-        ?"nightmareBtn"
-        :value+"Btn"
+        id
     ).classList.add(
         "selected"
     );
 
+
     document.getElementById(
         "difficultyHud"
-    ).textContent=
+    ).textContent =
         value.toUpperCase();
 }
 
-easyBtn.onclick=
-    ()=>setDifficulty("easy");
 
-normalBtn.onclick=
-    ()=>setDifficulty("normal");
+document.getElementById(
+    "easyBtn"
+).onclick =
+    () => setDifficulty("easy");
 
-hardBtn.onclick=
-    ()=>setDifficulty("hard");
 
-nightmareBtn.onclick=
-    ()=>setDifficulty("nightmare");
+document.getElementById(
+    "normalBtn"
+).onclick =
+    () => setDifficulty("normal");
 
-startBtn.onclick=
-    ()=>startGame();
 
-resumeBtn.onclick=
-    ()=>togglePause();
+document.getElementById(
+    "hardBtn"
+).onclick =
+    () => setDifficulty("hard");
 
-restartBtn.onclick=
-    ()=>startGame();
 
-menuBtn.onclick=
-    ()=>returnToMenu();
+document.getElementById(
+    "nightmareBtn"
+).onclick =
+    () => setDifficulty("nightmare");
 
-retryBtn.onclick=
-    ()=>startGame();
 
-deathMenuBtn.onclick=
-    ()=>returnToMenu();
+document.getElementById(
+    "startBtn"
+).onclick =
+    () => startGame();
+
+
+document.getElementById(
+    "resumeBtn"
+).onclick =
+    () => togglePause();
+
+
+document.getElementById(
+    "restartBtn"
+).onclick =
+    () => startGame();
+
+
+document.getElementById(
+    "menuBtn"
+).onclick =
+    () => returnToMenu();
+
+
+document.getElementById(
+    "retryBtn"
+).onclick =
+    () => startGame();
+
+
+document.getElementById(
+    "deathMenuBtn"
+).onclick =
+    () => returnToMenu();
+
 
 /* =========================================================
    POINTER LOCK
@@ -3546,42 +3619,45 @@ deathMenuBtn.onclick=
 
 document.addEventListener(
     "click",
-    ()=>{
+    () => {
 
-        if(
+        if (
             running &&
             !paused &&
             !dead &&
             !fallingIntoLevel &&
-            document.pointerLockElement!==
+            document.pointerLockElement !==
             document.body
-        ){
+        ) {
 
             document.body.requestPointerLock();
         }
     }
 );
 
+
 /* =========================================================
    MENU IMAGE ROTATION
 ========================================================= */
 
-const menuImages=
+const menuImages =
     Array.from(
         document.querySelectorAll(
             ".menuImage"
         )
     );
 
-let menuIndex=0;
+let menuIndex = 0;
 
-function cycleMenuImage(){
 
-    if(
-        menuImages.length===0
-    ){
+function cycleMenuImage() {
+
+    if (
+        menuImages.length === 0
+    ) {
         return;
     }
+
 
     menuImages[
         menuIndex
@@ -3589,11 +3665,13 @@ function cycleMenuImage(){
         "active"
     );
 
-    menuIndex=
+
+    menuIndex =
         (
-            menuIndex+1
-        )%
+            menuIndex + 1
+        ) %
         menuImages.length;
+
 
     menuImages[
         menuIndex
@@ -3602,14 +3680,12 @@ function cycleMenuImage(){
     );
 }
 
-/*
-   One image every minute.
-*/
 
 setInterval(
     cycleMenuImage,
     60000
 );
+
 
 /* =========================================================
    RESIZE
@@ -3617,103 +3693,119 @@ setInterval(
 
 addEventListener(
     "resize",
-    ()=>{
+    () => {
 
-        camera.aspect=
-            innerWidth/
+        camera.aspect =
+            innerWidth /
             innerHeight;
 
+
         camera.updateProjectionMatrix();
+
 
         renderer.setSize(
             innerWidth,
             innerHeight
         );
 
+
         renderer.setPixelRatio(
             Math.min(
-                devicePixelRatio,
+                window.devicePixelRatio || 1,
                 1.35
             )
         );
     }
 );
 
+
 /* =========================================================
    TIMER
 ========================================================= */
 
-const clock=
+const clock =
     new THREE.Clock();
 
-let recordingTime=0;
+let recordingTime = 0;
 
-function updateTimer(dt){
 
-    if(
+function updateTimer(dt) {
+
+    if (
         !running ||
         paused
-    ){
+    ) {
         return;
     }
 
-    recordingTime+=dt;
 
-    const total=
+    recordingTime += dt;
+
+
+    const total =
         Math.floor(
             recordingTime
         );
 
-    const hours=
+
+    const hours =
         Math.floor(
-            total/3600
+            total / 3600
         );
 
-    const minutes=
+
+    const minutes =
         Math.floor(
-            (total%3600)/60
+            (total % 3600) /
+            60
         );
 
-    const seconds=
-        total%60;
 
-    const format=
-        n=>
+    const seconds =
+        total % 60;
+
+
+    const format =
+        n =>
             String(n)
                 .padStart(
                     2,
                     "0"
                 );
 
+
     document.getElementById(
         "tapeTime"
-    ).textContent=
-        `${format(hours)}:`+
-        `${format(minutes)}:`+
+    ).textContent =
+        `${format(hours)}:` +
+        `${format(minutes)}:` +
         `${format(seconds)}`;
 }
+
 
 /* =========================================================
    GAME LOOP
 ========================================================= */
 
-function animate(){
+function animate() {
 
     requestAnimationFrame(
         animate
     );
 
-    const dt=
+
+    const dt =
         Math.min(
             clock.getDelta(),
             .05
         );
 
-    if(
+
+    if (
         running &&
         !paused &&
         !dead
-    ){
+    ) {
 
         updatePlayer(dt);
 
@@ -3729,16 +3821,18 @@ function animate(){
 
         updateTimer(dt);
 
-    }else{
+    } else {
 
         updateEntityAudio();
     }
+
 
     renderer.render(
         scene,
         camera
     );
 }
+
 
 /* =========================================================
    INITIAL LOAD
@@ -3752,3 +3846,4 @@ animate();
 
 </body>
 </html>
+```
