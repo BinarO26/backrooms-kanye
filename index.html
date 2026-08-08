@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>The Backrooms</title>
+
+<style>
+html,body{
+    margin:0;
+    padding:0;
+    overflow:hidden;
+    background:#000;
+    font-family:Arial,sans-serif;
+}
+
+#game{
+    position:fixed;
+    inset:0;
+}
+
+#crosshair{
+    position:fixed;
+    left:50%;
+    top:50%;
+    width:7px;
+    height:7px;
+    margin:-4px;
+    border:1px solid white;
+    border-radius:50%;
+    z-index:5;
+    pointer-events:none;
+}
+
+#start{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    color:white;
+    background:rgba(0,0,0,.8);
+    z-index:10;
+    text-align:center;
+}
+
+#start button{
+    padding:14px 24px;
+    border:0;
+    border-radius:6px;
+    cursor:pointer;
+    background:#d8c43d;
+    color:#171300;
+    font-weight:bold;
+    font-size:16px;
+}
+
+#danger{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:4;
+    box-shadow:inset 0 0 100px rgba(255,0,0,0);
+}
+
+#message{
+    position:fixed;
+    top:25px;
+    left:50%;
+    transform:translateX(-50%);
+    color:white;
+    font-size:20px;
+    z-index:6;
+    text-shadow:2px 2px 5px black;
+}
+</style>
+
+</head>
+
+<body>
+
+<div id="game"></div>
+<div id="crosshair"></div>
+<div id="danger"></div>
+<div id="message"></div>
+
+<div id="start">
+    <h1>THE BACKROOMS</h1>
+    <p>Something is wandering through the halls...</p>
+    <p>WASD = Move &nbsp; | &nbsp; Mouse = Look</p>
+    <button id="startButton">ENTER THE BACKROOMS</button>
+</div>
+
+<script type="importmap">
+{
+    "imports":{
+        "three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+    }
+}
+</script>
+
+<script type="module">
+
+import * as THREE from "three";
+
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+
+const PLAYER_RADIUS = 0.35;
+const PLAYER_SPEED = 4.5;
+
+const ENTITY_RADIUS = 0.38;
+const ENTITY_SPEED = 1.8;
+
+const CELL_SIZE = 4;
+
+/*
+    # = WALL
+    . = WALKABLE FLOOR
+
+    You can change this later to make your own map.
+*/
+
+const MAP = [
+    "###############",
+    "#.............#",
+    "#.#####.#####.#",
+    "#.#.........#.#",
+    "#.#.#######.#.#",
+    "#.#.#.....#.#.#",
+    "#...#.....#...#",
+    "###.#.....#.###",
+    "#...#.....#...#",
+    "#.#.#.....#.#.#",
+    "#.#.#######.#.#",
+    "#.#.........#.#",
+    "#.#####.#####.#",
+    "#.............#",
+    "###############"
+];
+
+/* =========================================================
+   SCENE
+   ========================================================= */
+
+const scene = new THREE.Scene();
+
+scene.background =
+    new THREE.Color(0x17150c);
+
+scene.fog =
+    new THREE.Fog(
+        0x17150c,
+        5,
+        35
+    );
+
+const camera =
+    new THREE.PerspectiveCamera(
+        75,
+        innerWidth / innerHeight,
+        .05,
+        100
+    );
+
+camera.rotation.order = "YXZ";
+
+const renderer =
+    new THREE.WebGLRenderer({
+        antialias:true
+    });
+
+renderer.setSize(
+    innerWidth,
+    innerHeight
+);
+
+renderer.setPixelRatio(
+    Math.min(devicePixelRatio,2)
+);
+
+renderer.shadowMap.enabled = true;
+
+document
+    .getElementById("game")
+    .appendChild(renderer.domElement);
+
+/* =========================================================
+   LIGHTING
+   ========================================================= */
+
+scene.add(
+    new THREE.AmbientLight(
+        0xffe7a5,
+        1.8
+    )
+);
+
+/* =========================================================
+   TEXTURES
+   ========================================================= */
+
+function makeWallTexture(){
+
+    const canvas =
+        document.createElement("canvas");
+
+    canvas.width = 512;
+    canvas.height = 512;
+
+    const ctx =
+        canvas.getContext("2d");
+
+    ctx.fillStyle = "#c9b84b";
+    ctx.fillRect(0,0,512,512);
+
+    for(let i=0;i<18000;i++){
+
+        ctx.fillStyle =
+            Math.random()>.5
+            ? "rgba(255,235,110,.08)"
+            : "rgba(80,65,20,.07)";
+
+        ctx.fillRect(
+            Math.random()*512,
+            Math.random()*512,
+            2,
+            2
+        );
+    }
+
+    for(let y=0;y<512;y+=35){
+
+        ctx.strokeStyle =
+            "rgba(80,70,20,.08)";
+
+        ctx.beginPath();
+        ctx.moveTo(0,y);
+        ctx.lineTo(512,y);
+        ctx.stroke();
+    }
+
+    return new THREE.CanvasTexture(canvas);
+}
+
+function makeFloorTexture(){
+
+    const canvas =
+        document.createElement("canvas");
+
+    canvas.width = 512;
+    canvas.height = 512;
+
+    const ctx =
+        canvas.getContext("2d");
+
+    ctx.fillStyle = "#6b653d";
+    ctx.fillRect(0,0,512,512);
+
+    for(let i=0;i<8000;i++){
+
+        ctx.fillStyle =
+            Math.random()>.5
+            ? "rgba(255,255,190,.05)"
+            : "rgba(0,0,0,.06)";
+
+        ctx.fillRect(
+            Math.random()*512,
+            Math.random()*512,
+            2,
+            2
+        );
+    }
+
+    return new THREE.CanvasTexture(canvas);
+}
+
+const wallTexture =
+    makeWallTexture();
+
+const floorTexture =
+    makeFloorTexture();
+
+/* =========================================================
+   MATERIALS
+   ========================================================= */
+
+const wallMaterial =
+    new THREE.MeshStandardMaterial({
+        map:wallTexture,
+        roughness:1
+    });
+
+const floorMaterial =
+    new THREE.MeshStandardMaterial({
+        map:floorTexture,
+        roughness:1
+    });
+
+/* =========================================================
+   MAP FUNCTIONS
+   ========================================================= */
+
+function cellToWorld(row,col){
+
+    const width =
+        MAP[0].length;
+
+    return new THREE.Vector3(
+        (col-width/2+.5)*CELL_SIZE,
+        0,
+        (row-MAP.length/2+.5)*CELL_SIZE
+    );
+}
+
+function isWall(row,col){
+
+    if(
+        row<0 ||
+        row>=MAP.length ||
+        col<0 ||
+        col>=MAP[0].length
+    )
+        return true;
+
+    return MAP[row][col]==="#";
+}
+
+function worldToCell(position){
+
+    const width =
+        MAP[0].length;
+
+    return {
+        row:Math.floor(
+            position.z/CELL_SIZE+
+            MAP.length/2
+        ),
+
+        col:Math.floor(
+            position.x/CELL_SIZE+
+            width/2
+        )
+    };
+}
+
+/* =========================================================
+   FLOOR
+   ========================================================= */
+
+const floor =
+    new THREE.Mesh(
+        new THREE.PlaneGeometry(
+            MAP[0].length*CELL_SIZE,
+            MAP.length*CELL_SIZE
+        ),
+        floorMaterial
+    );
+
+floor.rotation.x=-Math.PI/2;
+
+scene.add(floor);
+
+/* =========================================================
+   WALLS
+   ========================================================= */
+
+const wallGeometry =
+    new THREE.BoxGeometry(
+        CELL_SIZE,
+        3.5,
+        CELL_SIZE
+    );
+
+const wallBoxes=[];
+
+for(let r=0;r<MAP.length;r++){
+
+    for(let c=0;c<MAP[r].length;c++){
+
+        if(MAP[r][c]!=="#")
+            continue;
+
+        const pos =
+            cellToWorld(r,c);
+
+        const wall =
+            new THREE.Mesh(
+                wallGeometry,
+                wallMaterial
+            );
+
+        wall.position.set(
+            pos.x,
+            1.75,
+            pos.z
+        );
+
+        wall.castShadow=true;
+        wall.receiveShadow=true;
+
+        scene.add(wall);
+
+        wallBoxes.push(
+            new THREE.Box3().setFromObject(wall)
+        );
+    }
+}
+
+/* =========================================================
+   CEILING
+   ========================================================= */
+
+const ceiling =
+    new THREE.Mesh(
+        new THREE.PlaneGeometry(
+            MAP[0].length*CELL_SIZE,
+            MAP.length*CELL_SIZE
+        ),
+        new THREE.MeshStandardMaterial({
+            color:0x9c9042
+        })
+    );
+
+ceiling.rotation.x=Math.PI/2;
+ceiling.position.y=3.5;
+
+scene.add(ceiling);
+
+/* =========================================================
+   LIGHTS
+   ========================================================= */
+
+for(let r=1;r<MAP.length-1;r++){
+
+    for(let c=1;c<MAP[r].length-1;c++){
+
+        if(MAP[r][c]!==".")
+            continue;
+
+        if(
+            MAP[r-1][c]==="." &&
+            MAP[r+1][c]==="." &&
+            Math.random()<.25
+        ){
+
+            const pos =
+                cellToWorld(r,c);
+
+            const light =
+                new THREE.PointLight(
+                    0xffe9a3,
+                    5,
+                    12
+                );
+
+            light.position.set(
+                pos.x,
+                3.15,
+                pos.z
+            );
+
+            scene.add(light);
+
+            const bulb =
+                new THREE.Mesh(
+                    new THREE.BoxGeometry(
+                        1.2,.05,.45
+                    ),
+                    new THREE.MeshBasicMaterial({
+                        color:0xffffcc
+                    })
+                );
+
+            bulb.position.copy(
+                light.position
+            );
+
+            scene.add(bulb);
+        }
+    }
+}
+
+/* =========================================================
+   COLLISION
+   ========================================================= */
+
+function circleHitsWall(
+    position,
+    radius
+){
+
+    for(const box of wallBoxes){
+
+        const closestX =
+            Math.max(
+                box.min.x,
+                Math.min(
+                    position.x,
+                    box.max.x
+                )
+            );
+
+        const closestZ =
+            Math.max(
+                box.min.z,
+                Math.min(
+                    position.z,
+                    box.max.z
+                )
+            );
+
+        const dx =
+            position.x-closestX;
+
+        const dz =
+            position.z-closestZ;
+
+        if(
+            dx*dx+dz*dz<
+            radius*radius
+        )
+            return true;
+    }
+
+    return false;
+}
+
+function moveWithCollision(
+    object,
+    direction,
+    speed,
+    radius,
+    delta
+){
+
+    const movement =
+        direction.clone()
+        .multiplyScalar(
+            speed*delta
+        );
+
+    const nextX =
+        object.position.clone();
+
+    nextX.x+=movement.x;
+
+    if(!circleHitsWall(
+        nextX,
+        radius
+    )){
+        object.position.x=
+            nextX.x;
+    }
+
+    const nextZ =
+        object.position.clone();
+
+    nextZ.z+=movement.z;
+
+    if(!circleHitsWall(
+        nextZ,
+        radius
+    )){
+        object.position.z=
+            nextZ.z;
+    }
+}
+
+/* =========================================================
+   PLAYER
+   ========================================================= */
+
+const player =
+    new THREE.Object3D();
+
+player.position.copy(
+    cellToWorld(1,1)
+);
+
+player.position.y=1.65;
+
+scene.add(player);
+
+player.add(camera);
+
+camera.position.set(0,0,0);
+
+let yaw=0;
+let pitch=0;
+
+const keys={};
+
+addEventListener(
+    "keydown",
+    e=>{
+        keys[e.key.toLowerCase()]=true;
+    }
+);
+
+addEventListener(
+    "keyup",
+    e=>{
+        keys[e.key.toLowerCase()]=false;
+    }
+);
+
+document.body.addEventListener(
+    "mousemove",
+    e=>{
+
+        if(
+            document.pointerLockElement !==
+            document.body
+        )
+            return;
+
+        yaw-=e.movementX*.002;
+        pitch-=e.movementY*.002;
+
+        pitch=
+            Math.max(
+                -Math.PI/2.1,
+                Math.min(
+                    Math.PI/2.1,
+                    pitch
+                )
+            );
+
+        player.rotation.y=yaw;
+        camera.rotation.x=pitch;
+    }
+);
+
+/* =========================================================
+   ENTITY TEXTURE
+   =========================================================
+
+   IMPORTANT:
+
+   Put your entity PNG in the same folder
+   as index.html and call it:
+
+       entity.png
+
+*/
+
+const textureLoader =
+    new THREE.TextureLoader();
+
+const entityTexture =
+    textureLoader.load(
+        "./entity.png"
+    );
+
+const entityMaterial =
+    new THREE.MeshBasicMaterial({
+        map:entityTexture,
+        transparent:true,
+        side:THREE.DoubleSide
+    });
+
+const entity =
+    new THREE.Mesh(
+        new THREE.PlaneGeometry(
+            1.7,
+            3.2
+        ),
+        entityMaterial
+    );
+
+entity.position.copy(
+    cellToWorld(
+        MAP.length-2,
+        MAP[0].length-2
+    )
+);
+
+entity.position.y=1.6;
+
+scene.add(entity);
+
+/* =========================================================
+   ENTITY SOUND
+   =========================================================
+
+   Put your sound in the same folder as index.html
+   and call it:
+
+       entity.mp3
+
+*/
+
+const entitySound =
+    new Audio("./entity.mp3");
+
+entitySound.loop=true;
+entitySound.volume=0;
+
+/* =========================================================
+   ENTITY PATHFINDING
+   ========================================================= */
+
+function findPath(start,target){
+
+    const queue=[start];
+
+    const cameFrom={};
+
+    const key=(r,c)=>`${r},${c}`;
+
+    cameFrom[
+        key(start.row,start.col)
+    ]=null;
+
+    while(queue.length){
+
+        const current=
+            queue.shift();
+
+        if(
+            current.row===target.row &&
+            current.col===target.col
+        )
+            break;
+
+        const neighbors=[
+            {
+                row:current.row-1,
+                col:current.col
+            },
+            {
+                row:current.row+1,
+                col:current.col
+            },
+            {
+                row:current.row,
+                col:current.col-1
+            },
+            {
+                row:current.row,
+                col:current.col+1
+            }
+        ];
+
+        for(const next of neighbors){
+
+            if(
+                isWall(
+                    next.row,
+                    next.col
+                )
+            )
+                continue;
+
+            const k=
+                key(
+                    next.row,
+                    next.col
+                );
+
+            if(k in cameFrom)
+                continue;
+
+            cameFrom[k]=current;
+
+            queue.push(next);
+        }
+    }
+
+    const targetKey=
+        key(
+            target.row,
+            target.col
+        );
+
+    if(!(targetKey in cameFrom))
+        return [];
+
+    const path=[];
+
+    let current=target;
+
+    while(current){
+
+        path.unshift(current);
+
+        current=
+            cameFrom[
+                key(
+                    current.row,
+                    current.col
+                )
+            ];
+    }
+
+    return path;
+}
+
+let entityPath=[];
+let pathTimer=0;
+
+/* =========================================================
+   START GAME
+   ========================================================= */
+
+document
+    .getElementById("startButton")
+    .onclick=()=>{
+
+        /*
+            Starting the sound here is important.
+            Browsers generally allow audio after
+            the player interacts with the page.
+        */
+
+        entitySound
+            .play()
+            .catch(error=>{
+                console.log(
+                    "Sound could not start:",
+                    error
+                );
+            });
+
+        document.body.requestPointerLock();
+
+        document.getElementById(
+            "start"
+        ).style.display="none";
+    };
+
+/* =========================================================
+   GAME LOOP
+   ========================================================= */
+
+const clock=
+    new THREE.Clock();
+
+function animate(){
+
+    requestAnimationFrame(animate);
+
+    const delta=
+        Math.min(
+            clock.getDelta(),
+            .05
+        );
+
+    /* PLAYER */
+
+    const direction=
+        new THREE.Vector3();
+
+    if(keys["w"])
+        direction.z-=1;
+
+    if(keys["s"])
+        direction.z+=1;
+
+    if(keys["a"])
+        direction.x-=1;
+
+    if(keys["d"])
+        direction.x+=1;
+
+    if(direction.lengthSq()>0){
+
+        direction.normalize();
+
+        direction.applyAxisAngle(
+            new THREE.Vector3(0,1,0),
+            yaw
+        );
+
+        moveWithCollision(
+            player,
+            direction,
+            PLAYER_SPEED,
+            PLAYER_RADIUS,
+            delta
+        );
+    }
+
+    /* ENTITY PATH */
+
+    pathTimer-=delta;
+
+    if(pathTimer<=0){
+
+        pathTimer=.35;
+
+        const startCell=
+            worldToCell(
+                entity.position
+            );
+
+        const targetCell=
+            worldToCell(
+                player.position
+            );
+
+        entityPath=
+            findPath(
+                startCell,
+                targetCell
+            );
+    }
+
+    /* ENTITY MOVEMENT */
+
+    if(entityPath.length>1){
+
+        const nextCell=
+            entityPath[1];
+
+        const target=
+            cellToWorld(
+                nextCell.row,
+                nextCell.col
+            );
+
+        const direction=
+            new THREE.Vector3(
+                target.x-
+                    entity.position.x,
+                0,
+                target.z-
+                    entity.position.z
+            );
+
+        if(direction.length()>.15){
+
+            direction.normalize();
+
+            moveWithCollision(
+                entity,
+                direction,
+                ENTITY_SPEED,
+                ENTITY_RADIUS,
+                delta
+            );
+        }
+    }
+
+    /* ENTITY FACES PLAYER */
+
+    entity.lookAt(
+        player.position.x,
+        entity.position.y,
+        player.position.z
+    );
+
+    /* DISTANCE */
+
+    const distance=
+        entity.position.distanceTo(
+            player.position
+        );
+
+    /* =====================================================
+       ENTITY SOUND DISTANCE
+
+       20+ units = silent
+       10 units  = medium
+       5 units   = loud
+       0 units   = maximum
+       ===================================================== */
+
+    const SOUND_DISTANCE=20;
+
+    let volume=
+        1-
+        distance/SOUND_DISTANCE;
+
+    volume=
+        THREE.MathUtils.clamp(
+            volume,
+            0,
+            1
+        );
+
+    /*
+        Squaring the value makes the sound
+        increase more dramatically when
+        the entity gets close.
+    */
+
+    volume=volume*volume;
+
+    entitySound.volume=volume;
+
+    /* RED DANGER EFFECT */
+
+    const danger=
+        document.getElementById(
+            "danger"
+        );
+
+    if(distance<8){
+
+        const intensity=
+            Math.max(
+                0,
+                1-distance/8
+            );
+
+        danger.style.boxShadow=
+            `inset 0 0 100px
+             rgba(255,0,0,${intensity})`;
+    }
+    else{
+
+        danger.style.boxShadow=
+            "inset 0 0 100px rgba(255,0,0,0)";
+    }
+
+    /* ENTITY CATCHES PLAYER */
+
+    if(distance<1.2){
+
+        document.getElementById(
+            "message"
+        ).textContent=
+            "THE ENTITY FOUND YOU.";
+
+        player.position.copy(
+            cellToWorld(1,1)
+        );
+
+        entity.position.copy(
+            cellToWorld(
+                MAP.length-2,
+                MAP[0].length-2
+            )
+        );
+
+        setTimeout(()=>{
+            document.getElementById(
+                "message"
+            ).textContent="";
+        },2000);
+    }
+
+    renderer.render(
+        scene,
+        camera
+    );
+}
+
+animate();
+
+/* =========================================================
+   RESIZE
+   ========================================================= */
+
+addEventListener(
+    "resize",
+    ()=>{
+
+        camera.aspect=
+            innerWidth/innerHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(
+            innerWidth,
+            innerHeight
+        );
+    }
+);
+
+</script>
+
+</body>
+</html>
