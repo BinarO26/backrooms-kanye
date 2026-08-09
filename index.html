@@ -3,13 +3,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Backrooms — Level 0</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>THE BACKROOMS — LEVEL 0</title>
 
 <style>
-*{
-    box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 html,body{
     width:100%;
@@ -18,14 +16,16 @@ html,body{
     overflow:hidden;
     background:#000;
     font-family:Arial,Helvetica,sans-serif;
-}
-
-body{
     user-select:none;
 }
 
 canvas{
     display:block;
+}
+
+button{
+    font-family:Arial,Helvetica,sans-serif;
+    cursor:pointer;
 }
 
 /* =========================================================
@@ -36,23 +36,31 @@ canvas{
     position:fixed;
     inset:0;
     z-index:1000;
-    background:#050505;
     overflow:hidden;
+    background:#050504;
 }
 
 .menuImage{
     position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
+    inset:-3%;
+    width:106%;
+    height:106%;
     object-fit:cover;
     opacity:0;
-    transition:opacity 1.4s ease;
-    filter:brightness(.55) contrast(1.15) saturate(.8);
+    filter:
+        brightness(.48)
+        contrast(1.15)
+        saturate(.65)
+        sepia(.1);
+    transform:scale(1.03);
+    transition:
+        opacity 1.3s ease,
+        transform 8s ease;
 }
 
 .menuImage.active{
     opacity:1;
+    transform:scale(1);
 }
 
 .menuDark{
@@ -61,14 +69,14 @@ canvas{
     background:
         linear-gradient(
             90deg,
-            rgba(0,0,0,.82),
-            rgba(0,0,0,.15) 65%,
+            rgba(0,0,0,.84),
+            rgba(0,0,0,.12) 65%,
             rgba(0,0,0,.7)
         ),
         linear-gradient(
             0deg,
-            rgba(0,0,0,.95),
-            transparent 70%
+            rgba(0,0,0,.92),
+            transparent 68%
         );
 }
 
@@ -76,15 +84,51 @@ canvas{
     position:absolute;
     inset:0;
     pointer-events:none;
-    opacity:.15;
+    opacity:.14;
     background:
         repeating-linear-gradient(
             to bottom,
-            rgba(255,255,255,.08) 0px,
+            rgba(255,255,255,.08) 0,
             rgba(255,255,255,.08) 1px,
-            transparent 2px,
-            transparent 5px
+            transparent 3px,
+            transparent 6px
         );
+}
+
+.menuNoise{
+    position:absolute;
+    inset:-20%;
+    pointer-events:none;
+    opacity:.07;
+    background:
+        repeating-radial-gradient(
+            circle at 0 0,
+            rgba(255,255,255,.7) 0,
+            transparent 1px,
+            transparent 4px
+        );
+    animation:grain .08s steps(2) infinite;
+}
+
+.menuVignette{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+        radial-gradient(
+            ellipse at center,
+            transparent 28%,
+            rgba(0,0,0,.2) 65%,
+            rgba(0,0,0,.8)
+        );
+}
+
+@keyframes grain{
+    0%{transform:translate(0,0)}
+    25%{transform:translate(-3px,2px)}
+    50%{transform:translate(2px,-2px)}
+    75%{transform:translate(3px,1px)}
+    100%{transform:translate(0,0)}
 }
 
 .menuContent{
@@ -97,20 +141,20 @@ canvas{
 
 .menuContent h1{
     margin:0;
-    color:#d9ce83;
+    color:#d8cb70;
     font-size:clamp(42px,6vw,82px);
-    letter-spacing:10px;
+    letter-spacing:clamp(5px,1vw,14px);
 }
 
 .menuSubtitle{
     margin-top:5px;
     color:#aaa;
-    letter-spacing:4px;
     font-size:13px;
+    letter-spacing:4px;
 }
 
 .menuHint{
-    margin-top:14px;
+    margin-top:15px;
     color:#777;
     font-size:11px;
     letter-spacing:2px;
@@ -119,58 +163,46 @@ canvas{
 .menuButtons{
     position:absolute;
     right:8%;
-    bottom:10%;
-    width:330px;
+    bottom:11%;
+    width:min(340px,80vw);
 }
 
 .menuDifficulty{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
+    display:flex;
     gap:5px;
     margin-bottom:10px;
 }
 
-.menuDifficulty button,
-.menuButton,
-.overlay button,
-.controlsPanel button{
-    border:1px solid rgba(255,255,255,.3);
-    background:rgba(0,0,0,.65);
-    color:#ddd;
-    cursor:pointer;
-}
-
 .menuDifficulty button{
+    flex:1;
     padding:9px 2px;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(0,0,0,.62);
+    color:#999;
 }
 
 .menuDifficulty button:hover,
 .menuDifficulty button.selected{
-    border-color:#d8cc70;
-    background:rgba(80,70,25,.8);
     color:#fff;
+    border-color:#d8ca66;
+    background:rgba(100,90,30,.7);
 }
 
 .menuButton{
     display:block;
     width:100%;
-    padding:14px 18px;
     margin:7px 0;
-    text-align:left;
+    padding:14px 18px;
+    border:1px solid rgba(255,255,255,.3);
+    background:rgba(0,0,0,.62);
+    color:#eee;
     font-size:15px;
+    text-align:left;
 }
 
 .menuButton:hover{
-    background:rgba(90,80,30,.8);
-    border-color:#d8cc70;
-}
-
-.menuLocation{
-    position:absolute;
-    right:18px;
-    bottom:15px;
-    color:rgba(255,255,255,.4);
-    font:10px monospace;
+    background:rgba(100,90,30,.75);
+    border-color:#ddd16b;
 }
 
 /* =========================================================
@@ -180,47 +212,49 @@ canvas{
 .overlay{
     position:fixed;
     inset:0;
-    z-index:900;
+    z-index:1100;
     display:none;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    flex-direction:column;
-    background:
-        radial-gradient(
-            ellipse at center,
-            rgba(65,60,32,.85),
-            rgba(0,0,0,.98)
-        );
-    color:white;
+    background:rgba(0,0,0,.9);
+    color:#fff;
 }
 
 .overlay h1{
-    margin:0 0 20px;
-    color:#d7cb69;
+    margin:0 0 22px;
+    color:#d8cb60;
+    font-size:50px;
     letter-spacing:8px;
-    font-size:52px;
 }
 
-.overlay button{
+.overlay button,
+.controlsPanel button{
     width:330px;
-    padding:14px;
+    max-width:85vw;
     margin:5px;
+    padding:14px;
+    border:1px solid #666;
+    background:#111;
+    color:#eee;
 }
 
-.overlay button:hover{
-    border-color:#d8cc70;
-    background:#3c381c;
+.overlay button:hover,
+.controlsPanel button:hover{
+    background:#403a17;
+    border-color:#d9cc61;
 }
 
-.deathTitle{
-    color:#b00000!important;
-    font-size:58px!important;
+#deathTitle{
+    margin-bottom:10px;
+    color:#a80000;
+    font-size:55px;
+    letter-spacing:7px;
 }
 
-.deathText{
+#deathText{
+    margin-bottom:18px;
     color:#aaa;
-    margin-bottom:20px;
-    text-align:center;
 }
 
 /* =========================================================
@@ -234,39 +268,46 @@ canvas{
     display:none;
     align-items:center;
     justify-content:center;
-    background:rgba(0,0,0,.85);
+    background:rgba(0,0,0,.96);
 }
 
 .controlsPanel{
-    width:min(620px,90vw);
-    padding:28px;
-    background:rgba(10,10,8,.98);
-    border:1px solid rgba(220,210,120,.5);
-}
-
-.controlsPanel h2{
-    margin:0 0 20px;
-    color:#d8cc72;
-    letter-spacing:4px;
-}
-
-.controlRow{
-    display:flex;
-    justify-content:space-between;
-    padding:10px 4px;
-    border-bottom:1px solid rgba(255,255,255,.08);
-    color:#aaa;
-    font:14px monospace;
-}
-
-.controlKey{
+    width:min(720px,90vw);
+    padding:30px;
+    border:1px solid #555;
+    background:rgba(20,20,15,.98);
     color:#fff;
 }
 
-.controlsPanel button{
-    width:100%;
+.controlsPanel h1{
+    margin-top:0;
+    color:#d8cb60;
+    letter-spacing:6px;
+}
+
+.controlsGrid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:9px;
+}
+
+.controlKey{
     padding:12px;
-    margin-top:20px;
+    border:1px solid #444;
+    background:#111;
+}
+
+.controlKey strong{
+    display:inline-block;
+    min-width:110px;
+    color:#ddd16a;
+}
+
+.controlsNote{
+    margin:20px 0;
+    color:#999;
+    line-height:1.7;
+    font-size:12px;
 }
 
 /* =========================================================
@@ -277,11 +318,11 @@ canvas{
     position:fixed;
     left:50%;
     top:50%;
-    z-index:100;
+    z-index:40;
     width:5px;
     height:5px;
     margin:-2px;
-    border:1px solid rgba(255,255,255,.8);
+    border:1px solid rgba(255,255,255,.75);
     border-radius:50%;
     pointer-events:none;
 }
@@ -290,10 +331,10 @@ canvas{
     position:fixed;
     left:18px;
     bottom:18px;
-    z-index:100;
+    z-index:40;
     color:#fff;
     font:12px monospace;
-    text-shadow:2px 2px 7px #000;
+    text-shadow:2px 2px 6px #000;
 }
 
 #difficultyHud{
@@ -305,11 +346,12 @@ canvas{
     position:fixed;
     left:50%;
     top:45px;
+    z-index:40;
     transform:translateX(-50%);
-    z-index:100;
-    color:white;
+    color:#fff;
     font:14px monospace;
     text-shadow:2px 2px 8px #000;
+    text-align:center;
 }
 
 #hideIndicator,
@@ -317,28 +359,29 @@ canvas{
     position:fixed;
     left:50%;
     transform:translateX(-50%);
-    z-index:100;
-    color:white;
+    z-index:40;
+    color:#ddd;
     font:12px monospace;
-    text-shadow:2px 2px 8px #000;
+    text-shadow:2px 2px 6px #000;
     opacity:0;
+    pointer-events:none;
 }
 
 #hideIndicator{
-    bottom:25%;
+    bottom:17%;
 }
 
 #hiddenIndicator{
-    bottom:18%;
-    color:#d4c96f;
+    bottom:12%;
+    color:#d8cb60;
     letter-spacing:2px;
 }
 
 #rec{
     position:fixed;
-    top:17px;
     right:18px;
-    z-index:100;
+    top:17px;
+    z-index:50;
     color:#eee;
     font:13px monospace;
     text-shadow:2px 2px 6px #000;
@@ -350,80 +393,72 @@ canvas{
     height:9px;
     margin-right:6px;
     border-radius:50%;
-    background:#d00000;
-    animation:blink .9s infinite;
+    background:#e00000;
+    animation:recBlink .9s infinite;
 }
 
-@keyframes blink{
+@keyframes recBlink{
     0%,45%{opacity:1}
     46%,100%{opacity:.15}
 }
 
 #tapeTime{
     position:fixed;
-    top:39px;
     right:18px;
-    z-index:100;
-    color:rgba(255,255,255,.7);
+    top:39px;
+    z-index:50;
+    color:rgba(255,255,255,.75);
     font:11px monospace;
-    text-shadow:2px 2px 6px #000;
+    text-shadow:2px 2px 5px #000;
 }
 
 #battery{
     position:fixed;
     right:18px;
     bottom:18px;
-    z-index:100;
+    z-index:50;
     color:rgba(255,255,255,.7);
     font:11px monospace;
-    text-shadow:2px 2px 6px #000;
+    text-shadow:2px 2px 5px #000;
 }
 
 /* =========================================================
-   FOUND FOOTAGE
+   CAMCORDER
 ========================================================= */
 
 #camcorder{
     position:fixed;
     inset:0;
-    z-index:80;
+    z-index:30;
     pointer-events:none;
 }
 
-.camScanlines{
+.camScan{
     position:absolute;
     inset:0;
-    opacity:.16;
+    opacity:.17;
     background:
         repeating-linear-gradient(
             to bottom,
-            rgba(255,255,255,.08) 0px,
-            rgba(255,255,255,.08) 1px,
+            rgba(255,255,255,.06) 0,
+            rgba(255,255,255,.06) 1px,
+            transparent 4px,
+            transparent 6px
+        );
+}
+
+.camNoise{
+    position:absolute;
+    inset:-20%;
+    opacity:.065;
+    background:
+        repeating-radial-gradient(
+            circle,
+            rgba(255,255,255,.5) 0,
             transparent 2px,
             transparent 5px
         );
-}
-
-.camGrain{
-    position:absolute;
-    inset:-20%;
-    opacity:.08;
-    background:
-        repeating-radial-gradient(
-            circle at 0 0,
-            rgba(255,255,255,.8) 0,
-            transparent 1px,
-            transparent 4px
-        );
     animation:grain .07s steps(2) infinite;
-}
-
-@keyframes grain{
-    0%{transform:translate(0,0)}
-    25%{transform:translate(-3px,2px)}
-    50%{transform:translate(2px,-3px)}
-    75%{transform:translate(3px,2px)}
-    100%{transform:translate(0,0)}
 }
 
 .camVignette{
@@ -433,8 +468,8 @@ canvas{
         radial-gradient(
             ellipse at center,
             transparent 30%,
-            rgba(0,0,0,.15) 60%,
-            rgba(0,0,0,.65) 100%
+            rgba(0,0,0,.12) 55%,
+            rgba(0,0,0,.68) 100%
         );
 }
 
@@ -443,14 +478,14 @@ canvas{
 ========================================================= */
 
 #error{
+    display:none;
     position:fixed;
     left:10px;
     right:10px;
     bottom:10px;
-    z-index:3000;
-    display:none;
+    z-index:5000;
     padding:15px;
-    background:#420000;
+    background:#450000;
     border:1px solid red;
     color:white;
     font:13px monospace;
@@ -468,22 +503,29 @@ canvas{
 <div id="menu">
 
     <img class="menuImage active"
-         src="./textures/menu1.jpg">
+         src="./textures/menu1.jpg"
+         alt="">
 
     <img class="menuImage"
-         src="./textures/menu2.jpg">
+         src="./textures/menu2.jpg"
+         alt="">
 
     <img class="menuImage"
-         src="./textures/menu3.jpg">
+         src="./textures/menu3.jpg"
+         alt="">
 
     <img class="menuImage"
-         src="./textures/menu4.jpg">
+         src="./textures/menu4.jpg"
+         alt="">
 
     <img class="menuImage"
-         src="./textures/menu5.jpg">
+         src="./textures/menu5.jpg"
+         alt="">
 
     <div class="menuDark"></div>
+    <div class="menuNoise"></div>
     <div class="menuScanlines"></div>
+    <div class="menuVignette"></div>
 
     <div class="menuContent">
         <h1>THE BACKROOMS</h1>
@@ -501,39 +543,21 @@ canvas{
 
         <div class="menuDifficulty">
 
-            <button id="easyBtn">
-                EASY
-            </button>
-
-            <button id="normalBtn"
-                    class="selected">
-                NORMAL
-            </button>
-
-            <button id="hardBtn">
-                HARD
-            </button>
-
-            <button id="nightmareBtn">
-                NIGHTMARE
-            </button>
+            <button id="easyBtn">EASY</button>
+            <button id="normalBtn" class="selected">NORMAL</button>
+            <button id="hardBtn">HARD</button>
+            <button id="nightmareBtn">NIGHTMARE</button>
 
         </div>
 
-        <button class="menuButton"
-                id="startBtn">
+        <button class="menuButton" id="startBtn">
             ENTER LEVEL 0
         </button>
 
-        <button class="menuButton"
-                id="menuControlsBtn">
+        <button class="menuButton" id="menuControlsBtn">
             CONTROLS
         </button>
 
-    </div>
-
-    <div class="menuLocation">
-        CAMERA 01 // TAPE 0007
     </div>
 
 </div>
@@ -546,21 +570,11 @@ canvas{
 
     <h1>PAUSED</h1>
 
-    <button id="resumeBtn">
-        RESUME
-    </button>
-
-    <button id="pauseControlsBtn">
-        CONTROLS
-    </button>
-
-    <button id="restartBtn">
-        RESTART
-    </button>
-
-    <button id="menuBtn">
-        MAIN MENU
-    </button>
+    <button id="resumeBtn">RESUME</button>
+    <button id="pauseControlsBtn">CONTROLS</button>
+    <button id="crtToggleBtn">CAMERA EFFECT: ON</button>
+    <button id="restartBtn">RESTART</button>
+    <button id="menuBtn">MAIN MENU</button>
 
 </div>
 
@@ -570,22 +584,14 @@ canvas{
 
 <div id="death" class="overlay">
 
-    <div class="deathTitle">
-        YOU DIED
-    </div>
+    <div id="deathTitle">YOU DIED</div>
 
-    <div id="deathText"
-         class="deathText">
+    <div id="deathText">
         SOMETHING FOUND YOU.
     </div>
 
-    <button id="retryBtn">
-        RETRY
-    </button>
-
-    <button id="deathMenuBtn">
-        MAIN MENU
-    </button>
+    <button id="retryBtn">RETRY</button>
+    <button id="deathMenuBtn">MAIN MENU</button>
 
 </div>
 
@@ -597,36 +603,54 @@ canvas{
 
     <div class="controlsPanel">
 
-        <h2>CONTROLS</h2>
+        <h1>CONTROLS</h1>
 
-        <div class="controlRow">
-            <span>MOVE</span>
-            <span class="controlKey">W A S D</span>
+        <div class="controlsGrid">
+
+            <div class="controlKey">
+                <strong>W</strong> Forward
+            </div>
+
+            <div class="controlKey">
+                <strong>S</strong> Backward
+            </div>
+
+            <div class="controlKey">
+                <strong>A</strong> Strafe Left
+            </div>
+
+            <div class="controlKey">
+                <strong>D</strong> Strafe Right
+            </div>
+
+            <div class="controlKey">
+                <strong>SHIFT</strong> Sprint
+            </div>
+
+            <div class="controlKey">
+                <strong>SPACE</strong> Jump
+            </div>
+
+            <div class="controlKey">
+                <strong>MOUSE</strong> Look Around
+            </div>
+
+            <div class="controlKey">
+                <strong>ESC</strong> Pause
+            </div>
+
+            <div class="controlKey">
+                <strong>C</strong> Crouch / Hide
+            </div>
+
         </div>
 
-        <div class="controlRow">
-            <span>LOOK</span>
-            <span class="controlKey">MOUSE</span>
-        </div>
-
-        <div class="controlRow">
-            <span>SPRINT</span>
-            <span class="controlKey">SHIFT</span>
-        </div>
-
-        <div class="controlRow">
-            <span>CROUCH / HIDE</span>
-            <span class="controlKey">C</span>
-        </div>
-
-        <div class="controlRow">
-            <span>JUMP</span>
-            <span class="controlKey">SPACE</span>
-        </div>
-
-        <div class="controlRow">
-            <span>PAUSE</span>
-            <span class="controlKey">ESC</span>
+        <div class="controlsNote">
+            FIND THE SMALL WALL ALCOVES.
+            <br>
+            CROUCH INSIDE THEM TO HIDE.
+            <br>
+            WHILE HIDDEN, THE ENTITY WILL LOSE YOUR CURRENT POSITION.
         </div>
 
         <button id="controlsBackBtn">
@@ -637,6 +661,10 @@ canvas{
 
 </div>
 
+<!-- =======================================================
+     HUD
+======================================================= -->
+
 <div id="crosshair"></div>
 
 <div id="hud">
@@ -644,15 +672,15 @@ canvas{
     <div id="difficultyHud">NORMAL</div>
 </div>
 
+<div id="message"></div>
+
 <div id="hideIndicator">
-    CROUCH TO HIDE
+    PRESS C TO HIDE
 </div>
 
 <div id="hiddenIndicator">
     HIDDEN
 </div>
-
-<div id="message"></div>
 
 <div id="rec">
     <span id="recDot"></span>
@@ -668,9 +696,11 @@ canvas{
 </div>
 
 <div id="camcorder">
-    <div class="camScanlines"></div>
-    <div class="camGrain"></div>
+
+    <div class="camScan"></div>
+    <div class="camNoise"></div>
     <div class="camVignette"></div>
+
 </div>
 
 <div id="error"></div>
@@ -681,48 +711,79 @@ canvas{
 "use strict";
 
 /* =========================================================
-   THREE.JS CHECK
+   BASIC STATE
+   THIS WAS MISSING FROM THE PREVIOUS VERSION.
 ========================================================= */
 
-if(typeof THREE === "undefined"){
-    const error = document.getElementById("error");
+let gameStarted = false;
+let paused = false;
+let dead = false;
 
-    error.style.display = "block";
+let initialized = false;
+let initializing = true;
 
-    error.textContent =
-        "THREE.JS COULD NOT BE LOADED.\n\n" +
-        "Make sure three.min.js is in the repository root.";
+let difficulty = "normal";
+let gameTime = 0;
 
-    throw new Error("Three.js missing");
+const errorBox =
+    document.getElementById("error");
+
+function fatalError(message){
+
+    console.error(message);
+
+    errorBox.style.display = "block";
+    errorBox.textContent =
+        "BACKROOMS ERROR\n\n" +
+        message;
+
 }
 
 /* =========================================================
-   RENDERER
+   THREE CHECK
 ========================================================= */
 
-const scene = new THREE.Scene();
+if(typeof THREE === "undefined"){
+
+    fatalError(
+        "THREE.JS COULD NOT LOAD.\n\n" +
+        "Make sure three.min.js is in the repository root."
+    );
+
+    throw new Error("Three.js missing");
+
+}
+
+/* =========================================================
+   SCENE
+========================================================= */
+
+const scene =
+    new THREE.Scene();
 
 scene.background =
-    new THREE.Color(0x77704b);
+    new THREE.Color(0x716b45);
 
 scene.fog =
     new THREE.FogExp2(
-        0x77704b,
-        0.006
+        0x716b45,
+        0.008
     );
 
 const camera =
     new THREE.PerspectiveCamera(
         78,
         innerWidth / innerHeight,
-        0.03,
-        500
+        0.025,
+        600
     );
 
 const renderer =
     new THREE.WebGLRenderer({
+
         antialias:false,
         powerPreference:"high-performance"
+
     });
 
 renderer.setSize(
@@ -732,18 +793,41 @@ renderer.setSize(
 
 renderer.setPixelRatio(
     Math.min(
-        window.devicePixelRatio,
-        1.5
+        window.devicePixelRatio || 1,
+        1.4
     )
 );
 
-if("outputColorSpace" in renderer){
+/*
+    IMPORTANT:
+    Keep the PNGs unmodified.
+
+    No color multiplier.
+    No tint.
+*/
+
+if(
+    "outputColorSpace" in renderer &&
+    typeof THREE.SRGBColorSpace !== "undefined"
+){
+
     renderer.outputColorSpace =
         THREE.SRGBColorSpace;
+
+}else if(
+    "outputEncoding" in renderer &&
+    typeof THREE.sRGBEncoding !== "undefined"
+){
+
+    renderer.outputEncoding =
+        THREE.sRGBEncoding;
+
 }
 
 renderer.toneMapping =
     THREE.NoToneMapping;
+
+renderer.toneMappingExposure = 1;
 
 document.body.appendChild(
     renderer.domElement
@@ -756,15 +840,15 @@ document.body.appendChild(
 scene.add(
     new THREE.AmbientLight(
         0xffffff,
-        .32
+        .42
     )
 );
 
 scene.add(
     new THREE.HemisphereLight(
-        0xfff1b5,
-        0x16140d,
-        .45
+        0xfff0b0,
+        0x17140c,
+        .35
     )
 );
 
@@ -777,71 +861,69 @@ const world =
 
 scene.add(world);
 
+const colliders = [];
+const hidingSpots = [];
+const fluorescentLights = [];
+
 /* =========================================================
-   CONSTANTS
+   SCALE
 ========================================================= */
 
-const TILE = 3;
-const WALL_HEIGHT = 9;
+const TILE = 0.9144;
+const WALL_HEIGHT = 3.05;
 
-const PLAYER_HEIGHT = 5.8;
-const EYE_HEIGHT = 5.25;
-const CROUCH_EYE_HEIGHT = 3.15;
-const PLAYER_RADIUS = .52;
+const PLAYER_RADIUS = .26;
+const EYE_HEIGHT = 1.17;
+const CROUCH_EYE_HEIGHT = .72;
 
 const WALK_SPEED = 3.25;
-const SPRINT_SPEED = 5.6;
+const SPRINT_SPEED = 5.35;
 
 const GRAVITY = 22;
-const JUMP_SPEED = 7;
+const JUMP_SPEED = 5.2;
 
 /* =========================================================
    TEXTURES
 ========================================================= */
 
-/*
-    THESE ARE THE EXACT FILES IN YOUR REPOSITORY.
-
-    Do NOT rename these paths.
-*/
-
 const textureLoader =
     new THREE.TextureLoader();
 
-let wallTexture;
-let floorTexture;
-let ceilingTexture;
-let entityTexture;
+let wallTexture = null;
+let floorTexture = null;
+let ceilingTexture = null;
 
-function prepareTexture(
-    texture,
-    repeatX,
-    repeatY
-){
-
-    if(!texture)
-        return null;
+function configureTexture(texture){
 
     /*
-        Important:
-        The texture itself is used directly.
+        Use the PNG itself.
 
-        No color tint is applied.
+        No color tinting.
     */
 
-    texture.colorSpace =
-        THREE.SRGBColorSpace;
+    if(
+        "colorSpace" in texture &&
+        typeof THREE.SRGBColorSpace !== "undefined"
+    ){
+
+        texture.colorSpace =
+            THREE.SRGBColorSpace;
+
+    }else if(
+        "encoding" in texture &&
+        typeof THREE.sRGBEncoding !== "undefined"
+    ){
+
+        texture.encoding =
+            THREE.sRGBEncoding;
+
+    }
 
     texture.wrapS =
         THREE.RepeatWrapping;
 
     texture.wrapT =
         THREE.RepeatWrapping;
-
-    texture.repeat.set(
-        repeatX,
-        repeatY
-    );
 
     texture.magFilter =
         THREE.LinearFilter;
@@ -851,116 +933,103 @@ function prepareTexture(
 
     texture.anisotropy =
         Math.min(
-            renderer.capabilities
-                .getMaxAnisotropy(),
+            renderer.capabilities.getMaxAnisotropy(),
             8
         );
 
     texture.needsUpdate = true;
 
     return texture;
-}
-
-function loadTexture(
-    path,
-    repeatX,
-    repeatY
-){
-
-    return new Promise(
-        resolve => {
-
-            textureLoader.load(
-
-                path,
-
-                texture => {
-
-                    console.log(
-                        "TEXTURE LOADED:",
-                        path
-                    );
-
-                    resolve(
-                        prepareTexture(
-                            texture,
-                            repeatX,
-                            repeatY
-                        )
-                    );
-
-                },
-
-                undefined,
-
-                error => {
-
-                    console.error(
-                        "TEXTURE FAILED:",
-                        path,
-                        error
-                    );
-
-                    resolve(null);
-
-                }
-
-            );
-
-        }
-    );
 
 }
 
-async function loadAllTextures(){
+function loadTexture(path){
+
+    return new Promise(resolve => {
+
+        textureLoader.load(
+
+            path,
+
+            texture => {
+
+                console.log(
+                    "TEXTURE LOADED:",
+                    path
+                );
+
+                resolve(
+                    configureTexture(texture)
+                );
+
+            },
+
+            undefined,
+
+            error => {
+
+                console.error(
+                    "TEXTURE FAILED:",
+                    path,
+                    error
+                );
+
+                resolve(null);
+
+            }
+
+        );
+
+    });
+
+}
+
+async function loadTextures(){
 
     /*
-        EXACT PATH:
-        textures/wall.png
+        EXACT repository paths:
+        
+        /textures/wall.png
+        /textures/floor.png
+        /textures/ceiling.png
     */
 
     wallTexture =
         await loadTexture(
-            "./textures/wall.png",
-            1.15,
-            1.15
+            "./textures/wall.png"
         );
-
-    /*
-        EXACT PATH:
-        textures/floor.png
-    */
 
     floorTexture =
         await loadTexture(
-            "./textures/floor.png",
-            1.0,
-            1.0
+            "./textures/floor.png"
         );
-
-    /*
-        EXACT PATH:
-        textures/ceiling.png
-    */
 
     ceilingTexture =
         await loadTexture(
-            "./textures/ceiling.png",
-            1.0,
-            1.0
+            "./textures/ceiling.png"
         );
 
-    /*
-        Entity texture remains in repository root
-        unless you have moved it into textures.
-    */
+    const missing = [];
 
-    entityTexture =
-        await loadTexture(
-            "./entity.png",
-            1,
-            1
+    if(!wallTexture)
+        missing.push("textures/wall.png");
+
+    if(!floorTexture)
+        missing.push("textures/floor.png");
+
+    if(!ceilingTexture)
+        missing.push("textures/ceiling.png");
+
+    if(missing.length){
+
+        throw new Error(
+            "Could not load:\n" +
+            missing.join("\n") +
+            "\n\n" +
+            "Check that the files are inside /textures."
         );
+
+    }
 
 }
 
@@ -970,77 +1039,39 @@ async function loadAllTextures(){
 
 function makeWallMaterial(){
 
-    if(wallTexture){
-
-        return new THREE.MeshBasicMaterial({
-
-            map:wallTexture,
-
-            /*
-                MeshBasicMaterial is intentional here.
-
-                This means the PNG is displayed WITHOUT
-                scene lighting changing its appearance.
-            */
-
-            side:THREE.DoubleSide
-
-        });
-
-    }
-
     return new THREE.MeshBasicMaterial({
-        color:0xff00ff
+
+        map:wallTexture,
+        color:0xffffff,
+        side:THREE.DoubleSide
+
     });
 
 }
 
 function makeFloorMaterial(){
 
-    if(floorTexture){
-
-        return new THREE.MeshBasicMaterial({
-
-            map:floorTexture,
-
-            side:THREE.DoubleSide
-
-        });
-
-    }
-
     return new THREE.MeshBasicMaterial({
-        color:0xff00ff
+
+        map:floorTexture,
+        color:0xffffff,
+        side:THREE.DoubleSide
+
     });
 
 }
 
 function makeCeilingMaterial(){
 
-    if(ceilingTexture){
-
-        return new THREE.MeshBasicMaterial({
-
-            map:ceilingTexture,
-
-            side:THREE.DoubleSide
-
-        });
-
-    }
-
     return new THREE.MeshBasicMaterial({
-        color:0xff00ff
+
+        map:ceilingTexture,
+        color:0xffffff,
+        side:THREE.DoubleSide
+
     });
 
 }
-
-/*
-    If something is missing, it becomes MAGENTA instead
-    of silently looking like an untextured surface.
-
-    That makes texture problems immediately obvious.
-*/
 
 /* =========================================================
    MAP
@@ -1054,87 +1085,7 @@ let mapData = [];
 let playerSpawn = null;
 let entitySpawn = null;
 
-const wallColliders = [];
-const hidingSpots = [];
-
-/* =========================================================
-   MAP IMAGE
-========================================================= */
-
-function classifyPixel(
-    r,g,b
-){
-
-    /*
-        BLACK:
-        WALL
-    */
-
-    if(
-        Math.max(r,g,b) < 90
-    ){
-        return "wall";
-    }
-
-    /*
-        RED:
-        PLAYER SPAWN
-    */
-
-    if(
-        r > 150 &&
-        r > g * 1.45 &&
-        r > b * 1.45
-    ){
-        return "spawn";
-    }
-
-    /*
-        BLUE:
-        ENTITY
-    */
-
-    if(
-        b > 130 &&
-        b > r * 1.35 &&
-        b > g * 1.2
-    ){
-        return "entity";
-    }
-
-    /*
-        PURPLE:
-        HIDING
-    */
-
-    if(
-        r > 120 &&
-        b > 100 &&
-        g < 100
-    ){
-        return "hide";
-    }
-
-    /*
-        YELLOW:
-        HOLE
-    */
-
-    if(
-        r > 150 &&
-        g > 130 &&
-        b < 120
-    ){
-        return "hole";
-    }
-
-    return "floor";
-}
-
-function cellToWorld(
-    x,
-    y
-){
+function cellToWorld(x,y){
 
     return {
 
@@ -1150,24 +1101,19 @@ function cellToWorld(
 
 }
 
-function worldToCell(
-    x,
-    z
-){
+function worldToCell(x,z){
 
     return {
 
         x:
             Math.floor(
-                (x +
-                mapWidth*TILE/2) /
+                (x + mapWidth*TILE/2) /
                 TILE
             ),
 
         y:
             Math.floor(
-                (z +
-                mapHeight*TILE/2) /
+                (z + mapHeight*TILE/2) /
                 TILE
             )
 
@@ -1175,15 +1121,93 @@ function worldToCell(
 
 }
 
-async function loadMap(){
+/* =========================================================
+   MAP COLOR DETECTION
+========================================================= */
+
+function classifyPixel(r,g,b){
 
     /*
-        EXACT PATH:
-        textures/map1.png
-
-        This is the blueprint used to construct
-        the Level 0 layout.
+        Very dark = wall.
     */
+
+    if(
+        Math.max(r,g,b) < 80
+    ){
+
+        return "wall";
+
+    }
+
+    /*
+        Red = player spawn.
+    */
+
+    if(
+        r > 140 &&
+        r > g*1.35 &&
+        r > b*1.35
+    ){
+
+        return "spawn";
+
+    }
+
+    /*
+        Blue = entity spawn.
+    */
+
+    if(
+        b > 120 &&
+        b > r*1.3 &&
+        b > g*1.15
+    ){
+
+        return "entity";
+
+    }
+
+    /*
+        Purple = hiding spot.
+    */
+
+    if(
+        r > 100 &&
+        b > 90 &&
+        g < 100
+    ){
+
+        return "hide";
+
+    }
+
+    /*
+        Yellow = hole.
+    */
+
+    if(
+        r > 145 &&
+        g > 120 &&
+        b < 120
+    ){
+
+        return "hole";
+
+    }
+
+    /*
+        Everything else is walkable.
+    */
+
+    return "floor";
+
+}
+
+/* =========================================================
+   LOAD MAP
+========================================================= */
+
+async function loadMap(){
 
     const image =
         await new Promise(
@@ -1202,8 +1226,12 @@ async function loadMap(){
                         )
                     );
 
+                /*
+                    EXACT MAP PATH
+                */
+
                 img.src =
-                    "./textures/map1.png?v=" +
+                    "./textures/map1.png?cache=" +
                     Date.now();
 
             }
@@ -1215,23 +1243,29 @@ async function loadMap(){
     mapHeight =
         image.naturalHeight;
 
+    if(
+        !mapWidth ||
+        !mapHeight
+    ){
+
+        throw new Error(
+            "map1.png loaded but has invalid dimensions."
+        );
+
+    }
+
     console.log(
-        "MAP LOADED:",
+        "MAP:",
         mapWidth,
         "x",
         mapHeight
     );
 
     const canvas =
-        document.createElement(
-            "canvas"
-        );
+        document.createElement("canvas");
 
-    canvas.width =
-        mapWidth;
-
-    canvas.height =
-        mapHeight;
+    canvas.width = mapWidth;
+    canvas.height = mapHeight;
 
     const ctx =
         canvas.getContext(
@@ -1256,6 +1290,9 @@ async function loadMap(){
         ).data;
 
     mapData = [];
+
+    playerSpawn = null;
+    entitySpawn = null;
 
     for(
         let y=0;
@@ -1289,10 +1326,7 @@ async function loadMap(){
             ){
 
                 playerSpawn =
-                    cellToWorld(
-                        x,
-                        y
-                    );
+                    cellToWorld(x,y);
 
             }
 
@@ -1302,10 +1336,7 @@ async function loadMap(){
             ){
 
                 entitySpawn =
-                    cellToWorld(
-                        x,
-                        y
-                    );
+                    cellToWorld(x,y);
 
             }
 
@@ -1316,10 +1347,25 @@ async function loadMap(){
     }
 
     /*
-        Safety fallback.
+        VERY IMPORTANT FALLBACK.
+
+        If map1.png does not contain a red spawn pixel,
+        automatically find the first usable floor cell.
+
+        This prevents the camera from becoming NaN/black.
     */
 
     if(!playerSpawn){
+
+        let best = null;
+
+        const cx =
+            Math.floor(mapWidth/2);
+
+        const cy =
+            Math.floor(mapHeight/2);
+
+        let bestDistance = Infinity;
 
         for(
             let y=0;
@@ -1334,51 +1380,166 @@ async function loadMap(){
             ){
 
                 if(
-                    mapData[y][x] === "floor"
+                    mapData[y][x] === "floor" ||
+                    mapData[y][x] === "hide"
                 ){
 
-                    playerSpawn =
-                        cellToWorld(
-                            x,
-                            y
+                    const distance =
+                        Math.hypot(
+                            x-cx,
+                            y-cy
                         );
 
-                    break;
+                    if(
+                        distance < bestDistance
+                    ){
+
+                        bestDistance = distance;
+
+                        best =
+                            cellToWorld(
+                                x,y
+                            );
+
+                    }
 
                 }
 
             }
 
-            if(playerSpawn)
+        }
+
+        playerSpawn = best;
+
+    }
+
+    if(!playerSpawn){
+
+        throw new Error(
+            "map1.png contains no usable floor area."
+        );
+
+    }
+
+    /*
+        Entity fallback.
+    */
+
+    if(!entitySpawn){
+
+        /*
+            Search outward from player spawn.
+        */
+
+        const start =
+            worldToCell(
+                playerSpawn.x,
+                playerSpawn.z
+            );
+
+        let found = null;
+
+        for(
+            let radius=5;
+            radius<Math.max(
+                mapWidth,
+                mapHeight
+            );
+            radius++
+        ){
+
+            for(
+                let dy=-radius;
+                dy<=radius;
+                dy++
+            ){
+
+                for(
+                    let dx=-radius;
+                    dx<=radius;
+                    dx++
+                ){
+
+                    const x =
+                        start.x + dx;
+
+                    const y =
+                        start.y + dy;
+
+                    if(
+                        x<0 ||
+                        y<0 ||
+                        x>=mapWidth ||
+                        y>=mapHeight
+                    )
+                        continue;
+
+                    if(
+                        mapData[y][x] === "floor"
+                    ){
+
+                        if(
+                            Math.hypot(
+                                dx,
+                                dy
+                            ) >= 5
+                        ){
+
+                            found =
+                                cellToWorld(
+                                    x,y
+                                );
+
+                            break;
+
+                        }
+
+                    }
+
+                }
+
+                if(found)
+                    break;
+
+            }
+
+            if(found)
                 break;
 
         }
 
-    }
-
-    if(!entitySpawn){
-
-        entitySpawn = {
-
-            x:
-                playerSpawn.x + TILE*8,
-
-            z:
-                playerSpawn.z + TILE*8
-
-        };
+        entitySpawn =
+            found || {
+                x:playerSpawn.x + TILE*8,
+                z:playerSpawn.z + TILE*8
+            };
 
     }
 
 }
 
 /* =========================================================
-   WORLD BUILDING
+   WORLD HELPERS
 ========================================================= */
 
-function addFloor(
-    x,z
-){
+function isWalkable(x,y){
+
+    if(
+        x<0 ||
+        y<0 ||
+        x>=mapWidth ||
+        y>=mapHeight
+    )
+        return false;
+
+    return (
+        mapData[y][x] !== "wall" &&
+        mapData[y][x] !== "hole"
+    );
+
+}
+
+function addFloor(x,z){
 
     const mesh =
         new THREE.Mesh(
@@ -1401,28 +1562,52 @@ function addFloor(
         z
     );
 
+    /*
+        Make the texture repeat once per tile.
+    */
+
+    const material =
+        mesh.material;
+
+    if(material.map){
+
+        material.map =
+            floorTexture.clone();
+
+        material.map.wrapS =
+            THREE.RepeatWrapping;
+
+        material.map.wrapT =
+            THREE.RepeatWrapping;
+
+        material.map.repeat.set(
+            1,
+            1
+        );
+
+        material.map.needsUpdate =
+            true;
+
+    }
+
     world.add(mesh);
 
 }
 
-function addCeiling(
-    x,z
-){
+function addCeiling(x,z){
 
     const mesh =
         new THREE.Mesh(
 
-            new THREE.PlaneGeometry(
-                TILE,
-                TILE
+            new THREE.BoxGeometry(
+                TILE*.98,
+                .045,
+                TILE*.98
             ),
 
             makeCeilingMaterial()
 
         );
-
-    mesh.rotation.x =
-        Math.PI/2;
 
     mesh.position.set(
         x,
@@ -1430,13 +1615,35 @@ function addCeiling(
         z
     );
 
+    const material =
+        mesh.material;
+
+    if(material.map){
+
+        material.map =
+            ceilingTexture.clone();
+
+        material.map.wrapS =
+            THREE.RepeatWrapping;
+
+        material.map.wrapT =
+            THREE.RepeatWrapping;
+
+        material.map.repeat.set(
+            1,
+            1
+        );
+
+        material.map.needsUpdate =
+            true;
+
+    }
+
     world.add(mesh);
 
 }
 
-function addWall(
-    x,z
-){
+function addWall(x,z){
 
     const mesh =
         new THREE.Mesh(
@@ -1457,27 +1664,110 @@ function addWall(
         z
     );
 
+    /*
+        Clone the texture for this wall so every
+        wall cell gets the correct local texture.
+    */
+
+    if(mesh.material.map){
+
+        mesh.material.map =
+            wallTexture.clone();
+
+        mesh.material.map.wrapS =
+            THREE.RepeatWrapping;
+
+        mesh.material.map.wrapT =
+            THREE.RepeatWrapping;
+
+        /*
+            Repeat once across the wall tile.
+        */
+
+        mesh.material.map.repeat.set(
+            1,
+            1
+        );
+
+        mesh.material.map.needsUpdate =
+            true;
+
+    }
+
     world.add(mesh);
 
-    wallColliders.push({
+    colliders.push({
 
-        minX:
-            x-TILE/2,
-
-        maxX:
-            x+TILE/2,
-
-        minZ:
-            z-TILE/2,
-
-        maxZ:
-            z+TILE/2
+        minX:x-TILE/2,
+        maxX:x+TILE/2,
+        minZ:z-TILE/2,
+        maxZ:z+TILE/2
 
     });
 
 }
 
+/* =========================================================
+   BUILD WORLD
+========================================================= */
+
+function clearWorld(){
+
+    while(world.children.length){
+
+        const object =
+            world.children.pop();
+
+        object.traverse(
+            child => {
+
+                if(child.geometry)
+                    child.geometry.dispose();
+
+                if(child.material){
+
+                    if(
+                        Array.isArray(
+                            child.material
+                        )
+                    ){
+
+                        child.material.forEach(
+                            m=>m.dispose()
+                        );
+
+                    }else{
+
+                        child.material.dispose();
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+    for(
+        const item of fluorescentLights
+    ){
+
+        scene.remove(
+            item.light
+        );
+
+    }
+
+    colliders.length = 0;
+    hidingSpots.length = 0;
+    fluorescentLights.length = 0;
+
+}
+
 function buildWorld(){
+
+    clearWorld();
 
     for(
         let y=0;
@@ -1496,13 +1786,17 @@ function buildWorld(){
 
             const p =
                 cellToWorld(
-                    x,
-                    y
+                    x,y
                 );
 
-            if(
-                type !== "wall"
-            ){
+            if(type === "wall"){
+
+                addWall(
+                    p.x,
+                    p.z
+                );
+
+            }else{
 
                 addFloor(
                     p.x,
@@ -1516,24 +1810,13 @@ function buildWorld(){
 
             }
 
-            if(
-                type === "wall"
-            ){
-
-                addWall(
-                    p.x,
-                    p.z
-                );
-
-            }
-
-            if(
-                type === "hide"
-            ){
+            if(type === "hide"){
 
                 hidingSpots.push({
+
                     x:p.x,
                     z:p.z
+
                 });
 
             }
@@ -1542,40 +1825,97 @@ function buildWorld(){
 
     }
 
+    /*
+        Do not allow the player to spawn inside a wall.
+    */
+
+    if(
+        !playerSpawn ||
+        collides(
+            playerSpawn.x,
+            playerSpawn.z
+        )
+    ){
+
+        console.warn(
+            "Spawn needed correction."
+        );
+
+        for(
+            let y=0;
+            y<mapHeight;
+            y++
+        ){
+
+            let found = false;
+
+            for(
+                let x=0;
+                x<mapWidth;
+                x++
+            ){
+
+                if(
+                    isWalkable(x,y)
+                ){
+
+                    const p =
+                        cellToWorld(
+                            x,y
+                        );
+
+                    if(
+                        !collides(
+                            p.x,
+                            p.z
+                        )
+                    ){
+
+                        playerSpawn = p;
+                        found = true;
+                        break;
+
+                    }
+
+                }
+
+            }
+
+            if(found)
+                break;
+
+        }
+
+    }
+
 }
 
 /* =========================================================
-   FLUORESCENT LIGHTS
+   LIGHTS
 ========================================================= */
 
-const lights = [];
-
-function addLight(
-    x,z
-){
-
-    /*
-        Small square fluorescent fixture.
-    */
+function addLight(x,z){
 
     const fixture =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
-                TILE*.48,
-                .055,
-                TILE*.48
+                TILE*.9,
+                .035,
+                TILE*.22
             ),
 
             new THREE.MeshBasicMaterial({
-                color:0xffffef
+
+                color:0xffffe2
+
             })
 
         );
 
     fixture.position.set(
         x,
-        WALL_HEIGHT-.08,
+        WALL_HEIGHT-.05,
         z
     );
 
@@ -1583,23 +1923,29 @@ function addLight(
 
     const light =
         new THREE.PointLight(
-            0xfff0b0,
-            4.5,
-            13
+            0xffe7a2,
+            1.8,
+            6.5,
+            1.6
         );
 
     light.position.set(
         x,
-        WALL_HEIGHT-.3,
+        WALL_HEIGHT-.15,
         z
     );
 
     scene.add(light);
 
-    lights.push({
+    fluorescentLights.push({
+
         light,
+        fixture,
         timer:
-            Math.random()*4
+            .5 +
+            Math.random()*3,
+        base:1.8
+
     });
 
 }
@@ -1607,35 +1953,99 @@ function addLight(
 function buildLights(){
 
     /*
-        Place lights throughout walkable areas.
+        Sparse lighting prevents thousands of
+        point lights on large maps.
     */
 
+    const spacing = 8;
+
     for(
-        let y=2;
-        y<mapHeight-2;
-        y+=4
+        let y=1;
+        y<mapHeight-1;
+        y+=spacing
     ){
 
         for(
-            let x=2;
-            x<mapWidth-2;
-            x+=4
+            let x=1;
+            x<mapWidth-1;
+            x+=spacing
         ){
 
             if(
-                mapData[y][x] !== "wall"
+                isWalkable(x,y)
             ){
 
                 const p =
                     cellToWorld(
-                        x,
-                        y
+                        x,y
                     );
 
                 addLight(
                     p.x,
                     p.z
                 );
+
+            }
+
+        }
+
+    }
+
+    /*
+        Guarantee at least one light.
+    */
+
+    if(
+        fluorescentLights.length === 0 &&
+        playerSpawn
+    ){
+
+        addLight(
+            playerSpawn.x,
+            playerSpawn.z
+        );
+
+    }
+
+}
+
+function updateLights(dt){
+
+    for(
+        const item of fluorescentLights
+    ){
+
+        item.timer -= dt;
+
+        if(
+            item.timer <= 0
+        ){
+
+            item.timer =
+                .5 +
+                Math.random()*4;
+
+            if(
+                Math.random() < .13
+            ){
+
+                item.light.intensity =
+                    .25;
+
+                setTimeout(
+                    ()=>{
+                        if(item.light)
+                            item.light.intensity =
+                                item.base;
+                    },
+                    40 +
+                    Math.random()*140
+                );
+
+            }else{
+
+                item.light.intensity =
+                    item.base;
 
             }
 
@@ -1656,33 +2066,26 @@ scene.add(player);
 
 player.add(camera);
 
-camera.position.y =
-    EYE_HEIGHT;
-
-let yaw = 0;
-let pitch = 0;
-
 let velocityY = 0;
-
 let grounded = true;
-
 let falling = false;
 let fallTimer = 0;
 
 let crouching = false;
 let hidden = false;
 
+let yaw = 0;
+let pitch = 0;
+
 const keys = {};
 
-function collides(
-    x,z
-){
+function collides(x,z){
 
     const r =
         PLAYER_RADIUS;
 
     for(
-        const wall of wallColliders
+        const wall of colliders
     ){
 
         if(
@@ -1702,9 +2105,7 @@ function collides(
 
 }
 
-function movePlayer(
-    dx,dz
-){
+function movePlayer(dx,dz){
 
     const nextX =
         player.position.x + dx;
@@ -1738,9 +2139,7 @@ function movePlayer(
 
 }
 
-function updatePlayer(
-    dt
-){
+function updatePlayer(dt){
 
     if(
         !gameStarted ||
@@ -1755,24 +2154,24 @@ function updatePlayer(
 
         const progress =
             Math.min(
-                fallTimer/2,
+                fallTimer/1.8,
                 1
             );
 
         player.position.y =
-            -progress*5;
+            -progress*3.5;
 
         camera.position.y =
             EYE_HEIGHT -
-            progress*1.2;
+            progress*.65;
 
         camera.rotation.z =
             Math.sin(
-                fallTimer*16
+                fallTimer*15
             )*.025;
 
         if(
-            fallTimer >= 2
+            fallTimer >= 1.8
         ){
 
             die(
@@ -1803,27 +2202,23 @@ function updatePlayer(
     if(keys.a)
         strafe -= 1;
 
-    const length =
+    const len =
         Math.hypot(
             forward,
             strafe
         );
 
-    if(length > 0){
+    if(len > 0){
 
-        forward /= length;
-        strafe /= length;
+        forward /= len;
+        strafe /= len;
 
         const speed =
             keys.shift && !crouching
-            ?
-            SPRINT_SPEED
-            :
-            crouching
-            ?
-            WALK_SPEED*.58
-            :
-            WALK_SPEED;
+                ? SPRINT_SPEED
+                : crouching
+                    ? WALK_SPEED*.58
+                    : WALK_SPEED;
 
         const sin =
             Math.sin(yaw);
@@ -1854,6 +2249,10 @@ function updatePlayer(
 
     }
 
+    /*
+        Gravity.
+    */
+
     velocityY -=
         GRAVITY*dt;
 
@@ -1874,28 +2273,10 @@ function updatePlayer(
 
     }
 
-    if(
-        grounded &&
-        !crouching &&
-        keys[" "] &&
-        !keys.spaceUsed
-    ){
-
-        velocityY =
-            JUMP_SPEED;
-
-        grounded = false;
-
-        keys.spaceUsed = true;
-
-    }
-
     const targetHeight =
         crouching
-        ?
-        CROUCH_EYE_HEIGHT
-        :
-        EYE_HEIGHT;
+            ? CROUCH_EYE_HEIGHT
+            : EYE_HEIGHT;
 
     camera.position.y =
         THREE.MathUtils.lerp(
@@ -1908,7 +2289,6 @@ function updatePlayer(
         );
 
     updateHiding();
-
     checkHole();
 
 }
@@ -1919,14 +2299,14 @@ function updatePlayer(
 
 function updateHiding(){
 
-    let closest = null;
-    let distance = Infinity;
+    let nearest = null;
+    let nearestDistance = Infinity;
 
     for(
         const spot of hidingSpots
     ){
 
-        const d =
+        const distance =
             Math.hypot(
 
                 player.position.x-spot.x,
@@ -1935,19 +2315,22 @@ function updateHiding(){
             );
 
         if(
-            d < distance
+            distance < nearestDistance
         ){
 
-            distance = d;
-            closest = spot;
+            nearestDistance =
+                distance;
+
+            nearest =
+                spot;
 
         }
 
     }
 
     const near =
-        closest &&
-        distance < TILE*.65;
+        nearest &&
+        nearestDistance < TILE*.7;
 
     hidden =
         !!(
@@ -1959,19 +2342,15 @@ function updateHiding(){
         "hideIndicator"
     ).style.opacity =
         near && !hidden
-        ?
-        "1"
-        :
-        "0";
+            ? "1"
+            : "0";
 
     document.getElementById(
         "hiddenIndicator"
     ).style.opacity =
         hidden
-        ?
-        "1"
-        :
-        "0";
+            ? "1"
+            : "0";
 
 }
 
@@ -1991,10 +2370,10 @@ function checkHole(){
         );
 
     if(
-        cell.x<0 ||
-        cell.y<0 ||
-        cell.x>=mapWidth ||
-        cell.y>=mapHeight
+        cell.x < 0 ||
+        cell.y < 0 ||
+        cell.x >= mapWidth ||
+        cell.y >= mapHeight
     )
         return;
 
@@ -2020,45 +2399,38 @@ function checkHole(){
 let entity = null;
 let entityTarget = null;
 let entityMemory = 0;
+
 let entityWanderAngle = 0;
 let entityWanderTimer = 0;
 
 function createEntity(){
 
-    let material;
+    if(!entitySpawn)
+        return;
 
-    if(entityTexture){
+    /*
+        Simple dark entity.
 
-        material =
-            new THREE.MeshBasicMaterial({
+        This deliberately does not depend on
+        entity.png being present.
+    */
 
-                map:entityTexture,
+    const material =
+        new THREE.MeshBasicMaterial({
 
-                transparent:true,
+            color:0x050505,
+            transparent:true,
+            opacity:.94,
+            side:THREE.DoubleSide
 
-                alphaTest:.01,
-
-                side:THREE.DoubleSide,
-
-                depthWrite:true
-
-            });
-
-    }else{
-
-        material =
-            new THREE.MeshBasicMaterial({
-                color:0x111111
-            });
-
-    }
+        });
 
     entity =
         new THREE.Mesh(
 
             new THREE.PlaneGeometry(
-                1.8,
-                4.8
+                .9,
+                2.45
             ),
 
             material
@@ -2067,24 +2439,26 @@ function createEntity(){
 
     entity.position.set(
         entitySpawn.x,
-        2.4,
+        1.225,
         entitySpawn.z
     );
 
     world.add(entity);
 
     entityWanderAngle =
-        Math.random()*
+        Math.random() *
         Math.PI*2;
 
-    entityWanderTimer =
-        2;
+    entityWanderTimer = 2;
 
 }
 
 function entitySeesPlayer(){
 
     if(hidden)
+        return false;
+
+    if(!entity)
         return false;
 
     const dx =
@@ -2103,31 +2477,21 @@ function entitySeesPlayer(){
 
     const detection =
         difficulty === "easy"
-        ?
-        6
-        :
-        difficulty === "hard"
-        ?
-        11
-        :
-        difficulty === "nightmare"
-        ?
-        14
-        :
-        8;
+            ? 5.5
+            : difficulty === "hard"
+                ? 9
+                : difficulty === "nightmare"
+                    ? 12
+                    : 7;
 
     if(
         distance > detection
     )
         return false;
 
-    /*
-        Check walls between entity and player.
-    */
-
     const steps =
         Math.ceil(
-            distance/.25
+            distance/.2
         );
 
     for(
@@ -2164,26 +2528,19 @@ function entitySeesPlayer(){
 
 }
 
-function updateEntity(
-    dt
-){
+function updateEntity(dt){
 
     if(
         !entity ||
         paused ||
-        dead
+        dead ||
+        !gameStarted
     )
         return;
 
     if(
         entitySeesPlayer()
     ){
-
-        /*
-            It only remembers the position it actually
-            saw. If the player turns a corner, the entity
-            can lose them.
-        */
 
         entityTarget = {
 
@@ -2192,7 +2549,7 @@ function updateEntity(
 
         };
 
-        entityMemory = 2.5;
+        entityMemory = 2.2;
 
     }else if(
         entityMemory > 0
@@ -2219,16 +2576,16 @@ function updateEntity(
             entityTarget.z -
             entity.position.z;
 
-        const length =
+        const distance =
             Math.hypot(
                 dx,
                 dz
             );
 
-        if(length>.2){
+        if(distance > .15){
 
-            dx/=length;
-            dz/=length;
+            dx /= distance;
+            dz /= distance;
 
         }
 
@@ -2245,7 +2602,7 @@ function updateEntity(
                 Math.random()*4;
 
             entityWanderAngle =
-                Math.random()*
+                Math.random() *
                 Math.PI*2;
 
         }
@@ -2264,16 +2621,16 @@ function updateEntity(
 
     const speed =
         entityTarget
-        ?
-        difficulty === "nightmare"
-            ? 2.35
-            : difficulty === "hard"
-                ? 2.0
-                : difficulty === "easy"
-                    ? 1.25
-                    : 1.65
-        :
-        .7;
+            ? (
+                difficulty === "nightmare"
+                    ? 2.2
+                    : difficulty === "hard"
+                        ? 1.9
+                        : difficulty === "easy"
+                            ? 1.15
+                            : 1.55
+            )
+            : .65;
 
     const nx =
         entity.position.x +
@@ -2299,29 +2656,21 @@ function updateEntity(
     }else{
 
         entityTarget = null;
-
         entityWanderTimer = 0;
 
     }
 
     /*
-        Billboard.
+        Billboard toward camera.
     */
 
     entity.rotation.y =
         Math.atan2(
-
             camera.position.x -
             entity.position.x,
-
             camera.position.z -
             entity.position.z
-
         );
-
-    /*
-        Kill.
-    */
 
     const distance =
         Math.hypot(
@@ -2335,7 +2684,7 @@ function updateEntity(
         );
 
     if(
-        distance < .85 &&
+        distance < .72 &&
         !hidden
     ){
 
@@ -2351,9 +2700,7 @@ function updateEntity(
    DEATH
 ========================================================= */
 
-function die(
-    reason
-){
+function die(reason){
 
     if(dead)
         return;
@@ -2386,9 +2733,7 @@ function die(
 
 let messageTimer = 0;
 
-function showMessage(
-    text
-){
+function showMessage(text){
 
     document.getElementById(
         "message"
@@ -2399,26 +2744,23 @@ function showMessage(
 
 }
 
-function updateMessage(
-    dt
-){
+function updateMessage(dt){
 
     if(
-        messageTimer > 0
+        messageTimer <= 0
+    )
+        return;
+
+    messageTimer -= dt;
+
+    if(
+        messageTimer <= 0
     ){
 
-        messageTimer -= dt;
-
-        if(
-            messageTimer <= 0
-        ){
-
-            document.getElementById(
-                "message"
-            ).textContent =
-                "";
-
-        }
+        document.getElementById(
+            "message"
+        ).textContent =
+            "";
 
     }
 
@@ -2430,16 +2772,99 @@ function updateMessage(
 
 function resetPlayer(){
 
+    /*
+        Hard safety check.
+    */
+
+    if(!playerSpawn){
+
+        console.error(
+            "No player spawn available."
+        );
+
+        return false;
+
+    }
+
+    /*
+        Make absolutely sure the spawn isn't inside
+        a wall.
+    */
+
+    let spawnX =
+        playerSpawn.x;
+
+    let spawnZ =
+        playerSpawn.z;
+
+    if(
+        collides(
+            spawnX,
+            spawnZ
+        )
+    ){
+
+        console.warn(
+            "Spawn is inside collision. Searching..."
+        );
+
+        let found = false;
+
+        for(
+            let radius=1;
+            radius<30 && !found;
+            radius++
+        ){
+
+            for(
+                let a=0;
+                a<Math.PI*2;
+                a+=Math.PI/8
+            ){
+
+                const x =
+                    playerSpawn.x +
+                    Math.cos(a) *
+                    TILE *
+                    radius;
+
+                const z =
+                    playerSpawn.z +
+                    Math.sin(a) *
+                    TILE *
+                    radius;
+
+                if(
+                    !collides(x,z)
+                ){
+
+                    spawnX=x;
+                    spawnZ=z;
+                    found=true;
+                    break;
+
+                }
+
+            }
+
+        }
+
+    }
+
     player.position.set(
-        playerSpawn.x,
+        spawnX,
         0,
-        playerSpawn.z
+        spawnZ
     );
 
     yaw = 0;
     pitch = 0;
 
-    player.rotation.y = 0;
+    player.rotation.set(
+        0,
+        0,
+        0
+    );
 
     camera.rotation.set(
         0,
@@ -2447,28 +2872,73 @@ function resetPlayer(){
         0
     );
 
-    camera.position.y =
-        EYE_HEIGHT;
+    camera.position.set(
+        0,
+        EYE_HEIGHT,
+        0
+    );
 
     velocityY = 0;
-
     grounded = true;
 
     falling = false;
-
     fallTimer = 0;
 
+    crouching = false;
     hidden = false;
 
-    crouching = false;
+    return true;
 
 }
 
 /* =========================================================
-   GAME START
+   REMOVE ENTITY
+========================================================= */
+
+function removeEntity(){
+
+    if(!entity)
+        return;
+
+    world.remove(entity);
+
+    if(entity.geometry)
+        entity.geometry.dispose();
+
+    if(entity.material)
+        entity.material.dispose();
+
+    entity = null;
+    entityTarget = null;
+    entityMemory = 0;
+
+}
+
+/* =========================================================
+   START GAME
 ========================================================= */
 
 function startGame(){
+
+    if(!initialized){
+
+        showMessage(
+            "LEVEL 0 IS STILL LOADING..."
+        );
+
+        return;
+
+    }
+
+    if(!playerSpawn){
+
+        fatalError(
+            "The level loaded but no valid player spawn exists."
+        );
+
+        return;
+
+    }
 
     document.getElementById(
         "menu"
@@ -2485,35 +2955,47 @@ function startGame(){
     ).style.display =
         "none";
 
-    gameStarted = true;
-    paused = false;
     dead = false;
+    paused = false;
+    gameStarted = true;
 
-    resetPlayer();
+    gameTime = 0;
 
-    if(entity){
+    removeEntity();
 
-        world.remove(entity);
+    if(
+        !resetPlayer()
+    ){
 
-        entity.geometry.dispose();
+        gameStarted = false;
 
-        if(
-            entity.material.map === entityTexture
-        ){
-            /*
-                Do not dispose the shared texture.
-            */
-        }
+        fatalError(
+            "Could not place the player in Level 0."
+        );
 
-        entity.material.dispose();
-
-        entity = null;
+        return;
 
     }
 
     createEntity();
 
-    renderer.domElement.requestPointerLock();
+    /*
+        Pointer lock can fail when the browser
+        hasn't received a real user gesture.
+    */
+
+    try{
+
+        renderer.domElement.requestPointerLock();
+
+    }catch(error){
+
+        console.warn(
+            "Pointer lock unavailable:",
+            error
+        );
+
+    }
 
 }
 
@@ -2536,10 +3018,8 @@ function togglePause(){
         "pause"
     ).style.display =
         paused
-        ?
-        "flex"
-        :
-        "none";
+            ? "flex"
+            : "none";
 
     if(paused){
 
@@ -2555,6 +3035,43 @@ function togglePause(){
 
         renderer.domElement
             .requestPointerLock();
+
+    }
+
+}
+
+/* =========================================================
+   MAIN MENU
+========================================================= */
+
+function returnToMenu(){
+
+    gameStarted = false;
+    paused = false;
+    dead = false;
+
+    document.getElementById(
+        "pause"
+    ).style.display =
+        "none";
+
+    document.getElementById(
+        "death"
+    ).style.display =
+        "none";
+
+    document.getElementById(
+        "menu"
+    ).style.display =
+        "block";
+
+    removeEntity();
+
+    if(
+        document.pointerLockElement
+    ){
+
+        document.exitPointerLock();
 
     }
 
@@ -2583,7 +3100,7 @@ function hideControls(){
 }
 
 /* =========================================================
-   INPUT
+   KEYBOARD
 ========================================================= */
 
 document.addEventListener(
@@ -2603,7 +3120,9 @@ document.addEventListener(
 
             if(
                 grounded &&
-                !crouching
+                !crouching &&
+                gameStarted &&
+                !paused
             ){
 
                 velocityY =
@@ -2615,9 +3134,7 @@ document.addEventListener(
 
         }
 
-        if(
-            key === "escape"
-        ){
+        if(key === "escape"){
 
             if(
                 document.getElementById(
@@ -2670,10 +3187,10 @@ document.addEventListener(
             return;
 
         yaw -=
-            event.movementX*.0021;
+            event.movementX * .0021;
 
         pitch -=
-            event.movementY*.0018;
+            event.movementY * .0018;
 
         pitch =
             THREE.MathUtils.clamp(
@@ -2690,6 +3207,10 @@ document.addEventListener(
 
     }
 );
+
+/* =========================================================
+   CLICK CAN RELOCK MOUSE
+========================================================= */
 
 renderer.domElement.addEventListener(
     "click",
@@ -2763,56 +3284,46 @@ document.getElementById(
 document.getElementById(
     "menuBtn"
 ).onclick =
-    ()=>{
-
-        gameStarted = false;
-        paused = false;
-
-        document.getElementById(
-            "pause"
-        ).style.display =
-            "none";
-
-        document.getElementById(
-            "menu"
-        ).style.display =
-            "block";
-
-        if(
-            document.pointerLockElement
-        ){
-
-            document.exitPointerLock();
-
-        }
-
-    };
+    returnToMenu;
 
 document.getElementById(
     "deathMenuBtn"
 ).onclick =
+    returnToMenu;
+
+/* =========================================================
+   CRT TOGGLE
+========================================================= */
+
+let crtEnabled = true;
+
+document.getElementById(
+    "crtToggleBtn"
+).onclick =
     ()=>{
 
-        dead = false;
-        gameStarted = false;
+        crtEnabled =
+            !crtEnabled;
 
         document.getElementById(
-            "death"
+            "camcorder"
         ).style.display =
-            "none";
+            crtEnabled
+                ? "block"
+                : "none";
 
         document.getElementById(
-            "menu"
-        ).style.display =
-            "block";
+            "crtToggleBtn"
+        ).textContent =
+            crtEnabled
+                ? "CAMERA EFFECT: ON"
+                : "CAMERA EFFECT: OFF";
 
     };
 
 /* =========================================================
    DIFFICULTY
 ========================================================= */
-
-let difficulty = "normal";
 
 const difficultyButtons = {
 
@@ -2838,11 +3349,10 @@ const difficultyButtons = {
 
 };
 
-function selectDifficulty(
-    value
-){
+function selectDifficulty(value){
 
-    difficulty = value;
+    difficulty =
+        value;
 
     for(
         const name in difficultyButtons
@@ -2889,6 +3399,11 @@ let menuIndex = 0;
 setInterval(
     ()=>{
 
+        if(
+            menuImages.length < 2
+        )
+            return;
+
         menuImages[
             menuIndex
         ].classList.remove(
@@ -2897,7 +3412,7 @@ setInterval(
 
         menuIndex =
             (
-                menuIndex+1
+                menuIndex + 1
             ) %
             menuImages.length;
 
@@ -2912,68 +3427,10 @@ setInterval(
 );
 
 /* =========================================================
-   LIGHT FLICKER
-========================================================= */
-
-function updateLights(
-    dt
-){
-
-    for(
-        const item of lights
-    ){
-
-        item.timer -= dt;
-
-        if(
-            item.timer <= 0
-        ){
-
-            item.timer =
-                .4 +
-                Math.random()*5;
-
-            if(
-                Math.random()<.16
-            ){
-
-                item.light.intensity =
-                    .2 +
-                    Math.random()*2;
-
-                setTimeout(
-                    ()=>{
-
-                        item.light.intensity =
-                            4.5;
-
-                    },
-                    40 +
-                    Math.random()*120
-                );
-
-            }else{
-
-                item.light.intensity =
-                    4.5;
-
-            }
-
-        }
-
-    }
-
-}
-
-/* =========================================================
    TAPE TIME
 ========================================================= */
 
-let gameTime = 0;
-
-function updateTapeTime(
-    dt
-){
+function updateTapeTime(dt){
 
     if(
         !gameStarted ||
@@ -3002,7 +3459,7 @@ function updateTapeTime(
     const s =
         total%60;
 
-    const f =
+    const format =
         n =>
             String(n)
             .padStart(2,"0");
@@ -3010,7 +3467,9 @@ function updateTapeTime(
     document.getElementById(
         "tapeTime"
     ).textContent =
-        f(h)+":"+f(m)+":"+f(s);
+        format(h) + ":" +
+        format(m) + ":" +
+        format(s);
 
 }
 
@@ -3033,7 +3492,8 @@ function animate(){
     let dt =
         (now-lastTime)/1000;
 
-    lastTime = now;
+    lastTime =
+        now;
 
     dt =
         Math.min(
@@ -3065,7 +3525,7 @@ window.addEventListener(
     ()=>{
 
         camera.aspect =
-            innerWidth/
+            innerWidth /
             innerHeight;
 
         camera.updateProjectionMatrix();
@@ -3079,7 +3539,7 @@ window.addEventListener(
 );
 
 /* =========================================================
-   INITIALIZE
+   INITIALIZATION
 ========================================================= */
 
 async function initialize(){
@@ -3087,54 +3547,48 @@ async function initialize(){
     try{
 
         console.log(
-            "Loading Backrooms..."
+            "================================"
         );
 
         console.log(
-            "Wall texture: ./textures/wall.png"
+            "BACKROOMS INITIALIZATION"
         );
 
         console.log(
-            "Floor texture: ./textures/floor.png"
+            "================================"
         );
 
         console.log(
-            "Ceiling texture: ./textures/ceiling.png"
+            "Loading wall.png..."
         );
 
         console.log(
-            "Map: ./textures/map1.png"
+            "Loading floor.png..."
         );
 
-        await loadAllTextures();
+        console.log(
+            "Loading ceiling.png..."
+        );
 
-        /*
-            IMPORTANT:
-            Do not continue if the core textures
-            failed to load.
-        */
+        console.log(
+            "Loading map1.png..."
+        );
 
-        if(
-            !wallTexture ||
-            !floorTexture ||
-            !ceilingTexture
-        ){
-
-            throw new Error(
-                "One or more required textures failed to load.\n\n" +
-                "Expected files:\n" +
-                "./textures/wall.png\n" +
-                "./textures/floor.png\n" +
-                "./textures/ceiling.png"
-            );
-
-        }
+        await loadTextures();
 
         await loadMap();
+
+        /*
+            Build only AFTER all textures and map
+            are completely ready.
+        */
 
         buildWorld();
 
         buildLights();
+
+        initialized = true;
+        initializing = false;
 
         document.getElementById(
             "difficultyHud"
@@ -3142,33 +3596,59 @@ async function initialize(){
             difficulty.toUpperCase();
 
         console.log(
-            "BACKROOMS READY."
+            "================================"
+        );
+
+        console.log(
+            "BACKROOMS READY"
+        );
+
+        console.log(
+            "Spawn:",
+            playerSpawn
+        );
+
+        console.log(
+            "Entity:",
+            entitySpawn
+        );
+
+        console.log(
+            "Map:",
+            mapWidth,
+            "x",
+            mapHeight
+        );
+
+        console.log(
+            "================================"
         );
 
     }catch(error){
+
+        initializing = false;
+        initialized = false;
 
         console.error(
             error
         );
 
-        const errorBox =
-            document.getElementById(
-                "error"
-            );
-
-        errorBox.style.display =
-            "block";
-
-        errorBox.textContent =
-            "BACKROOMS INITIALIZATION ERROR\n\n" +
-            error.stack ||
-            String(error);
+        fatalError(
+            error && error.stack
+                ? error.stack
+                : String(error)
+        );
 
     }
 
 }
 
+/* =========================================================
+   START INITIALIZATION
+========================================================= */
+
 initialize();
+
 </script>
 
 </body>
