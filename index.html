@@ -1078,11 +1078,22 @@ renderer.setPixelRatio(
 
 if(
     "outputColorSpace"
-    in renderer
+    in renderer &&
+    typeof THREE.SRGBColorSpace!=="undefined"
 ){
 
     renderer.outputColorSpace=
         THREE.SRGBColorSpace;
+
+}
+else if(
+    "outputEncoding"
+    in renderer &&
+    typeof THREE.sRGBEncoding!=="undefined"
+){
+
+    renderer.outputEncoding=
+        THREE.sRGBEncoding;
 
 }
 
@@ -1132,11 +1143,22 @@ function configureTexture(
 
     if(
         "colorSpace"
-        in texture
+        in texture &&
+        typeof THREE.SRGBColorSpace!=="undefined"
     ){
 
         texture.colorSpace=
             THREE.SRGBColorSpace;
+
+    }
+    else if(
+        "encoding"
+        in texture &&
+        typeof THREE.sRGBEncoding!=="undefined"
+    ){
+
+        texture.encoding=
+            THREE.sRGBEncoding;
 
     }
 
@@ -1291,6 +1313,7 @@ scene.add(
 
 const colliders=[];
 const holes=[];
+const holeCells=new Set();
 const hidingSpots=[];
 const fluorescentLights=[];
 
@@ -2796,79 +2819,359 @@ function cellToWorld(
 }
 
 /* =========================================================
-   BUILD WORLD
+   OPTIMIZED WORLD GEOMETRY
 ========================================================= */
+
+function pushQuad(data,v0,v1,v2,v3,normal,uvScaleX=1,uvScaleY=1){
+
+    const base=data.positions.length/3;
+    const verts=[v0,v1,v2,v3];
+
+    for(const v of verts){
+        data.positions.push(v[0],v[1],v[2]);
+        data.normals.push(normal[0],normal[1],normal[2]);
+    }
+
+    data.uvs.push(
+        0,0,
+        uvScaleX,0,
+        uvScaleX,uvScaleY,
+        0,uvScaleY
+    );
+
+    data.indices.push(
+        base,base+1,base+2,
+        base,base+2,base+3
+    );
+
+}
+
+function createGeometry(data){
+
+    const geometry=new THREE.BufferGeometry();
+
+    geometry.setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute(data.positions,3)
+    );
+
+    geometry.setAttribute(
+        'normal',
+        new THREE.Float32BufferAttribute(data.normals,3)
+    );
+
+    geometry.setAttribute(
+        'uv',
+        new THREE.Float32BufferAttribute(data.uvs,2)
+    );
+
+    geometry.setIndex(data.indices);
+    geometry.computeBoundingSphere();
+
+    return geometry;
+
+}
+
+function newGeometryData(){
+    return {
+        positions:[],
+        normals:[],
+        uvs:[],
+        indices:[]
+    };
+}
+
+function pushBox(data,cx,cy,cz,sx,sy,sz){
+
+    const x=sx/2;
+    const y=sy/2;
+    const z=sz/2;
+
+    pushQuad(
+        data,
+        [cx-x,cy-y,cz+z],
+        [cx+x,cy-y,cz+z],
+        [cx+x,cy+y,cz+z],
+        [cx-x,cy+y,cz+z],
+        [0,0,1],1,sy/TILE
+    );
+
+    pushQuad(
+        data,
+        [cx+x,cy-y,cz-z],
+        [cx-x,cy-y,cz-z],
+        [cx-x,cy+y,cz-z],
+        [cx+x,cy+y,cz-z],
+        [0,0,-1],1,sy/TILE
+    );
+
+    pushQuad(
+        data,
+        [cx-x,cy-y,cz-z],
+        [cx-x,cy-y,cz+z],
+        [cx-x,cy+y,cz+z],
+        [cx-x,cy+y,cz-z],
+        [-1,0,0],1,sy/TILE
+    );
+
+    pushQuad(
+        data,
+        [cx+x,cy-y,cz+z],
+        [cx+x,cy-y,cz-z],
+        [cx+x,cy+y,cz-z],
+        [cx+x,cy+y,cz+z],
+        [1,0,0],1,sy/TILE
+    );
+
+    pushQuad(
+        data,
+        [cx-x,cy+y,cz+z],
+        [cx+x,cy+y,cz+z],
+        [cx+x,cy+y,cz-z],
+        [cx-x,cy+y,cz-z],
+        [0,1,0],1,1
+    );
+
+    pushQuad(
+        data,
+        [cx-x,cy-y,cz-z],
+        [cx+x,cy-y,cz-z],
+        [cx+x,cy-y,cz+z],
+        [cx-x,cy-y,cz+z],
+        [0,-1,0],1,1
+    );
+
+}
+
+function addMergedMesh(data,material){
+
+    if(!data.indices.length)
+        return null;
+
+    const mesh=new THREE.Mesh(
+        createGeometry(data),
+        material
+    );
+
+    world.add(mesh);
+    return mesh;
+
+}
+
+function buildMergedFloorAndCeiling(){
+
+    const floorData=newGeometryData();
+    const ceilingData=newGeometryData();
+
+    for(let y=0;y<mapHeight;y++){
+        for(let x=0;x<mapWidth;x++){
+
+            if(
+                mapData[y][x]==='wall'||
+                mapData[y][x]==='hole'
+            )
+                continue;
+
+            const p=cellToWorld(x,y);
+            const h=TILE/2;
+
+            pushQuad(
+                floorData,
+                [p.x-h,0,p.z-h],
+                [p.x+h,0,p.z-h],
+                [p.x+h,0,p.z+h],
+                [p.x-h,0,p.z+h],
+                [0,1,0],1,1
+            );
+
+            pushQuad(
+                ceilingData,
+                [p.x-h,WALL_HEIGHT,p.z+h],
+                [p.x+h,WALL_HEIGHT,p.z+h],
+                [p.x+h,WALL_HEIGHT,p.z-h],
+                [p.x-h,WALL_HEIGHT,p.z-h],
+                [0,-1,0],1,1
+            );
+
+        }
+    }
+
+    addMergedMesh(floorData,makeFloorMaterial());
+    addMergedMesh(ceilingData,makeCeilingMaterial());
+
+}
+
+function buildMergedWalls(){
+
+    const data=newGeometryData();
+
+    for(let y=0;y<mapHeight;y++){
+        for(let x=0;x<mapWidth;x++){
+
+            if(mapData[y][x]!=='wall')
+                continue;
+
+            if(diagonalConsumed.has(keyOf(x,y)))
+                continue;
+
+            const p=cellToWorld(x,y);
+
+            pushBox(
+                data,
+                p.x,
+                WALL_HEIGHT/2,
+                p.z,
+                TILE,
+                WALL_HEIGHT,
+                TILE
+            );
+
+            colliders.push({
+                minX:p.x-TILE/2,
+                maxX:p.x+TILE/2,
+                minZ:p.z-TILE/2,
+                maxZ:p.z+TILE/2
+            });
+
+        }
+    }
+
+    addMergedMesh(data,makeWallMaterial());
+
+}
+
+function buildMergedHoles(){
+
+    const sideData=newGeometryData();
+    const bottomData=newGeometryData();
+    const depth=3.5;
+
+    holeCells.clear();
+    holes.length=0;
+
+    for(let y=0;y<mapHeight;y++){
+        for(let x=0;x<mapWidth;x++){
+
+            if(mapData[y][x]!=='hole')
+                continue;
+
+            holeCells.add(keyOf(x,y));
+
+            const p=cellToWorld(x,y);
+            const h=TILE/2;
+            const bottom=-depth;
+
+            pushQuad(
+                bottomData,
+                [p.x-h,bottom,p.z-h],
+                [p.x+h,bottom,p.z-h],
+                [p.x+h,bottom,p.z+h],
+                [p.x-h,bottom,p.z+h],
+                [0,1,0],1,1
+            );
+
+            /* Only generate an exposed side when the neighboring
+               cell is NOT another hole. This is the main hole
+               performance fix: connected yellow regions don't
+               receive duplicate internal walls. */
+
+            const edges=[
+                [0,-1,[p.x-h,0,p.z-h],[p.x+h,0,p.z-h],[0,0,-1]],
+                [0,1,[p.x+h,0,p.z+h],[p.x-h,0,p.z+h],[0,0,1]],
+                [-1,0,[p.x-h,0,p.z+h],[p.x-h,0,p.z-h],[-1,0,0]],
+                [1,0,[p.x+h,0,p.z-h],[p.x+h,0,p.z+h],[1,0,0]]
+            ];
+
+            for(const edge of edges){
+
+                const nx=x+edge[0];
+                const ny=y+edge[1];
+                const neighborInHole=
+                    nx>=0&&ny>=0&&
+                    nx<mapWidth&&ny<mapHeight&&
+                    mapData[ny][nx]==='hole';
+
+                if(neighborInHole)
+                    continue;
+
+                const a=edge[2];
+                const b=edge[3];
+                const normal=edge[4];
+
+                pushQuad(
+                    sideData,
+                    [a[0],0,a[2]],
+                    [b[0],0,b[2]],
+                    [b[0],bottom,b[2]],
+                    [a[0],bottom,a[2]],
+                    normal,
+                    1,
+                    depth/TILE
+                );
+
+            }
+
+        }
+    }
+
+    const bottomMaterial=new THREE.MeshBasicMaterial({
+        color:0x030201
+    });
+
+    addMergedMesh(bottomData,bottomMaterial);
+
+    if(sideData.indices.length){
+
+        const sideMaterial=floorTexture
+            ? new THREE.MeshStandardMaterial({
+                map:floorTexture,
+                color:0xffffff,
+                roughness:1,
+                metalness:0,
+                side:THREE.DoubleSide
+            })
+            : new THREE.MeshStandardMaterial({
+                color:0x5c5435,
+                roughness:1,
+                side:THREE.DoubleSide
+            });
+
+        addMergedMesh(sideData,sideMaterial);
+
+    }
+
+}
 
 function clearWorld(){
 
-    while(
-        world.children.length
-    ){
+    while(world.children.length){
 
-        const object=
-            world.children[
-                world.children.length-1
-            ];
+        const object=world.children.pop();
 
-        world.remove(
-            object
-        );
+        object.traverse(child=>{
 
-        object.traverse(
-            child=>{
+            if(child.geometry)
+                child.geometry.dispose();
 
-                if(
-                    child.geometry
-                ){
-
-                    child.geometry.dispose();
-
-                }
-
-                if(
-                    child.material
-                ){
-
-                    if(
-                        Array.isArray(
-                            child.material
-                        )
-                    ){
-
-                        child.material.forEach(
-                            material=>
-                                material.dispose()
-                        );
-
-                    }else{
-
-                        child.material.dispose();
-
-                    }
-
-                }
-
+            if(child.material){
+                if(Array.isArray(child.material))
+                    child.material.forEach(m=>m.dispose());
+                else
+                    child.material.dispose();
             }
-        );
+
+        });
 
     }
 
-    for(
-        const item
-        of fluorescentLights
-    ){
-
-        scene.remove(
-            item.light
-        );
-
-    }
+    for(const item of fluorescentLights)
+        scene.remove(item.light);
 
     colliders.length=0;
     holes.length=0;
+    holeCells.clear();
     hidingSpots.length=0;
     fluorescentLights.length=0;
-
     exitObject=null;
 
 }
@@ -2879,256 +3182,53 @@ function buildWorld(){
 
     let foundExit=false;
 
-    /*
-       FLOOR + SPECIAL CELLS
-    */
+    for(let y=0;y<mapHeight;y++){
+        for(let x=0;x<mapWidth;x++){
 
-    for(
-        let y=0;
-        y<mapHeight;
-        y++
-    ){
+            const type=mapData[y][x];
+            const p=cellToWorld(x,y);
 
-        for(
-            let x=0;
-            x<mapWidth;
-            x++
-        ){
-
-            const type=
-                mapData[y][x];
-
-            const p=
-                cellToWorld(
-                    x,
-                    y
-                );
-
-            if(
-                type!=="wall" &&
-                type!=="hole"
-            ){
-
-                addFloor(
-                    p.x,
-                    p.z
-                );
-
+            if(type==='hide'){
+                hidingSpots.push({x:p.x,z:p.z});
             }
 
-            if(
-                type==="hole"
-            ){
-
-                addHole(
-                    p.x,
-                    p.z
-                );
-
-            }
-
-            if(
-                type==="hide"
-            ){
-
-                hidingSpots.push({
-
-                    x:p.x,
-                    z:p.z
-
-                });
-
-            }
-
-            if(
-                type==="exit" &&
-                !foundExit
-            ){
-
-                createExit(
-                    p.x,
-                    p.z
-                );
-
+            if(type==='exit'&&!foundExit){
+                createExit(p.x,p.z);
                 foundExit=true;
-
             }
 
         }
-
     }
 
-    /*
-       WALLS
-
-       Every black map cell becomes a 3D wall.
-
-       Because every cell is exactly 3 feet,
-       the entire map remains correctly scaled.
-
-       Diagonal corridor corners are smoothed into a single
-       angled wall by buildDiagonalWalls(), which runs FIRST
-       and marks which cells it already handled. "+" pillar
-       clusters are skipped by that pass on purpose, so they
-       stay blocky, and the normal loop below still builds
-       them like any other wall cell.
-    */
-
+    /* Build diagonal geometry first so those exact cells are
+       excluded from the merged square-wall mesh. */
     buildDiagonalWalls();
 
-    for(
-        let y=0;
-        y<mapHeight;
-        y++
-    ){
-
-        for(
-            let x=0;
-            x<mapWidth;
-            x++
-        ){
-
-            if(
-                mapData[y][x]!=="wall"
-            )
-                continue;
-
-            if(
-                diagonalConsumed.has(
-                    keyOf(x,y)
-                )
-            )
-                continue;
-
-            const p=
-                cellToWorld(
-                    x,
-                    y
-                );
-
-            addWall(
-                p.x,
-                p.z
-            );
-
-        }
-
-    }
-
-    /*
-       CEILING
-
-       Every non-wall/non-hole cell gets a ceiling
-       panel.
-
-       The fluorescent lights are then placed on
-       their own sparse grid.
-    */
-
-    for(
-        let y=0;
-        y<mapHeight;
-        y++
-    ){
-
-        for(
-            let x=0;
-            x<mapWidth;
-            x++
-        ){
-
-            if(
-                !isWalkableCell(x,y)
-            )
-                continue;
-
-            if(
-                mapData[y][x]==="hole"
-            )
-                continue;
-
-            const p=
-                cellToWorld(
-                    x,
-                    y
-                );
-
-            addCeilingPanel(
-                p.x,
-                p.z
-            );
-
-        }
-
-    }
-
+    buildMergedWalls();
+    buildMergedFloorAndCeiling();
+    buildMergedHoles();
     buildLightGrid();
 
-    /*
-       FALLBACK PLAYER SPAWN
-    */
-
-    if(
-        !playerSpawn
-    ){
-
+    if(!playerSpawn){
         outer:
-        for(
-            let y=0;
-            y<mapHeight;
-            y++
-        ){
-
-            for(
-                let x=0;
-                x<mapWidth;
-                x++
-            ){
-
+        for(let y=0;y<mapHeight;y++){
+            for(let x=0;x<mapWidth;x++){
                 if(
-                    isWalkableCell(
-                        x,
-                        y
-                    ) &&
-                    mapData[y][x]!=="hole"
+                    isWalkableCell(x,y)&&
+                    mapData[y][x]!=='hole'
                 ){
-
-                    playerSpawn=
-                        cellToWorld(
-                            x,
-                            y
-                        );
-
+                    playerSpawn=cellToWorld(x,y);
                     break outer;
-
                 }
-
             }
-
         }
-
     }
 
-    /*
-       FALLBACK ENTITY SPAWN
-    */
-
-    if(
-        !entitySpawn
-    ){
-
+    if(!entitySpawn){
         entitySpawn={
-
-            x:
-                playerSpawn.x+
-                TILE*8,
-
-            z:
-                playerSpawn.z+
-                TILE*8
-
+            x:playerSpawn.x+TILE*8,
+            z:playerSpawn.z+TILE*8
         };
-
     }
 
 }
@@ -3261,110 +3361,48 @@ function movePlayer(
    HOLE FALLING
 ========================================================= */
 
-function checkForHole(){
+function worldToCell(x,z){
 
-    if(falling)
-        return;
+    const offsetX=mapWidth*TILE/2;
+    const offsetZ=mapHeight*TILE/2;
 
-    for(
-        const hole
-        of holes
-    ){
-
-        const d=
-            Math.hypot(
-
-                player.position.x-
-                hole.x,
-
-                player.position.z-
-                hole.z
-
-            );
-
-        if(
-            d<
-            hole.radius
-        ){
-
-            falling=true;
-
-            fallTimer=0;
-
-            velocityY=0;
-
-            showMessage(
-                "THE FLOOR GIVES WAY..."
-            );
-
-            return;
-
-        }
-
-    }
+    return {
+        x:Math.floor((x+offsetX)/TILE),
+        y:Math.floor((z+offsetZ)/TILE)
+    };
 
 }
 
-function updateFall(
-    dt
-){
+function checkForHole(){
+
+    if(falling||player.position.y>0.12)
+        return;
+
+    const cell=worldToCell(
+        player.position.x,
+        player.position.z
+    );
 
     if(
-        !falling
+        cell.x<0||
+        cell.y<0||
+        cell.x>=mapWidth||
+        cell.y>=mapHeight
     )
         return;
 
-    fallTimer+=dt;
-
-    const progress=
-        Math.min(
-            fallTimer/
-            1.25,
-            1
-        );
-
-    /*
-       Falling animation.
-    */
-
-    player.position.y=
-        -4.3*
-        progress;
-
-    camera.rotation.z=
-        Math.sin(
-            fallTimer*7
-        )*.045;
-
-    camera.rotation.x=
-        pitch+
-        Math.sin(
-            fallTimer*5
-        )*.07;
-
     if(
-        progress>=1
-    ){
+        mapData[cell.y][cell.x]!=='hole'
+    )
+        return;
 
-        falling=false;
+    falling=true;
+    fallTimer=0;
+    velocityY=0;
 
-        player.position.y=0;
-
-        player.position.x=
-            playerSpawn.x;
-
-        player.position.z=
-            playerSpawn.z;
-
-        camera.rotation.z=0;
-        camera.rotation.x=
-            pitch;
-
-        showMessage(
-            "YOU FALL BACK INTO LEVEL 0."
-        );
-
-    }
+    showMessage(
+        "THE FLOOR GIVES WAY..."
+    );
 
 }
 
