@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -702,7 +701,6 @@ button{
 
 <div id="menu">
 
-```
 <!-- EXACT filenames from your folder -->
 
 <img
@@ -794,7 +792,6 @@ button{
     </button>
 
 </div>
-```
 
 </div>
 
@@ -804,7 +801,6 @@ button{
 
 <div id="pause" class="overlay">
 
-```
 <h1>PAUSED</h1>
 
 <button id="resumeBtn">
@@ -826,7 +822,6 @@ button{
 <button id="menuBtn">
     MAIN MENU
 </button>
-```
 
 </div>
 
@@ -836,7 +831,6 @@ button{
 
 <div id="death" class="overlay">
 
-```
 <div id="deathTitle">
     YOU DIED
 </div>
@@ -852,7 +846,6 @@ button{
 <button id="deathMenuBtn">
     MAIN MENU
 </button>
-```
 
 </div>
 
@@ -862,7 +855,6 @@ button{
 
 <div id="controlsBox">
 
-```
 <div class="controlsInner">
 
     <h1>CONTROLS</h1>
@@ -937,7 +929,6 @@ button{
     </button>
 
 </div>
-```
 
 </div>
 
@@ -949,13 +940,11 @@ button{
 
 <div id="hud">
 
-```
 LEVEL 0
 
 <div id="difficultyHud">
     NORMAL
 </div>
-```
 
 </div>
 
@@ -971,11 +960,9 @@ LEVEL 0
 
 <div id="rec">
 
-```
 <span id="recDot"></span>
 
 REC
-```
 
 </div>
 
@@ -985,11 +972,9 @@ REC
 
 <div id="camcorder">
 
-```
 <div class="camScan"></div>
 <div class="camNoise"></div>
 <div class="camVignette"></div>
-```
 
 </div>
 
@@ -1209,9 +1194,27 @@ function loadTexture(
 
                 error=>{
 
+                    /*
+                       Extra-verbose logging so it's obvious in the
+                       console whether this is a 404 (wrong filename
+                       / path) or a security/CORS error (usually
+                       means the page was opened via file:// instead
+                       of a local server).
+                    */
+
                     console.error(
                         "FAILED TEXTURE:",
-                        path,
+                        path
+                    );
+
+                    console.error(
+                        "If this says something about 'cross-origin' "+
+                        "or 'SecurityError', you're probably opening "+
+                        "index.html directly (file://). Run a local "+
+                        "server instead, e.g.:  python3 -m http.server"
+                    );
+
+                    console.error(
                         error
                     );
 
@@ -1548,6 +1551,311 @@ function addWall(
             z+TILE/2
 
     });
+
+}
+
+/* =========================================================
+   DIAGONAL WALL SMOOTHING
+
+   Grid-based maps normally render diagonal corridors as a
+   blocky staircase of square wall cubes. This pass looks for
+   true 2x2 diagonal notches (two opposite wall cells, two
+   opposite floor cells) and replaces the pair of blocky cubes
+   with one angled wall mesh spanning between them.
+
+   "+" shaped pillar clusters (a wall cell surrounded on all 4
+   orthogonal sides by more wall, but open on all 4 diagonals)
+   are deliberately EXCLUDED, so they stay sharp/blocky instead
+   of being smoothed.
+========================================================= */
+
+const diagonalConsumed=
+    new Set();
+
+function keyOf(
+    x,
+    y
+){
+
+    return x+","+y;
+
+}
+
+function isWallCell(
+    x,
+    y
+){
+
+    if(
+        x<0||
+        y<0||
+        x>=mapWidth||
+        y>=mapHeight
+    )
+        return true;
+
+    return mapData[y][x]==="wall";
+
+}
+
+function isPlusPillar(
+    x,
+    y
+){
+
+    if(
+        mapData[y][x]!=="wall"
+    )
+        return false;
+
+    const n=
+        isWallCell(x,y-1);
+
+    const s=
+        isWallCell(x,y+1);
+
+    const w=
+        isWallCell(x-1,y);
+
+    const e=
+        isWallCell(x+1,y);
+
+    if(
+        !(n&&s&&w&&e)
+    )
+        return false;
+
+    const nw=
+        isWallCell(x-1,y-1);
+
+    const ne=
+        isWallCell(x+1,y-1);
+
+    const sw=
+        isWallCell(x-1,y+1);
+
+    const se=
+        isWallCell(x+1,y+1);
+
+    return(
+        !nw&&
+        !ne&&
+        !sw&&
+        !se
+    );
+
+}
+
+/*
+   Tweak these two to taste.
+
+   DIAGONAL_THICKNESS: how thick the angled wall slab is.
+   DIAGONAL_OVERLAP: small extra length so the ends don't
+   leave a hairline gap against the neighboring cubes.
+*/
+
+const DIAGONAL_THICKNESS=
+    TILE*.5;
+
+const DIAGONAL_OVERLAP=
+    TILE*.15;
+
+function addDiagonalWallPair(
+    x1,
+    y1,
+    x2,
+    y2
+){
+
+    const p1=
+        cellToWorld(
+            x1,
+            y1
+        );
+
+    const p2=
+        cellToWorld(
+            x2,
+            y2
+        );
+
+    const midX=
+        (p1.x+p2.x)/2;
+
+    const midZ=
+        (p1.z+p2.z)/2;
+
+    const dx=
+        p2.x-p1.x;
+
+    const dz=
+        p2.z-p1.z;
+
+    const length=
+        Math.hypot(dx,dz)+
+        DIAGONAL_OVERLAP;
+
+    const angle=
+        Math.atan2(dz,dx);
+
+    const geometry=
+        new THREE.BoxGeometry(
+            length,
+            WALL_HEIGHT,
+            DIAGONAL_THICKNESS
+        );
+
+    const mesh=
+        new THREE.Mesh(
+            geometry,
+            makeWallMaterial()
+        );
+
+    mesh.position.set(
+        midX,
+        WALL_HEIGHT/2,
+        midZ
+    );
+
+    mesh.rotation.y=
+        -angle;
+
+    world.add(
+        mesh
+    );
+
+    /*
+       Keep both original square colliders so the player can
+       never clip through the corner, even though it now looks
+       smooth. This is intentionally simple/safe rather than
+       true rotated-box collision.
+    */
+
+    colliders.push({
+
+        minX:
+            p1.x-TILE/2,
+
+        maxX:
+            p1.x+TILE/2,
+
+        minZ:
+            p1.z-TILE/2,
+
+        maxZ:
+            p1.z+TILE/2
+
+    });
+
+    colliders.push({
+
+        minX:
+            p2.x-TILE/2,
+
+        maxX:
+            p2.x+TILE/2,
+
+        minZ:
+            p2.z-TILE/2,
+
+        maxZ:
+            p2.z+TILE/2
+
+    });
+
+}
+
+function buildDiagonalWalls(){
+
+    diagonalConsumed.clear();
+
+    for(
+        let y=0;
+        y<mapHeight-1;
+        y++
+    ){
+
+        for(
+            let x=0;
+            x<mapWidth-1;
+            x++
+        ){
+
+            const a=
+                mapData[y][x]==="wall";
+
+            const b=
+                mapData[y][x+1]==="wall";
+
+            const c=
+                mapData[y+1][x]==="wall";
+
+            const d=
+                mapData[y+1][x+1]==="wall";
+
+            /*
+               \ diagonal
+            */
+
+            if(
+                a&&d&&!b&&!c
+            ){
+
+                if(
+                    !isPlusPillar(x,y)&&
+                    !isPlusPillar(x+1,y+1)
+                ){
+
+                    addDiagonalWallPair(
+                        x,y,
+                        x+1,y+1
+                    );
+
+                    diagonalConsumed.add(
+                        keyOf(x,y)
+                    );
+
+                    diagonalConsumed.add(
+                        keyOf(x+1,y+1)
+                    );
+
+                }
+
+            }
+
+            /*
+               / diagonal
+            */
+
+            if(
+                b&&c&&!a&&!d
+            ){
+
+                if(
+                    !isPlusPillar(x+1,y)&&
+                    !isPlusPillar(x,y+1)
+                ){
+
+                    addDiagonalWallPair(
+                        x+1,y,
+                        x,y+1
+                    );
+
+                    diagonalConsumed.add(
+                        keyOf(x+1,y)
+                    );
+
+                    diagonalConsumed.add(
+                        keyOf(x,y+1)
+                    );
+
+                }
+
+            }
+
+        }
+
+    }
 
 }
 
@@ -2283,6 +2591,9 @@ async function loadMap(){
                         }
                     );
 
+                mapContext.imageSmoothingEnabled=
+                    false;
+
                 mapContext.drawImage(
                     image,
                     0,
@@ -2295,13 +2606,37 @@ async function loadMap(){
                 mapHeight=
                     image.naturalHeight;
 
-                const pixels=
-                    mapContext.getImageData(
-                        0,
-                        0,
-                        mapWidth,
-                        mapHeight
-                    ).data;
+                let pixels;
+
+                try{
+
+                    pixels=
+                        mapContext.getImageData(
+                            0,
+                            0,
+                            mapWidth,
+                            mapHeight
+                        ).data;
+
+                }catch(error){
+
+                    fatalError(
+                        "Could not read map1.png pixel data.\n\n"+
+                        "This usually means the page was opened "+
+                        "directly (file://) instead of through a "+
+                        "local server, which blocks canvas access "+
+                        "to local images for security reasons.\n\n"+
+                        "Run a local server, e.g.:\n"+
+                        "  python3 -m http.server\n"+
+                        "then open http://localhost:8000\n\n"+
+                        String(error)
+                    );
+
+                    resolve();
+
+                    return;
+
+                }
 
                 mapData=[];
 
@@ -2630,7 +2965,16 @@ function buildWorld(){
 
        Because every cell is exactly 3 feet,
        the entire map remains correctly scaled.
+
+       Diagonal corridor corners are smoothed into a single
+       angled wall by buildDiagonalWalls(), which runs FIRST
+       and marks which cells it already handled. "+" pillar
+       clusters are skipped by that pass on purpose, so they
+       stay blocky, and the normal loop below still builds
+       them like any other wall cell.
     */
+
+    buildDiagonalWalls();
 
     for(
         let y=0;
@@ -2646,6 +2990,13 @@ function buildWorld(){
 
             if(
                 mapData[y][x]!=="wall"
+            )
+                continue;
+
+            if(
+                diagonalConsumed.has(
+                    keyOf(x,y)
+                )
             )
                 continue;
 
