@@ -502,38 +502,15 @@ const JUMP_POWER = 7.5;
 const EXIT_WIDTH = 2.8;
 const EXIT_HEIGHT = 5.8;
 
-/* =========================================================
-   ENTITY AUDIO SETTINGS
-========================================================= */
-
 /*
-    The MP3 must be located at:
+    ENTITY AUDIO
 
-        sounds/entity.mp3
-
-    The audio is proximity based.
-
-    FAR_DISTANCE:
-        Entity is completely silent beyond this distance.
-
-    MAX_VOLUME_DISTANCE:
-        Entity reaches maximum volume at this distance.
+    20 units = 25% volume.
+    Closer than 20 units gets progressively louder.
+    Farther than 20 units is silent.
 */
-
-const ENTITY_AUDIO_PATH =
-    "./sounds/entity.mp3";
-
-const ENTITY_AUDIO_FAR_DISTANCE = 42;
-
-const ENTITY_AUDIO_MAX_VOLUME_DISTANCE = 2.5;
-
-const ENTITY_AUDIO_MAX_VOLUME = .72;
-
-/*
-    Small amount of smoothing prevents the volume from
-    jumping around every frame.
-*/
-const ENTITY_AUDIO_SMOOTHING = 4;
+const ENTITY_AUDIO_DISTANCE = 20;
+const ENTITY_AUDIO_MIN_VOLUME = .25;
 
 /* =========================================================
    STATE
@@ -584,107 +561,65 @@ let entity = null;
 let entityTexture = null;
 let entityWidth = ENTITY_HEIGHT;
 
-const keys = {};
-
 /* =========================================================
    ENTITY AUDIO
 ========================================================= */
 
 let entityAudio = null;
-let entityAudioReady = false;
 
-/*
-    Create the audio object once.
-
-    Using a normal HTML Audio element is much more reliable
-    on GitHub Pages than trying to use an AudioListener
-    attached to the Three.js camera.
-*/
 function createEntityAudio(){
 
-    if(entityAudio)
-        return;
+    /*
+        The file MUST be located at:
+
+        sounds/entity.mp3
+    */
 
     entityAudio =
-    new Audio(
-        ENTITY_AUDIO_PATH
-    );
+    new Audio("./sounds/entity.mp3");
 
     entityAudio.loop = true;
 
-    entityAudio.preload = "auto";
-
+    /*
+        Start at zero so it never suddenly blasts
+        when the entity becomes active.
+    */
     entityAudio.volume = 0;
 
-    entityAudioReady = false;
-
-    entityAudio.addEventListener(
-        "canplaythrough",
-        ()=>{
-            entityAudioReady = true;
-        }
-    );
+    entityAudio.preload = "auto";
 
     entityAudio.addEventListener(
         "error",
         ()=>{
             console.warn(
-                "Could not load entity audio:",
-                ENTITY_AUDIO_PATH
+                "Could not load ./sounds/entity.mp3"
             );
-
-            entityAudioReady = false;
         }
     );
-
-    /*
-        Force the browser to begin loading the MP3.
-    */
-    entityAudio.load();
 }
 
-/*
-    Start the entity sound after the player clicks
-    ENTER LEVEL 0.
-
-    Browsers normally block audio until a user gesture,
-    so this is intentionally called from startGame().
-*/
 function startEntityAudio(){
-
-    if(!entityAudio)
-        createEntityAudio();
 
     if(!entityAudio)
         return;
 
-    entityAudio.volume = 0;
-
-    const promise =
-    entityAudio.play();
-
-    if(promise){
-
-        promise.then(
-            ()=>{
-                console.log(
-                    "Entity proximity audio started."
-                );
-            }
-        ).catch(
-            error=>{
-                console.warn(
-                    "Entity audio was blocked:",
-                    error
-                );
-            }
-        );
-    }
+    /*
+        Browsers generally allow this because
+        startGame() is called directly by the
+        ENTER LEVEL 0 button.
+    */
+    entityAudio
+    .play()
+    .catch(
+        error=>{
+            console.warn(
+                "Entity audio could not start:",
+                error
+            );
+        }
+    );
 }
 
-/*
-    Completely stop the audio.
-*/
 function stopEntityAudio(){
 
     if(!entityAudio)
@@ -692,26 +627,17 @@ function stopEntityAudio(){
 
     entityAudio.pause();
 
-    try{
-        entityAudio.currentTime=0;
-    }catch(e){}
+    entityAudio.currentTime=0;
 
     entityAudio.volume=0;
 }
 
-/*
-    Calculate the entity sound volume from distance.
-
-    This is deliberately separate from entityActive.
-
-    That means the sound tells the player that the entity
-    is nearby even before the entity starts chasing.
-*/
 function updateEntityAudio(){
 
     if(
         !entityAudio ||
         !entity ||
+        !entityActive ||
         !started ||
         paused ||
         dead ||
@@ -719,12 +645,7 @@ function updateEntityAudio(){
     ){
 
         if(entityAudio)
-            entityAudio.volume =
-            THREE.MathUtils.lerp(
-                entityAudio.volume,
-                0,
-                .15
-            );
+            entityAudio.volume=0;
 
         return;
     }
@@ -740,90 +661,67 @@ function updateEntityAudio(){
     const distance =
     Math.hypot(dx,dz);
 
-    let targetVolume = 0;
+    /*
+        0 units = 100%
+        5 units = about 81%
+        10 units = about 63%
+        15 units = about 44%
+        20 units = 25%
+        >20 units = 0%
+    */
 
-    if(
-        distance <
-        ENTITY_AUDIO_FAR_DISTANCE
-    ){
+    if(distance>=ENTITY_AUDIO_DISTANCE){
 
-        /*
-            0 when far away.
+        entityAudio.volume=0;
 
-            1 when extremely close.
-
-            Squaring the normalized value makes the
-            sound stay subtle for a while and then
-            become much more noticeable as the entity
-            gets close.
-        */
-        const normalized =
-        1 -
-        (
-            distance /
-            ENTITY_AUDIO_FAR_DISTANCE
-        );
-
-        const proximity =
-        Math.pow(
-            THREE.MathUtils.clamp(
-                normalized,
-                0,
-                1
-            ),
-            2
-        );
-
-        targetVolume =
-        proximity *
-        ENTITY_AUDIO_MAX_VOLUME;
-
-        /*
-            Very close range gets a stronger sound.
-        */
-        if(
-            distance <
-            ENTITY_AUDIO_MAX_VOLUME_DISTANCE
-        ){
-
-            const close =
-            1 -
-            (
-                distance /
-                ENTITY_AUDIO_MAX_VOLUME_DISTANCE
-            );
-
-            targetVolume =
-            Math.max(
-                targetVolume,
-                .45 +
-                close*.25
-            );
-        }
+        return;
     }
 
-    /*
-        Hiding makes the entity harder to hear.
-    */
-    if(hidden)
-        targetVolume*=.35;
+    const normalized =
+    THREE.MathUtils.clamp(
+        1 -
+        distance/
+        ENTITY_AUDIO_DISTANCE,
+        0,
+        1
+    );
 
     /*
-        Smooth volume changes.
+        Ease the volume curve so it becomes
+        noticeably louder as the entity gets close.
     */
-    const smoothing =
-    Math.min(
-        1,
-        ENTITY_AUDIO_SMOOTHING / 60
-    );
+    const curved =
+    normalized *
+    normalized;
+
+    const volume =
+    ENTITY_AUDIO_MIN_VOLUME +
+    (
+        1 -
+        ENTITY_AUDIO_MIN_VOLUME
+    ) *
+    curved;
 
     entityAudio.volume =
-    THREE.MathUtils.lerp(
-        entityAudio.volume,
-        targetVolume,
-        smoothing
+    THREE.MathUtils.clamp(
+        volume,
+        0,
+        1
     );
+
+    /*
+        If the audio was stopped for some reason,
+        try to resume it while the game is running.
+    */
+    if(entityAudio.paused){
+
+        entityAudio
+        .play()
+        .catch(()=>{});
+    }
 }
+
+const keys = {};
 
 /* =========================================================
    RENDERER
@@ -912,9 +810,7 @@ let wallTexture;
 let floorTexture;
 let ceilingTexture;
 
-function prepareTexture(
-    texture
-){
+function prepareTexture(texture){
 
     texture.colorSpace =
     THREE.SRGBColorSpace;
@@ -1113,9 +1009,7 @@ function isWalkable(x,y){
     );
 }
 
-function classifyPixel(
-    r,g,b,a
-){
+function classifyPixel(r,g,b,a){
 
     if(a<20)
         return "floor";
@@ -1336,10 +1230,6 @@ async function loadMap(){
         farthest;
     }
 
-    /*
-        EXIT LOCATION
-    */
-
     let candidates = [];
 
     for(
@@ -1457,9 +1347,7 @@ function createWallGeometry(){
     const s=TILE/2;
     const h=WALL_HEIGHT;
 
-    function face(
-        a,b,c,d,normal
-    ){
+    function face(a,b,c,d,normal){
 
         const base=p.length/3;
 
@@ -1609,9 +1497,7 @@ function buildWalls(){
     }
 }
 
-function collides(
-    x,z,r=.42
-){
+function collides(x,z,r=.42){
 
     for(
         const wall of wallColliders
@@ -2374,14 +2260,6 @@ function updateEntity(dt){
     )
         return;
 
-    /*
-        IMPORTANT:
-
-        The entity audio is NOT controlled by this.
-
-        The audio runs independently based on distance.
-    */
-
     if(!entityActive){
 
         entityTimer+=dt;
@@ -2404,6 +2282,12 @@ function updateEntity(dt){
             showMessage(
                 "SOMETHING IS HERE."
             );
+
+            /*
+                Start the looping audio when the entity
+                becomes active.
+            */
+            startEntityAudio();
         }
 
         return;
@@ -2454,6 +2338,12 @@ function updateEntity(dt){
     }
 
     updateEntityFacing();
+
+    /*
+        AUDIO IS UPDATED EVERY FRAME SO IT
+        FOLLOWS THE ENTITY'S DISTANCE.
+    */
+    updateEntityAudio();
 
     if(
         distance<1.15 &&
@@ -2538,6 +2428,12 @@ function updateFalling(dt){
 
     if(!falling)
         return;
+
+    /*
+        Silence the entity audio during the fall.
+    */
+    if(entityAudio)
+        entityAudio.volume=0;
 
     fallTime+=dt;
 
@@ -2980,7 +2876,7 @@ function resetGame(){
 }
 
 /* =========================================================
-   START
+   GAME START
 ========================================================= */
 
 function startGame(){
@@ -3008,14 +2904,18 @@ function startGame(){
     resetGame();
 
     /*
-        IMPORTANT:
-
-        This happens directly from the button click,
-        which gives the browser permission to play audio.
+        The user clicked the start button,
+        so this is a valid browser audio
+        activation point.
     */
-    createEntityAudio();
-
     startEntityAudio();
+
+    /*
+        Keep it silent until the entity
+        actually becomes active.
+    */
+    if(entityAudio)
+        entityAudio.volume=0;
 
     renderer.domElement
     .requestPointerLock()
@@ -3062,6 +2962,9 @@ function pauseGame(){
         return;
 
     paused=true;
+
+    if(entityAudio)
+        entityAudio.volume=0;
 
     document.getElementById(
         "pause"
@@ -3201,14 +3104,22 @@ document.getElementById(
         "pause"
     ).style.display="none";
 
-    /*
-        Resume audio if the browser paused it.
-    */
-    startEntityAudio();
-
     renderer.domElement
     .requestPointerLock()
     .catch(()=>{});
+
+    /*
+        Resume audio if the entity is active.
+    */
+    if(
+        entityActive &&
+        entityAudio
+    ){
+
+        entityAudio
+        .play()
+        .catch(()=>{});
+    }
 };
 
 document.getElementById(
@@ -3418,6 +3329,12 @@ async function init(){
 
     try{
 
+        /*
+            Load the entity audio immediately so the
+            browser has it ready when the entity appears.
+        */
+        createEntityAudio();
+
         wallTexture=
         await loadTexture(
             "./textures/wall.png"
@@ -3449,12 +3366,6 @@ async function init(){
         entityTexture=
         await loadEntityTexture();
 
-        /*
-            Prepare the audio early so the browser can
-            begin loading it before the game starts.
-        */
-        createEntityAudio();
-
         await loadMap();
 
         buildWalls();
@@ -3482,7 +3393,7 @@ async function init(){
 
         console.log(
             "Entity audio:",
-            ENTITY_AUDIO_PATH
+            "./sounds/entity.mp3"
         );
 
     }catch(error){
@@ -3524,10 +3435,8 @@ function animate(now){
     updateEntity(dt);
 
     /*
-        THIS is what makes the MP3 proximity based.
-
-        It runs every frame independently of the entity's
-        AI activation state.
+        This also keeps the volume correct if the
+        entity is moving around the player.
     */
     updateEntityAudio();
 
