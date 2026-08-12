@@ -503,20 +503,29 @@ const EXIT_WIDTH = 2.8;
 const EXIT_HEIGHT = 5.8;
 
 /*
-    ENTITY AUDIO
-
-    Maximum audible distance:
-    40 units.
-
-    At 40 units:
-    25% volume.
-
-    At 5 units or closer:
-    100% volume.
+    Entity spawning.
 */
-const ENTITY_AUDIO_MAX_DISTANCE = 40;
-const ENTITY_AUDIO_FULL_DISTANCE = 5;
-const ENTITY_AUDIO_MIN_VOLUME = .25;
+const ENTITY_MIN_SPAWN_DISTANCE = 25;
+const ENTITY_MAX_SPAWN_DISTANCE = 48;
+
+/*
+    Entity pathfinding.
+*/
+const ENTITY_PATH_RECALCULATE = .65;
+const ENTITY_PATH_TARGET_CHANGE = 2.0;
+const ENTITY_PATH_MAX_NODES = 18000;
+
+/*
+    Proximity audio.
+
+    50 units = silent
+    40 units = quiet
+    20 units = 25%
+    10 units = 55%
+    3 units = 100%
+*/
+const ENTITY_AUDIO_DISTANCE = 50;
+const ENTITY_AUDIO_FULL_DISTANCE = 3;
 
 /* =========================================================
    STATE
@@ -565,19 +574,218 @@ let hideSpots = [];
 
 let entity = null;
 let entityTexture = null;
-
 let entityWidth = ENTITY_HEIGHT;
 
-/*
-    ENTITY AUDIO
-*/
-let entityAudio = null;
+/* =========================================================
+   ENTITY PATHFINDING STATE
+========================================================= */
+
+let entityPath = [];
+let entityPathIndex = 0;
+
+let entityPathTimer = 0;
+
+let lastEntityTargetCell = {
+    x:-999999,
+    y:-999999
+};
 
 /*
-    Prevent repeatedly choosing the exact same
-    spawn when possible.
+    This prevents the entity from constantly recalculating
+    paths every frame.
 */
-let previousEntitySpawn = null;
+let entityPathGoal = null;
+
+/* =========================================================
+   ENTITY AUDIO
+========================================================= */
+
+let entityAudio = null;
+let audioUnlocked = false;
+
+/*
+    Audio is loaded from:
+
+        ./sounds/entity.mp3
+*/
+function setupEntityAudio(){
+
+    entityAudio =
+    new Audio(
+        "./sounds/entity.mp3"
+    );
+
+    entityAudio.loop = true;
+
+    entityAudio.preload = "auto";
+
+    entityAudio.volume = 0;
+
+    entityAudio.addEventListener(
+        "error",
+        ()=>{
+            console.warn(
+                "Could not load ./sounds/entity.mp3"
+            );
+        }
+    );
+}
+
+/*
+    Browsers require audio to be started after a user
+    interaction. The start button provides that interaction.
+*/
+async function unlockEntityAudio(){
+
+    if(!entityAudio)
+        return;
+
+    try{
+
+        entityAudio.volume = 0;
+
+        await entityAudio.play();
+
+        entityAudio.pause();
+
+        entityAudio.currentTime = 0;
+
+        audioUnlocked = true;
+
+    }catch(error){
+
+        console.warn(
+            "Audio unlock waiting for another interaction.",
+            error
+        );
+    }
+}
+
+function stopEntityAudio(){
+
+    if(!entityAudio)
+        return;
+
+    entityAudio.pause();
+
+    try{
+        entityAudio.currentTime=0;
+    }catch(e){}
+
+    entityAudio.volume=0;
+}
+
+function updateEntityAudio(){
+
+    if(
+        !entityAudio ||
+        !entityActive ||
+        !entity ||
+        !started ||
+        paused ||
+        dead ||
+        falling
+    ){
+
+        if(entityAudio)
+            entityAudio.volume=0;
+
+        return;
+    }
+
+    const distance =
+    Math.hypot(
+        player.position.x-
+        entity.position.x,
+
+        player.position.z-
+        entity.position.z
+    );
+
+    /*
+        Completely silent beyond the audio radius.
+    */
+    if(
+        distance >=
+        ENTITY_AUDIO_DISTANCE
+    ){
+
+        entityAudio.volume=0;
+
+        if(!entityAudio.paused)
+            entityAudio.pause();
+
+        return;
+    }
+
+    /*
+        Normalize distance.
+
+        0 = entity is right next to player.
+        1 = entity is at maximum audible distance.
+    */
+    const normalized =
+    THREE.MathUtils.clamp(
+        (
+            ENTITY_AUDIO_DISTANCE-
+            distance
+        )/
+        (
+            ENTITY_AUDIO_DISTANCE-
+            ENTITY_AUDIO_FULL_DISTANCE
+        ),
+        0,
+        1
+    );
+
+    /*
+        Smooth curve so the audio doesn't abruptly
+        jump in volume.
+    */
+    let volume =
+    normalized * normalized;
+
+    /*
+        At 20 units this gives roughly 25%.
+    */
+    if(
+        distance>=19 &&
+        distance<=21
+    ){
+
+        volume=.25;
+    }
+
+    /*
+        Make very close entity loud.
+    */
+    if(
+        distance<=ENTITY_AUDIO_FULL_DISTANCE
+    ){
+
+        volume=1;
+    }
+
+    entityAudio.volume =
+    THREE.MathUtils.clamp(
+        volume,
+        0,
+        1
+    );
+
+    if(
+        entityAudio.paused &&
+        audioUnlocked
+    ){
+
+        entityAudio.play()
+        .catch(()=>{});
+    }
+}
+
+/* =========================================================
+   INPUT
+========================================================= */
 
 const keys = {};
 
@@ -668,9 +876,7 @@ let wallTexture;
 let floorTexture;
 let ceilingTexture;
 
-function prepareTexture(
-    texture
-){
+function prepareTexture(texture){
 
     texture.colorSpace =
     THREE.SRGBColorSpace;
@@ -718,7 +924,8 @@ function loadTexture(path){
                 ()=>{
                     reject(
                         new Error(
-                            "Could not load:\n"+path
+                            "Could not load:\n"+
+                            path
                         )
                     );
                 }
@@ -792,226 +999,6 @@ function loadEntityTexture(){
 }
 
 /* =========================================================
-   ENTITY AUDIO
-========================================================= */
-
-function setupEntityAudio(){
-
-    /*
-        The audio file must be:
-
-        sounds/entity.mp3
-    */
-
-    entityAudio =
-    new Audio(
-        "./sounds/entity.mp3"
-    );
-
-    entityAudio.loop = true;
-
-    entityAudio.preload = "auto";
-
-    entityAudio.volume = 0;
-
-    /*
-        Loading errors are shown in the console rather
-        than stopping the entire game.
-    */
-    entityAudio.addEventListener(
-        "error",
-        ()=>{
-            console.error(
-                "Could not load ./sounds/entity.mp3"
-            );
-        }
-    );
-}
-
-/*
-    Browsers require audio playback to begin after
-    user interaction.
-
-    The START button counts as user interaction,
-    so this function is called when the game begins.
-*/
-function unlockEntityAudio(){
-
-    if(!entityAudio)
-        return;
-
-    entityAudio.muted = true;
-
-    const promise =
-    entityAudio.play();
-
-    if(
-        promise &&
-        promise.catch
-    ){
-
-        promise
-        .then(()=>{
-
-            entityAudio.pause();
-
-            entityAudio.currentTime=0;
-
-            entityAudio.muted=false;
-
-            entityAudio.volume=0;
-
-        })
-        .catch(()=>{
-
-            /*
-                If autoplay is blocked, the next
-                user interaction will try again.
-            */
-
-        });
-    }
-}
-
-/*
-    Calculate proximity volume.
-
-    0-5 units:
-        100%
-
-    5-40 units:
-        smoothly fades from 100% to 25%
-
-    40+ units:
-        silent
-*/
-function getEntityAudioVolume(
-    distance
-){
-
-    if(
-        distance >=
-        ENTITY_AUDIO_MAX_DISTANCE
-    )
-        return 0;
-
-    if(
-        distance <=
-        ENTITY_AUDIO_FULL_DISTANCE
-    )
-        return 1;
-
-    const range =
-    ENTITY_AUDIO_MAX_DISTANCE -
-    ENTITY_AUDIO_FULL_DISTANCE;
-
-    const progress =
-    (
-        ENTITY_AUDIO_MAX_DISTANCE -
-        distance
-    ) /
-    range;
-
-    /*
-        Smooth fade instead of a straight linear
-        change.
-    */
-    const smooth =
-    progress *
-    progress *
-    (
-        3 -
-        2*progress
-    );
-
-    return (
-        ENTITY_AUDIO_MIN_VOLUME +
-        (
-            1-
-            ENTITY_AUDIO_MIN_VOLUME
-        ) *
-        smooth
-    );
-}
-
-function updateEntityAudio(){
-
-    if(!entityAudio)
-        return;
-
-    /*
-        Audio should not continue while the game
-        is paused/dead/falling or before the entity
-        has become active.
-    */
-    if(
-        !started ||
-        paused ||
-        dead ||
-        falling ||
-        !entity ||
-        !entityActive
-    ){
-
-        entityAudio.volume=0;
-
-        if(!entityAudio.paused)
-            entityAudio.pause();
-
-        return;
-    }
-
-    const distance =
-    Math.hypot(
-        player.position.x -
-        entity.position.x,
-
-        player.position.z -
-        entity.position.z
-    );
-
-    const volume =
-    getEntityAudioVolume(
-        distance
-    );
-
-    entityAudio.volume =
-    volume;
-
-    if(volume>0){
-
-        if(
-            entityAudio.paused
-        ){
-
-            const playPromise =
-            entityAudio.play();
-
-            if(
-                playPromise &&
-                playPromise.catch
-            ){
-
-                playPromise.catch(
-                    ()=>{
-                        /*
-                            Browser may have blocked
-                            playback. It will retry
-                            on the next update.
-                        */
-                    }
-                );
-            }
-        }
-
-    }else{
-
-        if(!entityAudio.paused)
-            entityAudio.pause();
-    }
-}
-
-/* =========================================================
    MATERIALS
 ========================================================= */
 
@@ -1034,7 +1021,7 @@ new THREE.MeshBasicMaterial({
 });
 
 /* =========================================================
-   MAP
+   MAP HELPERS
 ========================================================= */
 
 function cellToWorld(x,y){
@@ -1085,9 +1072,14 @@ function isWalkable(x,y){
 
     return(
         inside(x,y) &&
-        map[y][x] !== "wall"
+        map[y][x] !== "wall" &&
+        map[y][x] !== "hole"
     );
 }
+
+/* =========================================================
+   MAP CLASSIFICATION
+========================================================= */
 
 function classifyPixel(
     r,g,b,a
@@ -1133,6 +1125,10 @@ function classifyPixel(
     return "floor";
 }
 
+/* =========================================================
+   MAP LOADING
+========================================================= */
+
 async function loadMap(){
 
     const image =
@@ -1175,7 +1171,9 @@ async function loadMap(){
     const ctx =
     canvas.getContext(
         "2d",
-        {willReadFrequently:true}
+        {
+            willReadFrequently:true
+        }
     );
 
     ctx.drawImage(
@@ -1207,7 +1205,7 @@ async function loadMap(){
         y++
     ){
 
-        const row = [];
+        const row=[];
 
         for(
             let x=0;
@@ -1218,7 +1216,7 @@ async function loadMap(){
             const i =
             (y*mapWidth+x)*4;
 
-            const type =
+            let type =
             classifyPixel(
                 pixels[i],
                 pixels[i+1],
@@ -1228,14 +1226,26 @@ async function loadMap(){
 
             row.push(type);
 
-            if(type!=="wall")
-                walkable.push({x,y});
+            if(
+                type!=="wall" &&
+                type!=="hole"
+            )
+                walkable.push({
+                    x,
+                    y
+                });
 
             if(type==="hide")
-                hideCells.push({x,y});
+                hideCells.push({
+                    x,
+                    y
+                });
 
             if(type==="hole")
-                holeCells.push({x,y});
+                holeCells.push({
+                    x,
+                    y
+                });
 
             if(
                 type==="spawn" &&
@@ -1243,17 +1253,11 @@ async function loadMap(){
             ){
 
                 playerSpawn =
-                cellToWorld(x,y);
+                cellToWorld(
+                    x,
+                    y
+                );
             }
-
-            /*
-                IMPORTANT:
-                We no longer permanently use the blue
-                entity marker as the entity spawn.
-
-                It is still recognized by the map, but
-                a random valid location is selected later.
-            */
 
             if(
                 type==="entity" &&
@@ -1261,7 +1265,10 @@ async function loadMap(){
             ){
 
                 entitySpawn =
-                cellToWorld(x,y);
+                cellToWorld(
+                    x,
+                    y
+                );
             }
         }
 
@@ -1285,54 +1292,27 @@ async function loadMap(){
     }
 
     /*
-        Keep the old fallback entity position,
-        but the actual spawn is randomized every
-        time resetGame() runs.
+        We don't permanently use the blue entity
+        marker as the spawn anymore.
+
+        It can still be used as a preferred spawn
+        if it happens to be a good distance away.
     */
+
     if(!entitySpawn){
 
-        let farthest = null;
-        let distance = -1;
-
-        for(
-            const cell of walkable
-        ){
-
-            if(
-                map[cell.y][cell.x]==="hole"
-            )
-                continue;
-
-            const p =
-            cellToWorld(
-                cell.x,
-                cell.y
-            );
-
-            const d =
-            Math.hypot(
-                p.x-playerSpawn.x,
-                p.z-playerSpawn.z
-            );
-
-            if(d>distance){
-
-                distance=d;
-                farthest=p;
-            }
-        }
-
         entitySpawn =
-        farthest;
+        findRandomEntitySpawn(
+            playerSpawn,
+            false
+        );
     }
 
     /*
-        =====================================================
-        FIND EXIT LOCATION
-        =====================================================
+        Exit location.
     */
 
-    let candidates = [];
+    let candidates=[];
 
     for(
         const cell of walkable
@@ -1344,7 +1324,7 @@ async function loadMap(){
         )
             continue;
 
-        let clear = true;
+        let clear=true;
 
         for(
             let yy=-2;
@@ -1436,42 +1416,39 @@ async function loadMap(){
 }
 
 /* =========================================================
-   RANDOM ENTITY SPAWN
+   RANDOM ENTITY SPAWNING
 ========================================================= */
 
-function chooseRandomEntitySpawn(){
+function findRandomEntitySpawn(
+    origin,
+    preferDistance=true
+){
 
-    if(
-        !walkable ||
-        walkable.length===0 ||
-        !playerSpawn
-    )
-        return;
+    if(!walkable.length)
+        return origin;
+
+    const originCell =
+    worldToCell(
+        origin.x,
+        origin.z
+    );
+
+    const candidates=[];
 
     /*
-        Build a list of valid spawn locations.
+        Gather possible cells.
 
-        The entity should not spawn directly beside
-        the player. This also prevents it from spawning
-        inside a hole.
+        This uses actual map cells rather than choosing
+        an arbitrary world coordinate, so the entity
+        always begins inside a walkable area.
     */
-    const candidates = [];
-
     for(
         const cell of walkable
     ){
 
         if(
-            !inside(
-                cell.x,
-                cell.y
-            )
-        )
-            continue;
-
-        if(
-            map[cell.y][cell.x]==="wall" ||
-            map[cell.y][cell.x]==="hole"
+            map[cell.y][cell.x]==="hole" ||
+            map[cell.y][cell.x]==="wall"
         )
             continue;
 
@@ -1481,102 +1458,180 @@ function chooseRandomEntitySpawn(){
             cell.y
         );
 
-        const distanceFromPlayer =
+        const distance =
         Math.hypot(
-            p.x-playerSpawn.x,
-            p.z-playerSpawn.z
+            p.x-origin.x,
+            p.z-origin.z
         );
 
-        /*
-            Don't spawn within 20 units of the
-            player's starting location.
-        */
         if(
-            distanceFromPlayer<20
-        )
-            continue;
-
-        /*
-            If possible, don't reuse the exact previous
-            spawn.
-        */
-        if(
-            previousEntitySpawn &&
-            Math.hypot(
-                p.x-previousEntitySpawn.x,
-                p.z-previousEntitySpawn.z
-            )<TILE*2
-        )
-            continue;
-
-        candidates.push(p);
-    }
-
-    /*
-        If the map is too small for the restrictions,
-        fall back to any valid walkable location
-        reasonably far from the player.
-    */
-    if(candidates.length===0){
-
-        for(
-            const cell of walkable
+            distance>=
+            ENTITY_MIN_SPAWN_DISTANCE &&
+            distance<=
+            ENTITY_MAX_SPAWN_DISTANCE
         ){
 
-            if(
-                map[cell.y][cell.x]==="wall" ||
-                map[cell.y][cell.x]==="hole"
-            )
-                continue;
+            /*
+                Don't spawn directly beside a wall.
+            */
+            let openNeighbors=0;
 
-            const p =
-            cellToWorld(
-                cell.x,
-                cell.y
-            );
+            const dirs=[
+                [1,0],
+                [-1,0],
+                [0,1],
+                [0,-1]
+            ];
 
-            const d =
-            Math.hypot(
-                p.x-playerSpawn.x,
-                p.z-playerSpawn.z
-            );
+            for(
+                const d of dirs
+            ){
 
-            if(d>10)
-                candidates.push(p);
+                if(
+                    isWalkable(
+                        cell.x+d[0],
+                        cell.y+d[1]
+                    )
+                )
+                    openNeighbors++;
+            }
+
+            if(openNeighbors>=2){
+
+                candidates.push({
+                    cell,
+                    position:p,
+                    distance
+                });
+            }
         }
     }
 
     /*
-        Final fallback.
-    */
-    if(candidates.length===0){
+        If there are good candidates, choose randomly
+        from them.
 
-        candidates.push({
-            x:entitySpawn.x,
-            z:entitySpawn.z
-        });
+        We don't simply choose the farthest because
+        that makes the entity appear in roughly the
+        same kind of location every time.
+    */
+    if(candidates.length){
+
+        /*
+            Shuffle first.
+        */
+        for(
+            let i=candidates.length-1;
+            i>0;
+            i--
+        ){
+
+            const j =
+            Math.floor(
+                Math.random()*(i+1)
+            );
+
+            [
+                candidates[i],
+                candidates[j]
+            ]=[
+                candidates[j],
+                candidates[i]
+            ];
+        }
+
+        /*
+            Prefer locations roughly 30-40 units away.
+        */
+        candidates.sort(
+            (a,b)=>{
+
+                const scoreA =
+                Math.abs(
+                    a.distance-34
+                );
+
+                const scoreB =
+                Math.abs(
+                    b.distance-34
+                );
+
+                return scoreA-scoreB;
+            }
+        );
+
+        const topCount =
+        Math.min(
+            candidates.length,
+            12
+        );
+
+        const selected =
+        candidates[
+            Math.floor(
+                Math.random()*topCount
+            )
+        ];
+
+        return selected.position;
     }
 
-    const selected =
-    candidates[
-        Math.floor(
-            Math.random()*
-            candidates.length
-        )
-    ];
+    /*
+        Fallback:
+        choose the farthest reachable cell.
+    */
 
-    previousEntitySpawn = {
-        x:selected.x,
-        z:selected.z
-    };
+    let best=null;
+    let bestDistance=-1;
 
-    entitySpawn = {
-        x:selected.x,
-        z:selected.z
+    for(
+        const cell of walkable
+    ){
+
+        const p =
+        cellToWorld(
+            cell.x,
+            cell.y
+        );
+
+        const distance =
+        Math.hypot(
+            p.x-origin.x,
+            p.z-origin.z
+        );
+
+        if(distance>bestDistance){
+
+            bestDistance=distance;
+            best=p;
+        }
+    }
+
+    return best || origin;
+}
+
+/* =========================================================
+   ENTITY SPAWN RESET
+========================================================= */
+
+function randomizeEntitySpawn(){
+
+    const spawn =
+    findRandomEntitySpawn(
+        player.position,
+        true
+    );
+
+    if(!spawn)
+        return;
+
+    entitySpawn={
+        x:spawn.x,
+        z:spawn.z
     };
 
     console.log(
-        "RANDOM ENTITY SPAWN:",
+        "ENTITY SPAWN:",
         entitySpawn.x,
         entitySpawn.z
     );
@@ -1719,7 +1774,10 @@ function buildWalls(){
                 continue;
 
             const p =
-            cellToWorld(x,y);
+            cellToWorld(
+                x,
+                y
+            );
 
             const mesh =
             new THREE.Mesh(
@@ -1737,19 +1795,26 @@ function buildWalls(){
 
             wallColliders.push({
 
-                minX:p.x-TILE/2,
-                maxX:p.x+TILE/2,
+                minX:
+                p.x-TILE/2,
 
-                minZ:p.z-TILE/2,
-                maxZ:p.z+TILE/2
+                maxX:
+                p.x+TILE/2,
 
+                minZ:
+                p.z-TILE/2,
+
+                maxZ:
+                p.z+TILE/2
             });
         }
     }
 }
 
 function collides(
-    x,z,r=.42
+    x,
+    z,
+    r=.42
 ){
 
     for(
@@ -1780,6 +1845,7 @@ function buildOptimizedFloor(){
     const i=[];
 
     let vertices=0;
+
     const h=TILE/2;
 
     for(
@@ -1805,7 +1871,10 @@ function buildOptimizedFloor(){
                 continue;
 
             const c =
-            cellToWorld(x,y);
+            cellToWorld(
+                x,
+                y
+            );
 
             p.push(
 
@@ -1892,6 +1961,7 @@ function buildOptimizedCeiling(){
     const i=[];
 
     let vertices=0;
+
     const h=TILE/2;
 
     for(
@@ -1912,7 +1982,10 @@ function buildOptimizedCeiling(){
                 continue;
 
             const c =
-            cellToWorld(x,y);
+            cellToWorld(
+                x,
+                y
+            );
 
             p.push(
 
@@ -2067,10 +2140,13 @@ function buildLights(){
                 continue;
 
             const p =
-            cellToWorld(x,y);
+            cellToWorld(
+                x,
+                y
+            );
 
             /*
-                EXACTLY 1 TILE.
+                EXACTLY ONE TILE.
             */
             const fixture =
             new THREE.Mesh(
@@ -2144,7 +2220,7 @@ function buildHideSpots(){
 }
 
 /* =========================================================
-   GREEN EXIT
+   EXIT
 ========================================================= */
 
 function createExit(){
@@ -2294,24 +2370,21 @@ function createExit(){
     });
 
     const glow =
-    new THREE.PlaneGeometry(
-        EXIT_WIDTH,
-        EXIT_HEIGHT
-    );
-
-    const glowMesh =
     new THREE.Mesh(
-        glow,
+        new THREE.PlaneGeometry(
+            EXIT_WIDTH,
+            EXIT_HEIGHT
+        ),
         glowMaterial
     );
 
-    glowMesh.position.set(
+    glow.position.set(
         0,
         EXIT_HEIGHT/2,
         .04
     );
 
-    group.add(glowMesh);
+    group.add(glow);
 
     const light =
     new THREE.PointLight(
@@ -2338,7 +2411,6 @@ function createExit(){
     canvas.getContext("2d");
 
     ctx.fillStyle="#063d12";
-
     ctx.fillRect(
         0,
         0,
@@ -2419,7 +2491,7 @@ function createExit(){
 
     world.add(group);
 
-    exitObject = {
+    exitObject={
         group,
         light,
         glow:floorGlow
@@ -2440,13 +2512,6 @@ function createEntity(){
 
     if(!entityTexture)
         return;
-
-    /*
-        IMPORTANT:
-        Pick a NEW random spawn every time the entity
-        is created.
-    */
-    chooseRandomEntitySpawn();
 
     const geometry =
     new THREE.PlaneGeometry(
@@ -2476,11 +2541,16 @@ function createEntity(){
 
     world.add(entity);
 
-    console.log(
-        "ENTITY CREATED AT:",
-        entity.position.x,
-        entity.position.z
-    );
+    entityPath=[];
+    entityPathIndex=0;
+    entityPathTimer=0;
+
+    entityPathGoal=null;
+
+    lastEntityTargetCell={
+        x:-999999,
+        y:-999999
+    };
 }
 
 function updateEntityFacing(){
@@ -2488,6 +2558,12 @@ function updateEntityFacing(){
     if(!entity)
         return;
 
+    /*
+        Billboard the PNG toward the player.
+
+        This keeps the PNG square/unaltered rather than
+        squishing it sideways.
+    */
     const dx =
     player.position.x-
     entity.position.x;
@@ -2504,7 +2580,660 @@ function updateEntityFacing(){
 }
 
 /* =========================================================
-   ENTITY AI
+   A* PATHFINDING
+========================================================= */
+
+function cellKey(x,y){
+
+    return (
+        x+
+        ","+
+        y
+    );
+}
+
+function heuristic(
+    ax,
+    ay,
+    bx,
+    by
+){
+
+    /*
+        Manhattan distance is good for the four-direction
+        movement used by the entity.
+    */
+    return Math.abs(
+        ax-bx
+    )+
+    Math.abs(
+        ay-by
+    );
+}
+
+function getPathNeighbors(
+    x,
+    y
+){
+
+    const result=[];
+
+    /*
+        The entity moves through the center of tiles.
+        Four-direction movement makes it much less likely
+        to cut through corners/walls.
+    */
+    const dirs=[
+        [1,0],
+        [-1,0],
+        [0,1],
+        [0,-1]
+    ];
+
+    for(
+        const d of dirs
+    ){
+
+        const nx =
+        x+d[0];
+
+        const ny =
+        y+d[1];
+
+        if(
+            !isWalkable(nx,ny)
+        )
+            continue;
+
+        /*
+            Prevent corner-hugging through extremely
+            tight spaces.
+
+            At least one adjacent perpendicular cell
+            must also be open when moving around a corner.
+        */
+        if(
+            d[0]!==0
+        ){
+
+            const up =
+            isWalkable(
+                x,
+                y-1
+            );
+
+            const down =
+            isWalkable(
+                x,
+                y+1
+            );
+
+            if(
+                !up &&
+                !down
+            )
+                continue;
+        }
+
+        if(
+            d[1]!==0
+        ){
+
+            const left =
+            isWalkable(
+                x-1,
+                y
+            );
+
+            const right =
+            isWalkable(
+                x+1,
+                y
+            );
+
+            if(
+                !left &&
+                !right
+            )
+                continue;
+        }
+
+        result.push({
+            x:nx,
+            y:ny
+        });
+    }
+
+    return result;
+}
+
+function findEntityPath(
+    startCell,
+    targetCell
+){
+
+    if(
+        !isWalkable(
+            startCell.x,
+            startCell.y
+        )
+    )
+        return [];
+
+    if(
+        !isWalkable(
+            targetCell.x,
+            targetCell.y
+        )
+    )
+        return [];
+
+    if(
+        startCell.x===targetCell.x &&
+        startCell.y===targetCell.y
+    )
+        return [startCell];
+
+    const open=[];
+
+    const closed=
+    new Set();
+
+    const gScore=
+    new Map();
+
+    const fScore=
+    new Map();
+
+    const cameFrom=
+    new Map();
+
+    const startKey=
+    cellKey(
+        startCell.x,
+        startCell.y
+    );
+
+    gScore.set(
+        startKey,
+        0
+    );
+
+    fScore.set(
+        startKey,
+        heuristic(
+            startCell.x,
+            startCell.y,
+            targetCell.x,
+            targetCell.y
+        )
+    );
+
+    open.push({
+        x:startCell.x,
+        y:startCell.y,
+        f:fScore.get(startKey)
+    });
+
+    let iterations=0;
+
+    while(
+        open.length &&
+        iterations<
+        ENTITY_PATH_MAX_NODES
+    ){
+
+        iterations++;
+
+        /*
+            Find the lowest f-score.
+        */
+        let bestIndex=0;
+
+        for(
+            let i=1;
+            i<open.length;
+            i++
+        ){
+
+            if(
+                open[i].f<
+                open[bestIndex].f
+            )
+                bestIndex=i;
+        }
+
+        const current=
+        open[
+            bestIndex
+        ];
+
+        open.splice(
+            bestIndex,
+            1
+        );
+
+        const currentKey=
+        cellKey(
+            current.x,
+            current.y
+        );
+
+        if(
+            current.x===
+            targetCell.x &&
+            current.y===
+            targetCell.y
+        ){
+
+            const path=[];
+
+            let key=currentKey;
+
+            let safety=0;
+
+            while(
+                key &&
+                safety<
+                ENTITY_PATH_MAX_NODES
+            ){
+
+                safety++;
+
+                const comma=
+                key.indexOf(",");
+
+                const x=
+                Number(
+                    key.slice(
+                        0,
+                        comma
+                    )
+                );
+
+                const y=
+                Number(
+                    key.slice(
+                        comma+1
+                    )
+                );
+
+                path.push({
+                    x,
+                    y
+                });
+
+                key=
+                cameFrom.get(key);
+            }
+
+            path.reverse();
+
+            return path;
+        }
+
+        closed.add(currentKey);
+
+        const neighbors=
+        getPathNeighbors(
+            current.x,
+            current.y
+        );
+
+        for(
+            const neighbor of neighbors
+        ){
+
+            const neighborKey=
+            cellKey(
+                neighbor.x,
+                neighbor.y
+            );
+
+            if(
+                closed.has(neighborKey)
+            )
+                continue;
+
+            const tentativeG=
+            (
+                gScore.get(
+                    currentKey
+                ) ?? Infinity
+            )+1;
+
+            const oldG=
+            gScore.get(
+                neighborKey
+            ) ?? Infinity;
+
+            if(
+                tentativeG<
+                oldG
+            ){
+
+                cameFrom.set(
+                    neighborKey,
+                    currentKey
+                );
+
+                gScore.set(
+                    neighborKey,
+                    tentativeG
+                );
+
+                const f=
+                tentativeG+
+                heuristic(
+                    neighbor.x,
+                    neighbor.y,
+                    targetCell.x,
+                    targetCell.y
+                );
+
+                fScore.set(
+                    neighborKey,
+                    f
+                );
+
+                /*
+                    Avoid adding the same node repeatedly
+                    when it is already waiting in open.
+                */
+                let alreadyOpen=false;
+
+                for(
+                    const item of open
+                ){
+
+                    if(
+                        item.x===
+                        neighbor.x &&
+                        item.y===
+                        neighbor.y
+                    ){
+
+                        alreadyOpen=true;
+
+                        if(f<item.f)
+                            item.f=f;
+
+                        break;
+                    }
+                }
+
+                if(!alreadyOpen){
+
+                    open.push({
+                        x:neighbor.x,
+                        y:neighbor.y,
+                        f
+                    });
+                }
+            }
+        }
+    }
+
+    /*
+        No path found.
+    */
+    return [];
+}
+
+/* =========================================================
+   ENTITY PATH UPDATE
+========================================================= */
+
+function shouldRecalculateEntityPath(){
+
+    if(!entity)
+        return false;
+
+    const targetCell=
+    worldToCell(
+        player.position.x,
+        player.position.z
+    );
+
+    const currentCell=
+    worldToCell(
+        entity.position.x,
+        entity.position.z
+    );
+
+    if(
+        !entityPath.length
+    )
+        return true;
+
+    if(
+        entityPathIndex>=
+        entityPath.length
+    )
+        return true;
+
+    if(
+        entityPathTimer>=
+        ENTITY_PATH_RECALCULATE
+    )
+        return true;
+
+    if(
+        Math.abs(
+            targetCell.x-
+            lastEntityTargetCell.x
+        )+
+        Math.abs(
+            targetCell.y-
+            lastEntityTargetCell.y
+        )>=1
+    ){
+
+        /*
+            Only force an immediate recalculation when
+            the player has moved a couple tiles away from
+            the previous path goal.
+        */
+        const targetWorld=
+        cellToWorld(
+            lastEntityTargetCell.x,
+            lastEntityTargetCell.y
+        );
+
+        const targetMovement=
+        Math.hypot(
+            targetWorld.x-
+            player.position.x,
+
+            targetWorld.z-
+            player.position.z
+        );
+
+        if(
+            targetMovement>
+            ENTITY_PATH_TARGET_CHANGE
+        )
+            return true;
+    }
+
+    /*
+        If entity somehow leaves the current path,
+        calculate again.
+    */
+    const currentPathCell=
+    entityPath[
+        Math.min(
+            entityPathIndex,
+            entityPath.length-1
+        )
+    ];
+
+    if(
+        currentPathCell
+    ){
+
+        const currentPathWorld=
+        cellToWorld(
+            currentPathCell.x,
+            currentPathCell.y
+        );
+
+        const distanceFromPath=
+        Math.hypot(
+            entity.position.x-
+            currentPathWorld.x,
+
+            entity.position.z-
+            currentPathWorld.z
+        );
+
+        if(
+            distanceFromPath>
+            TILE*1.6
+        )
+            return true;
+    }
+
+    return false;
+}
+
+function recalculateEntityPath(){
+
+    if(!entity)
+        return;
+
+    const startCell=
+    worldToCell(
+        entity.position.x,
+        entity.position.z
+    );
+
+    let targetCell=
+    worldToCell(
+        player.position.x,
+        player.position.z
+    );
+
+    /*
+        If the player is inside a hole or another invalid
+        cell, search nearby for the closest valid target.
+    */
+    if(
+        !isWalkable(
+            targetCell.x,
+            targetCell.y
+        )
+    ){
+
+        let best=null;
+        let bestDistance=Infinity;
+
+        for(
+            let radius=1;
+            radius<=5;
+            radius++
+        ){
+
+            for(
+                let yy=-radius;
+                yy<=radius;
+                yy++
+            ){
+
+                for(
+                    let xx=-radius;
+                    xx<=radius;
+                    xx++
+                ){
+
+                    const cx=
+                    targetCell.x+xx;
+
+                    const cy=
+                    targetCell.y+yy;
+
+                    if(
+                        !isWalkable(
+                            cx,
+                            cy
+                        )
+                    )
+                        continue;
+
+                    const d=
+                    Math.abs(xx)+
+                    Math.abs(yy);
+
+                    if(
+                        d<bestDistance
+                    ){
+
+                        bestDistance=d;
+
+                        best={
+                            x:cx,
+                            y:cy
+                        };
+                    }
+                }
+            }
+
+            if(best)
+                break;
+        }
+
+        if(best)
+            targetCell=best;
+    }
+
+    const path=
+    findEntityPath(
+        startCell,
+        targetCell
+    );
+
+    if(path.length){
+
+        entityPath=path;
+
+        /*
+            Skip the tile the entity is already standing on.
+        */
+        entityPathIndex=
+        path.length>1
+        ? 1
+        : 0;
+
+        lastEntityTargetCell={
+            x:targetCell.x,
+            y:targetCell.y
+        };
+
+        entityPathGoal={
+            x:targetCell.x,
+            y:targetCell.y
+        };
+
+    }else{
+
+        /*
+            Don't erase a good old path if a single
+            recalculation happens to fail.
+        */
+        if(
+            !entityPath.length
+        ){
+
+            entityPath=[];
+            entityPathIndex=0;
+        }
+    }
+
+    entityPathTimer=0;
+}
+
+/* =========================================================
+   ENTITY MOVEMENT
 ========================================================= */
 
 function getEntitySpeed(){
@@ -2521,6 +3250,117 @@ function getEntitySpeed(){
     return 6.7;
 }
 
+function moveEntityAlongPath(dt){
+
+    if(
+        !entity ||
+        !entityPath.length
+    )
+        return;
+
+    if(
+        entityPathIndex>=
+        entityPath.length
+    )
+        return;
+
+    const targetCell=
+    entityPath[
+        entityPathIndex
+    ];
+
+    const target=
+    cellToWorld(
+        targetCell.x,
+        targetCell.y
+    );
+
+    const dx=
+    target.x-
+    entity.position.x;
+
+    const dz=
+    target.z-
+    entity.position.z;
+
+    const distance=
+    Math.hypot(
+        dx,
+        dz
+    );
+
+    const speed=
+    getEntitySpeed();
+
+    if(
+        distance<.12
+    ){
+
+        entity.position.x=
+        target.x;
+
+        entity.position.z=
+        target.z;
+
+        entityPathIndex++;
+
+        return;
+    }
+
+    const step=
+    Math.min(
+        distance,
+        speed*dt
+    );
+
+    const nx=
+    entity.position.x+
+    (dx/distance)*step;
+
+    const nz=
+    entity.position.z+
+    (dz/distance)*step;
+
+    /*
+        Extra physical collision check.
+
+        A* should already keep the entity out of walls,
+        but this is a second safety layer.
+    */
+    if(
+        !collides(
+            nx,
+            entity.position.z,
+            .35
+        )
+    ){
+
+        entity.position.x=
+        nx;
+    }
+
+    if(
+        !collides(
+            entity.position.x,
+            nz,
+            .35
+        )
+    ){
+
+        entity.position.z=
+        nz;
+    }
+
+    /*
+        If it gets stuck against something, force a new
+        path next update.
+    */
+}
+
+/* =========================================================
+   ENTITY AI
+========================================================= */
+
 function updateEntity(dt){
 
     if(
@@ -2529,12 +3369,8 @@ function updateEntity(dt){
         dead ||
         falling ||
         !entity
-    ){
-
-        updateEntityAudio();
-
+    )
         return;
-    }
 
     if(!entityActive){
 
@@ -2551,74 +3387,55 @@ function updateEntity(dt){
         if(difficulty==="nightmare")
             delay=12;
 
-        if(entityTimer>=delay){
+        if(
+            entityTimer>=delay
+        ){
 
             entityActive=true;
+
+            entityPath=[];
+            entityPathIndex=0;
+            entityPathTimer=999;
 
             showMessage(
                 "SOMETHING IS HERE."
             );
-        }
 
-        updateEntityAudio();
+            /*
+                Immediately make sure the audio starts
+                when the entity becomes active.
+            */
+            unlockEntityAudio();
+        }
 
         return;
     }
 
-    const dx =
-    player.position.x-
-    entity.position.x;
+    entityPathTimer+=dt;
 
-    const dz =
-    player.position.z-
-    entity.position.z;
+    if(
+        shouldRecalculateEntityPath()
+    ){
 
-    const distance =
-    Math.hypot(dx,dz);
-
-    if(distance>.5){
-
-        const nx =
-        entity.position.x+
-        (dx/distance)*
-        getEntitySpeed()*
-        dt;
-
-        const nz =
-        entity.position.z+
-        (dz/distance)*
-        getEntitySpeed()*
-        dt;
-
-        if(
-            !collides(
-                nx,
-                entity.position.z,
-                .35
-            )
-        )
-            entity.position.x=nx;
-
-        if(
-            !collides(
-                entity.position.x,
-                nz,
-                .35
-            )
-        )
-            entity.position.z=nz;
+        recalculateEntityPath();
     }
+
+    moveEntityAlongPath(dt);
 
     updateEntityFacing();
 
-    /*
-        NEW:
-        Update the proximity audio after the entity
-        has moved so the volume is based on its
-        current distance.
-    */
-    updateEntityAudio();
+    const distance=
+    Math.hypot(
+        player.position.x-
+        entity.position.x,
 
+        player.position.z-
+        entity.position.z
+    );
+
+    /*
+        Very close = caught.
+    */
     if(
         distance<1.15 &&
         !hidden
@@ -2634,12 +3451,15 @@ function updateEntity(dt){
    MOVEMENT
 ========================================================= */
 
-function movePlayer(dx,dz){
+function movePlayer(
+    dx,
+    dz
+){
 
-    const nx =
+    const nx=
     player.position.x+dx;
 
-    const nz =
+    const nz=
     player.position.z+dz;
 
     if(
@@ -2665,7 +3485,7 @@ function movePlayer(dx,dz){
 
 function playerOverHole(){
 
-    const cell =
+    const cell=
     worldToCell(
         player.position.x,
         player.position.z
@@ -2686,18 +3506,23 @@ function playerOverHole(){
 
 function startFalling(){
 
-    if(falling||dead)
+    if(
+        falling ||
+        dead
+    )
         return;
 
     falling=true;
-    fallTime=0;
-    velocityY=0;
 
-    updateEntityAudio();
+    fallTime=0;
+
+    velocityY=0;
 
     showMessage(
         "THE FLOOR GIVES WAY..."
     );
+
+    stopEntityAudio();
 }
 
 function updateFalling(dt){
@@ -2707,31 +3532,36 @@ function updateFalling(dt){
 
     fallTime+=dt;
 
-    if(fallTime>=.18){
+    if(
+        fallTime>=.18
+    ){
 
-        const t =
+        const t=
         Math.min(
             1,
             (fallTime-.18)/1.12
         );
 
-        player.position.y =
+        player.position.y=
         -(t*t*15);
 
-        camera.position.y =
+        camera.position.y=
         PLAYER_HEIGHT-
         t*1.35;
 
-        camera.rotation.x =
-        pitch+t*.48;
+        camera.rotation.x=
+        pitch+
+        t*.48;
 
-        camera.rotation.z =
+        camera.rotation.z=
         Math.sin(
             t*24
         )*.045*t;
     }
 
-    if(fallTime>=1.3){
+    if(
+        fallTime>=1.3
+    ){
 
         die(
             "THE FLOOR TOOK YOU."
@@ -2752,25 +3582,27 @@ function updateHiding(){
         const spot of hideSpots
     ){
 
-        const d =
+        const d=
         Math.hypot(
             player.position.x-spot.x,
             player.position.z-spot.z
         );
 
-        if(d<closestDistance){
+        if(
+            d<closestDistance
+        ){
 
             closestDistance=d;
             closest=spot;
         }
     }
 
-    const hideText =
+    const hideText=
     document.getElementById(
         "hideText"
     );
 
-    const hiddenText =
+    const hiddenText=
     document.getElementById(
         "hiddenText"
     );
@@ -2791,11 +3623,13 @@ function updateHiding(){
     ){
 
         hidden=true;
+
         hiddenText.style.opacity="1";
 
     }else{
 
         hidden=false;
+
         hiddenText.style.opacity="0";
     }
 }
@@ -2813,10 +3647,10 @@ function checkExit(){
     )
         return;
 
-    const exit =
+    const exit=
     exitObject.group;
 
-    const local =
+    const local=
     new THREE.Vector3();
 
     local.copy(
@@ -2827,16 +3661,16 @@ function checkExit(){
         local
     );
 
-    const insideDoor =
-    Math.abs(local.x) <
+    const insideDoor=
+    Math.abs(local.x)<
     EXIT_WIDTH*.5;
 
-    const correctHeight =
-    player.position.y <
+    const correctHeight=
+    player.position.y<
     EXIT_HEIGHT;
 
-    const throughDoor =
-    Math.abs(local.z) <
+    const throughDoor=
+    Math.abs(local.z)<
     1.15;
 
     if(
@@ -2856,26 +3690,26 @@ function winGame(){
 
     dead=true;
 
-    updateEntityAudio();
+    stopEntityAudio();
 
     document.querySelector(
         "#death .deathTitle"
-    ).textContent =
+    ).textContent=
     "ESCAPED";
 
     document.querySelector(
         "#death .deathTitle"
-    ).style.color =
+    ).style.color=
     "#39ff62";
 
     document.getElementById(
         "deathReason"
-    ).textContent =
+    ).textContent=
     "YOU FOUND THE EXIT.";
 
     document.getElementById(
         "death"
-    ).style.display =
+    ).style.display=
     "flex";
 
     if(
@@ -2900,23 +3734,31 @@ function updatePlayer(dt){
     if(falling){
 
         updateFalling(dt);
+
         return;
     }
 
     let forward=0;
     let strafe=0;
 
-    if(keys.w)forward++;
-    if(keys.s)forward--;
-    if(keys.d)strafe++;
-    if(keys.a)strafe--;
+    if(keys.w)
+        forward++;
+
+    if(keys.s)
+        forward--;
+
+    if(keys.d)
+        strafe++;
+
+    if(keys.a)
+        strafe--;
 
     if(
         forward!==0 ||
         strafe!==0
     ){
 
-        const length =
+        const length=
         Math.hypot(
             forward,
             strafe
@@ -2925,7 +3767,7 @@ function updatePlayer(dt){
         forward/=length;
         strafe/=length;
 
-        let speed =
+        let speed=
         keys.shift
         ? SPRINT_SPEED
         : WALK_SPEED;
@@ -2933,13 +3775,13 @@ function updatePlayer(dt){
         if(crouching)
             speed*=.55;
 
-        const sin =
+        const sin=
         Math.sin(yaw);
 
-        const cos =
+        const cos=
         Math.cos(yaw);
 
-        const dx =
+        const dx=
         (
             strafe*cos-
             forward*sin
@@ -2947,7 +3789,7 @@ function updatePlayer(dt){
         speed*
         dt;
 
-        const dz =
+        const dz=
         (
             -forward*cos-
             strafe*sin
@@ -2961,10 +3803,10 @@ function updatePlayer(dt){
         );
     }
 
-    velocityY -=
+    velocityY-=
     GRAVITY*dt;
 
-    player.position.y +=
+    player.position.y+=
     velocityY*dt;
 
     if(
@@ -2972,7 +3814,9 @@ function updatePlayer(dt){
     ){
 
         player.position.y=0;
+
         velocityY=0;
+
         grounded=true;
 
     }else{
@@ -2994,12 +3838,12 @@ function updatePlayer(dt){
         keys.spacePressed=false;
     }
 
-    const targetHeight =
+    const targetHeight=
     crouching
     ? CROUCH_HEIGHT
     : PLAYER_HEIGHT;
 
-    camera.position.y =
+    camera.position.y=
     THREE.MathUtils.lerp(
         camera.position.y,
         targetHeight,
@@ -3040,7 +3884,9 @@ function updateMessage(dt){
 
     messageTimer-=dt;
 
-    if(messageTimer<=0){
+    if(
+        messageTimer<=0
+    ){
 
         document.getElementById(
             "message"
@@ -3059,7 +3905,7 @@ function die(reason){
 
     dead=true;
 
-    updateEntityAudio();
+    stopEntityAudio();
 
     document.getElementById(
         "deathReason"
@@ -3067,15 +3913,18 @@ function die(reason){
 
     document.querySelector(
         "#death .deathTitle"
-    ).textContent="YOU DIED";
+    ).textContent=
+    "YOU DIED";
 
     document.querySelector(
         "#death .deathTitle"
-    ).style.color="#850000";
+    ).style.color=
+    "#850000";
 
     document.getElementById(
         "death"
-    ).style.display="flex";
+    ).style.display=
+    "flex";
 
     if(
         document.pointerLockElement
@@ -3131,40 +3980,44 @@ function resetGame(){
     entityActive=false;
 
     /*
-        Stop the old entity audio before creating
-        the newly randomized entity.
+        NEW:
+        Randomize the entity every time the player
+        starts/restarts.
     */
-    if(entityAudio){
-
-        entityAudio.pause();
-
-        entityAudio.currentTime=0;
-
-        entityAudio.volume=0;
-    }
+    randomizeEntitySpawn();
 
     if(entity){
 
         world.remove(entity);
 
         entity.geometry.dispose();
+
         entity.material.dispose();
 
         entity=null;
     }
 
-    /*
-        createEntity() now automatically chooses
-        a randomized spawn.
-    */
+    entityPath=[];
+    entityPathIndex=0;
+    entityPathTimer=0;
+
+    entityPathGoal=null;
+
+    lastEntityTargetCell={
+        x:-999999,
+        y:-999999
+    };
+
     createEntity();
+
+    stopEntityAudio();
 }
 
 /* =========================================================
    GAME START
 ========================================================= */
 
-function startGame(){
+async function startGame(){
 
     document.getElementById(
         "menu"
@@ -3186,12 +4039,12 @@ function startGame(){
     paused=false;
     dead=false;
 
-    /*
-        Unlock audio using the user's button click.
-    */
-    unlockEntityAudio();
-
     resetGame();
+
+    /*
+        Unlock audio from the button click.
+    */
+    await unlockEntityAudio();
 
     renderer.domElement
     .requestPointerLock()
@@ -3204,18 +4057,7 @@ function goMainMenu(){
     paused=false;
     dead=false;
 
-    /*
-        Stop proximity audio when returning
-        to the main menu.
-    */
-    if(entityAudio){
-
-        entityAudio.volume=0;
-
-        entityAudio.pause();
-
-        entityAudio.currentTime=0;
-    }
+    stopEntityAudio();
 
     document.getElementById(
         "pause"
@@ -3250,7 +4092,8 @@ function pauseGame(){
 
     paused=true;
 
-    updateEntityAudio();
+    if(entityAudio)
+        entityAudio.volume=0;
 
     document.getElementById(
         "pause"
@@ -3270,7 +4113,7 @@ window.addEventListener(
     "keydown",
     e=>{
 
-        const key =
+        const key=
         e.key.toLowerCase();
 
         if(key==="escape"){
@@ -3319,7 +4162,7 @@ window.addEventListener(
     "keyup",
     e=>{
 
-        const key =
+        const key=
         e.key.toLowerCase();
 
         if(key===" ")
@@ -3367,8 +4210,11 @@ document.addEventListener(
             1.45
         );
 
-        player.rotation.y=yaw;
-        camera.rotation.x=pitch;
+        player.rotation.y=
+        yaw;
+
+        camera.rotation.x=
+        pitch;
     }
 );
 
@@ -3391,9 +4237,11 @@ document.getElementById(
     ).style.display="none";
 
     /*
-        Audio will automatically resume according
-        to proximity in updateEntityAudio().
+        Audio is allowed to resume from the button
+        interaction.
     */
+    unlockEntityAudio();
+
     renderer.domElement
     .requestPointerLock()
     .catch(()=>{});
@@ -3447,10 +4295,17 @@ document.getElementById(
 ========================================================= */
 
 const difficultyButtons={
-    easy:document.getElementById("easy"),
-    normal:document.getElementById("normal"),
-    hard:document.getElementById("hard"),
-    nightmare:document.getElementById("nightmare")
+    easy:
+    document.getElementById("easy"),
+
+    normal:
+    document.getElementById("normal"),
+
+    hard:
+    document.getElementById("hard"),
+
+    nightmare:
+    document.getElementById("nightmare")
 };
 
 function chooseDifficulty(value){
@@ -3480,7 +4335,10 @@ for(
 
     difficultyButtons[name].onclick=
     ()=>{
-        chooseDifficulty(name);
+
+        chooseDifficulty(
+            name
+        );
     };
 }
 
@@ -3488,7 +4346,7 @@ for(
    MENU SLIDESHOW
 ========================================================= */
 
-const menuImages =
+const menuImages=
 document.querySelectorAll(
     ".menuImage"
 );
@@ -3498,7 +4356,9 @@ let menuIndex=0;
 setInterval(
     ()=>{
 
-        if(!menuImages.length)
+        if(
+            !menuImages.length
+        )
             return;
 
         menuImages[
@@ -3530,10 +4390,14 @@ setInterval(
 function updateHUD(){
 
     const total=
-    Math.floor(elapsed);
+    Math.floor(
+        elapsed
+    );
 
     const hours=
-    Math.floor(total/3600);
+    Math.floor(
+        total/3600
+    );
 
     const minutes=
     Math.floor(
@@ -3606,6 +4470,11 @@ async function init(){
 
     try{
 
+        /*
+            Set up entity audio first.
+        */
+        setupEntityAudio();
+
         wallTexture=
         await loadTexture(
             "./textures/wall.png"
@@ -3637,11 +4506,6 @@ async function init(){
         entityTexture=
         await loadEntityTexture();
 
-        /*
-            Set up entity.mp3.
-        */
-        setupEntityAudio();
-
         await loadMap();
 
         buildWalls();
@@ -3663,13 +4527,25 @@ async function init(){
         );
 
         console.log(
-            "Exit:",
-            exitPosition
+            "MAP:",
+            mapWidth,
+            "x",
+            mapHeight
         );
 
         console.log(
-            "Entity audio:",
-            "./sounds/entity.mp3"
+            "PLAYER SPAWN:",
+            playerSpawn
+        );
+
+        console.log(
+            "ENTITY INITIAL SPAWN:",
+            entitySpawn
+        );
+
+        console.log(
+            "EXIT:",
+            exitPosition
         );
 
     }catch(error){
@@ -3710,16 +4586,15 @@ function animate(now){
 
     updateEntity(dt);
 
-    /*
-        Keep the audio updated every frame so the
-        volume smoothly follows the entity.
-    */
     updateEntityAudio();
 
     updateMessage(dt);
 
     updateHUD();
 
+    /*
+        Slowly pulse exit.
+    */
     if(exitObject){
 
         const pulse=
@@ -3744,10 +4619,14 @@ function animate(now){
     );
 }
 
+/* =========================================================
+   START
+========================================================= */
+
 init();
 
 requestAnimationFrame(
-animate
+    animate
 );
 
 </script>
