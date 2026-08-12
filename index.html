@@ -505,11 +505,17 @@ const EXIT_HEIGHT = 5.8;
 /*
     ENTITY AUDIO
 
-    20 units = 25% volume.
-    Closer than 20 units gets progressively louder.
-    Farther than 20 units is silent.
+    Maximum audible distance:
+    40 units.
+
+    At 40 units:
+    25% volume.
+
+    At 5 units or closer:
+    100% volume.
 */
-const ENTITY_AUDIO_DISTANCE = 20;
+const ENTITY_AUDIO_MAX_DISTANCE = 40;
+const ENTITY_AUDIO_FULL_DISTANCE = 5;
 const ENTITY_AUDIO_MIN_VOLUME = .25;
 
 /* =========================================================
@@ -559,167 +565,19 @@ let hideSpots = [];
 
 let entity = null;
 let entityTexture = null;
+
 let entityWidth = ENTITY_HEIGHT;
 
-/* =========================================================
-   ENTITY AUDIO
-========================================================= */
-
+/*
+    ENTITY AUDIO
+*/
 let entityAudio = null;
 
-function createEntityAudio(){
-
-    /*
-        The file MUST be located at:
-
-        sounds/entity.mp3
-    */
-
-    entityAudio =
-    new Audio("./sounds/entity.mp3");
-
-    entityAudio.loop = true;
-
-    /*
-        Start at zero so it never suddenly blasts
-        when the entity becomes active.
-    */
-    entityAudio.volume = 0;
-
-    entityAudio.preload = "auto";
-
-    entityAudio.addEventListener(
-        "error",
-        ()=>{
-            console.warn(
-                "Could not load ./sounds/entity.mp3"
-            );
-        }
-    );
-}
-
-function startEntityAudio(){
-
-    if(!entityAudio)
-        return;
-
-    /*
-        Browsers generally allow this because
-        startGame() is called directly by the
-        ENTER LEVEL 0 button.
-    */
-    entityAudio
-    .play()
-    .catch(
-        error=>{
-            console.warn(
-                "Entity audio could not start:",
-                error
-            );
-        }
-    );
-}
-
-function stopEntityAudio(){
-
-    if(!entityAudio)
-        return;
-
-    entityAudio.pause();
-
-    entityAudio.currentTime=0;
-
-    entityAudio.volume=0;
-}
-
-function updateEntityAudio(){
-
-    if(
-        !entityAudio ||
-        !entity ||
-        !entityActive ||
-        !started ||
-        paused ||
-        dead ||
-        falling
-    ){
-
-        if(entityAudio)
-            entityAudio.volume=0;
-
-        return;
-    }
-
-    const dx =
-    player.position.x -
-    entity.position.x;
-
-    const dz =
-    player.position.z -
-    entity.position.z;
-
-    const distance =
-    Math.hypot(dx,dz);
-
-    /*
-        0 units = 100%
-        5 units = about 81%
-        10 units = about 63%
-        15 units = about 44%
-        20 units = 25%
-        >20 units = 0%
-    */
-
-    if(distance>=ENTITY_AUDIO_DISTANCE){
-
-        entityAudio.volume=0;
-
-        return;
-    }
-
-    const normalized =
-    THREE.MathUtils.clamp(
-        1 -
-        distance/
-        ENTITY_AUDIO_DISTANCE,
-        0,
-        1
-    );
-
-    /*
-        Ease the volume curve so it becomes
-        noticeably louder as the entity gets close.
-    */
-    const curved =
-    normalized *
-    normalized;
-
-    const volume =
-    ENTITY_AUDIO_MIN_VOLUME +
-    (
-        1 -
-        ENTITY_AUDIO_MIN_VOLUME
-    ) *
-    curved;
-
-    entityAudio.volume =
-    THREE.MathUtils.clamp(
-        volume,
-        0,
-        1
-    );
-
-    /*
-        If the audio was stopped for some reason,
-        try to resume it while the game is running.
-    */
-    if(entityAudio.paused){
-
-        entityAudio
-        .play()
-        .catch(()=>{});
-    }
-}
+/*
+    Prevent repeatedly choosing the exact same
+    spawn when possible.
+*/
+let previousEntitySpawn = null;
 
 const keys = {};
 
@@ -810,7 +668,9 @@ let wallTexture;
 let floorTexture;
 let ceilingTexture;
 
-function prepareTexture(texture){
+function prepareTexture(
+    texture
+){
 
     texture.colorSpace =
     THREE.SRGBColorSpace;
@@ -932,6 +792,226 @@ function loadEntityTexture(){
 }
 
 /* =========================================================
+   ENTITY AUDIO
+========================================================= */
+
+function setupEntityAudio(){
+
+    /*
+        The audio file must be:
+
+        sounds/entity.mp3
+    */
+
+    entityAudio =
+    new Audio(
+        "./sounds/entity.mp3"
+    );
+
+    entityAudio.loop = true;
+
+    entityAudio.preload = "auto";
+
+    entityAudio.volume = 0;
+
+    /*
+        Loading errors are shown in the console rather
+        than stopping the entire game.
+    */
+    entityAudio.addEventListener(
+        "error",
+        ()=>{
+            console.error(
+                "Could not load ./sounds/entity.mp3"
+            );
+        }
+    );
+}
+
+/*
+    Browsers require audio playback to begin after
+    user interaction.
+
+    The START button counts as user interaction,
+    so this function is called when the game begins.
+*/
+function unlockEntityAudio(){
+
+    if(!entityAudio)
+        return;
+
+    entityAudio.muted = true;
+
+    const promise =
+    entityAudio.play();
+
+    if(
+        promise &&
+        promise.catch
+    ){
+
+        promise
+        .then(()=>{
+
+            entityAudio.pause();
+
+            entityAudio.currentTime=0;
+
+            entityAudio.muted=false;
+
+            entityAudio.volume=0;
+
+        })
+        .catch(()=>{
+
+            /*
+                If autoplay is blocked, the next
+                user interaction will try again.
+            */
+
+        });
+    }
+}
+
+/*
+    Calculate proximity volume.
+
+    0-5 units:
+        100%
+
+    5-40 units:
+        smoothly fades from 100% to 25%
+
+    40+ units:
+        silent
+*/
+function getEntityAudioVolume(
+    distance
+){
+
+    if(
+        distance >=
+        ENTITY_AUDIO_MAX_DISTANCE
+    )
+        return 0;
+
+    if(
+        distance <=
+        ENTITY_AUDIO_FULL_DISTANCE
+    )
+        return 1;
+
+    const range =
+    ENTITY_AUDIO_MAX_DISTANCE -
+    ENTITY_AUDIO_FULL_DISTANCE;
+
+    const progress =
+    (
+        ENTITY_AUDIO_MAX_DISTANCE -
+        distance
+    ) /
+    range;
+
+    /*
+        Smooth fade instead of a straight linear
+        change.
+    */
+    const smooth =
+    progress *
+    progress *
+    (
+        3 -
+        2*progress
+    );
+
+    return (
+        ENTITY_AUDIO_MIN_VOLUME +
+        (
+            1-
+            ENTITY_AUDIO_MIN_VOLUME
+        ) *
+        smooth
+    );
+}
+
+function updateEntityAudio(){
+
+    if(!entityAudio)
+        return;
+
+    /*
+        Audio should not continue while the game
+        is paused/dead/falling or before the entity
+        has become active.
+    */
+    if(
+        !started ||
+        paused ||
+        dead ||
+        falling ||
+        !entity ||
+        !entityActive
+    ){
+
+        entityAudio.volume=0;
+
+        if(!entityAudio.paused)
+            entityAudio.pause();
+
+        return;
+    }
+
+    const distance =
+    Math.hypot(
+        player.position.x -
+        entity.position.x,
+
+        player.position.z -
+        entity.position.z
+    );
+
+    const volume =
+    getEntityAudioVolume(
+        distance
+    );
+
+    entityAudio.volume =
+    volume;
+
+    if(volume>0){
+
+        if(
+            entityAudio.paused
+        ){
+
+            const playPromise =
+            entityAudio.play();
+
+            if(
+                playPromise &&
+                playPromise.catch
+            ){
+
+                playPromise.catch(
+                    ()=>{
+                        /*
+                            Browser may have blocked
+                            playback. It will retry
+                            on the next update.
+                        */
+                    }
+                );
+            }
+        }
+
+    }else{
+
+        if(!entityAudio.paused)
+            entityAudio.pause();
+    }
+}
+
+/* =========================================================
    MATERIALS
 ========================================================= */
 
@@ -1009,7 +1089,9 @@ function isWalkable(x,y){
     );
 }
 
-function classifyPixel(r,g,b,a){
+function classifyPixel(
+    r,g,b,a
+){
 
     if(a<20)
         return "floor";
@@ -1164,6 +1246,15 @@ async function loadMap(){
                 cellToWorld(x,y);
             }
 
+            /*
+                IMPORTANT:
+                We no longer permanently use the blue
+                entity marker as the entity spawn.
+
+                It is still recognized by the map, but
+                a random valid location is selected later.
+            */
+
             if(
                 type==="entity" &&
                 !entitySpawn
@@ -1193,6 +1284,11 @@ async function loadMap(){
         );
     }
 
+    /*
+        Keep the old fallback entity position,
+        but the actual spawn is randomized every
+        time resetGame() runs.
+    */
     if(!entitySpawn){
 
         let farthest = null;
@@ -1229,6 +1325,12 @@ async function loadMap(){
         entitySpawn =
         farthest;
     }
+
+    /*
+        =====================================================
+        FIND EXIT LOCATION
+        =====================================================
+    */
 
     let candidates = [];
 
@@ -1334,6 +1436,153 @@ async function loadMap(){
 }
 
 /* =========================================================
+   RANDOM ENTITY SPAWN
+========================================================= */
+
+function chooseRandomEntitySpawn(){
+
+    if(
+        !walkable ||
+        walkable.length===0 ||
+        !playerSpawn
+    )
+        return;
+
+    /*
+        Build a list of valid spawn locations.
+
+        The entity should not spawn directly beside
+        the player. This also prevents it from spawning
+        inside a hole.
+    */
+    const candidates = [];
+
+    for(
+        const cell of walkable
+    ){
+
+        if(
+            !inside(
+                cell.x,
+                cell.y
+            )
+        )
+            continue;
+
+        if(
+            map[cell.y][cell.x]==="wall" ||
+            map[cell.y][cell.x]==="hole"
+        )
+            continue;
+
+        const p =
+        cellToWorld(
+            cell.x,
+            cell.y
+        );
+
+        const distanceFromPlayer =
+        Math.hypot(
+            p.x-playerSpawn.x,
+            p.z-playerSpawn.z
+        );
+
+        /*
+            Don't spawn within 20 units of the
+            player's starting location.
+        */
+        if(
+            distanceFromPlayer<20
+        )
+            continue;
+
+        /*
+            If possible, don't reuse the exact previous
+            spawn.
+        */
+        if(
+            previousEntitySpawn &&
+            Math.hypot(
+                p.x-previousEntitySpawn.x,
+                p.z-previousEntitySpawn.z
+            )<TILE*2
+        )
+            continue;
+
+        candidates.push(p);
+    }
+
+    /*
+        If the map is too small for the restrictions,
+        fall back to any valid walkable location
+        reasonably far from the player.
+    */
+    if(candidates.length===0){
+
+        for(
+            const cell of walkable
+        ){
+
+            if(
+                map[cell.y][cell.x]==="wall" ||
+                map[cell.y][cell.x]==="hole"
+            )
+                continue;
+
+            const p =
+            cellToWorld(
+                cell.x,
+                cell.y
+            );
+
+            const d =
+            Math.hypot(
+                p.x-playerSpawn.x,
+                p.z-playerSpawn.z
+            );
+
+            if(d>10)
+                candidates.push(p);
+        }
+    }
+
+    /*
+        Final fallback.
+    */
+    if(candidates.length===0){
+
+        candidates.push({
+            x:entitySpawn.x,
+            z:entitySpawn.z
+        });
+    }
+
+    const selected =
+    candidates[
+        Math.floor(
+            Math.random()*
+            candidates.length
+        )
+    ];
+
+    previousEntitySpawn = {
+        x:selected.x,
+        z:selected.z
+    };
+
+    entitySpawn = {
+        x:selected.x,
+        z:selected.z
+    };
+
+    console.log(
+        "RANDOM ENTITY SPAWN:",
+        entitySpawn.x,
+        entitySpawn.z
+    );
+}
+
+/* =========================================================
    WALLS
 ========================================================= */
 
@@ -1347,7 +1596,9 @@ function createWallGeometry(){
     const s=TILE/2;
     const h=WALL_HEIGHT;
 
-    function face(a,b,c,d,normal){
+    function face(
+        a,b,c,d,normal
+    ){
 
         const base=p.length/3;
 
@@ -1497,7 +1748,9 @@ function buildWalls(){
     }
 }
 
-function collides(x,z,r=.42){
+function collides(
+    x,z,r=.42
+){
 
     for(
         const wall of wallColliders
@@ -1816,6 +2069,9 @@ function buildLights(){
             const p =
             cellToWorld(x,y);
 
+            /*
+                EXACTLY 1 TILE.
+            */
             const fixture =
             new THREE.Mesh(
                 new THREE.BoxGeometry(
@@ -2038,21 +2294,24 @@ function createExit(){
     });
 
     const glow =
+    new THREE.PlaneGeometry(
+        EXIT_WIDTH,
+        EXIT_HEIGHT
+    );
+
+    const glowMesh =
     new THREE.Mesh(
-        new THREE.PlaneGeometry(
-            EXIT_WIDTH,
-            EXIT_HEIGHT
-        ),
+        glow,
         glowMaterial
     );
 
-    glow.position.set(
+    glowMesh.position.set(
         0,
         EXIT_HEIGHT/2,
         .04
     );
 
-    group.add(glow);
+    group.add(glowMesh);
 
     const light =
     new THREE.PointLight(
@@ -2182,6 +2441,13 @@ function createEntity(){
     if(!entityTexture)
         return;
 
+    /*
+        IMPORTANT:
+        Pick a NEW random spawn every time the entity
+        is created.
+    */
+    chooseRandomEntitySpawn();
+
     const geometry =
     new THREE.PlaneGeometry(
         entityWidth,
@@ -2209,6 +2475,12 @@ function createEntity(){
     );
 
     world.add(entity);
+
+    console.log(
+        "ENTITY CREATED AT:",
+        entity.position.x,
+        entity.position.z
+    );
 }
 
 function updateEntityFacing(){
@@ -2257,8 +2529,12 @@ function updateEntity(dt){
         dead ||
         falling ||
         !entity
-    )
+    ){
+
+        updateEntityAudio();
+
         return;
+    }
 
     if(!entityActive){
 
@@ -2282,13 +2558,9 @@ function updateEntity(dt){
             showMessage(
                 "SOMETHING IS HERE."
             );
-
-            /*
-                Start the looping audio when the entity
-                becomes active.
-            */
-            startEntityAudio();
         }
+
+        updateEntityAudio();
 
         return;
     }
@@ -2340,8 +2612,10 @@ function updateEntity(dt){
     updateEntityFacing();
 
     /*
-        AUDIO IS UPDATED EVERY FRAME SO IT
-        FOLLOWS THE ENTITY'S DISTANCE.
+        NEW:
+        Update the proximity audio after the entity
+        has moved so the volume is based on its
+        current distance.
     */
     updateEntityAudio();
 
@@ -2419,6 +2693,8 @@ function startFalling(){
     fallTime=0;
     velocityY=0;
 
+    updateEntityAudio();
+
     showMessage(
         "THE FLOOR GIVES WAY..."
     );
@@ -2428,12 +2704,6 @@ function updateFalling(dt){
 
     if(!falling)
         return;
-
-    /*
-        Silence the entity audio during the fall.
-    */
-    if(entityAudio)
-        entityAudio.volume=0;
 
     fallTime+=dt;
 
@@ -2586,7 +2856,7 @@ function winGame(){
 
     dead=true;
 
-    stopEntityAudio();
+    updateEntityAudio();
 
     document.querySelector(
         "#death .deathTitle"
@@ -2789,7 +3059,7 @@ function die(reason){
 
     dead=true;
 
-    stopEntityAudio();
+    updateEntityAudio();
 
     document.getElementById(
         "deathReason"
@@ -2818,8 +3088,6 @@ function die(reason){
 ========================================================= */
 
 function resetGame(){
-
-    stopEntityAudio();
 
     player.position.set(
         playerSpawn.x,
@@ -2862,6 +3130,19 @@ function resetGame(){
     entityTimer=0;
     entityActive=false;
 
+    /*
+        Stop the old entity audio before creating
+        the newly randomized entity.
+    */
+    if(entityAudio){
+
+        entityAudio.pause();
+
+        entityAudio.currentTime=0;
+
+        entityAudio.volume=0;
+    }
+
     if(entity){
 
         world.remove(entity);
@@ -2872,6 +3153,10 @@ function resetGame(){
         entity=null;
     }
 
+    /*
+        createEntity() now automatically chooses
+        a randomized spawn.
+    */
     createEntity();
 }
 
@@ -2901,21 +3186,12 @@ function startGame(){
     paused=false;
     dead=false;
 
+    /*
+        Unlock audio using the user's button click.
+    */
+    unlockEntityAudio();
+
     resetGame();
-
-    /*
-        The user clicked the start button,
-        so this is a valid browser audio
-        activation point.
-    */
-    startEntityAudio();
-
-    /*
-        Keep it silent until the entity
-        actually becomes active.
-    */
-    if(entityAudio)
-        entityAudio.volume=0;
 
     renderer.domElement
     .requestPointerLock()
@@ -2928,7 +3204,18 @@ function goMainMenu(){
     paused=false;
     dead=false;
 
-    stopEntityAudio();
+    /*
+        Stop proximity audio when returning
+        to the main menu.
+    */
+    if(entityAudio){
+
+        entityAudio.volume=0;
+
+        entityAudio.pause();
+
+        entityAudio.currentTime=0;
+    }
 
     document.getElementById(
         "pause"
@@ -2963,8 +3250,7 @@ function pauseGame(){
 
     paused=true;
 
-    if(entityAudio)
-        entityAudio.volume=0;
+    updateEntityAudio();
 
     document.getElementById(
         "pause"
@@ -3104,22 +3390,13 @@ document.getElementById(
         "pause"
     ).style.display="none";
 
+    /*
+        Audio will automatically resume according
+        to proximity in updateEntityAudio().
+    */
     renderer.domElement
     .requestPointerLock()
     .catch(()=>{});
-
-    /*
-        Resume audio if the entity is active.
-    */
-    if(
-        entityActive &&
-        entityAudio
-    ){
-
-        entityAudio
-        .play()
-        .catch(()=>{});
-    }
 };
 
 document.getElementById(
@@ -3329,12 +3606,6 @@ async function init(){
 
     try{
 
-        /*
-            Load the entity audio immediately so the
-            browser has it ready when the entity appears.
-        */
-        createEntityAudio();
-
         wallTexture=
         await loadTexture(
             "./textures/wall.png"
@@ -3365,6 +3636,11 @@ async function init(){
 
         entityTexture=
         await loadEntityTexture();
+
+        /*
+            Set up entity.mp3.
+        */
+        setupEntityAudio();
 
         await loadMap();
 
@@ -3435,8 +3711,8 @@ function animate(now){
     updateEntity(dt);
 
     /*
-        This also keeps the volume correct if the
-        entity is moving around the player.
+        Keep the audio updated every frame so the
+        volume smoothly follows the entity.
     */
     updateEntityAudio();
 
