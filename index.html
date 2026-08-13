@@ -25,6 +25,10 @@ canvas{
     display:block;
 }
 
+/* =========================================================
+   MENU
+========================================================= */
+
 #menu{
     position:fixed;
     inset:0;
@@ -43,7 +47,9 @@ canvas{
     filter:brightness(.28) contrast(1.2) saturate(.6);
 }
 
-.menuImage.active{opacity:1}
+.menuImage.active{
+    opacity:1;
+}
 
 .menuShade{
     position:absolute;
@@ -150,6 +156,10 @@ button:hover{
     font-size:14px;
 }
 
+/* =========================================================
+   OVERLAYS
+========================================================= */
+
 .overlay{
     position:fixed;
     inset:0;
@@ -190,6 +200,10 @@ button:hover{
     color:#888;
     margin:12px 0 20px;
 }
+
+/* =========================================================
+   CONTROLS
+========================================================= */
 
 #controls{
     position:fixed;
@@ -233,62 +247,82 @@ button:hover{
     margin-top:20px;
 }
 
+/* =========================================================
+   DEV TOOLS
+========================================================= */
+
 #devTools{
     position:fixed;
     inset:0;
-    z-index:1800;
+    z-index:3000;
     display:none;
-    background:rgba(0,0,0,.94);
-    align-items:center;
-    justify-content:center;
+    background:rgba(0,0,0,.93);
+    color:#ddd;
+    font-family:monospace;
 }
 
 .devPanel{
-    width:min(760px,92vw);
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:min(720px,92vw);
     max-height:88vh;
     overflow:auto;
-    padding:25px;
-    background:#080806;
-    border:1px solid #77704b;
+    background:#090909;
+    border:1px solid #777;
+    box-shadow:0 0 40px rgba(0,0,0,.8);
+    padding:24px;
 }
 
-.devPanel h2{
-    margin:0 0 5px;
-    color:#c9c07a;
-    letter-spacing:4px;
+.devTitle{
+    color:#ddd;
+    font-size:24px;
+    letter-spacing:3px;
+    margin-bottom:5px;
 }
 
-.devWarning{
+.devSubtitle{
     color:#666;
-    font:11px monospace;
     margin-bottom:20px;
 }
 
-.devGrid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
+.devSection{
+    border-top:1px solid #252525;
+    padding-top:15px;
+    margin-top:15px;
 }
 
-.devPanel button{
+.devSectionTitle{
+    color:#aaa;
+    margin-bottom:10px;
+}
+
+.devButton{
+    display:block;
     width:100%;
-    padding:13px;
+    margin:6px 0;
+    padding:12px;
+    text-align:left;
     font-family:monospace;
 }
 
 .devStatus{
-    margin-top:15px;
     padding:12px;
-    background:#020202;
+    background:#050505;
+    border:1px solid #222;
     color:#777;
-    font:12px monospace;
-    min-height:40px;
+    margin-top:12px;
 }
 
-#mapViewer{
+.devStatus strong{
+    color:#ddd;
+}
+
+#mapScreen{
     position:fixed;
     inset:0;
-    z-index:1900;
+    z-index:4000;
     display:none;
     align-items:center;
     justify-content:center;
@@ -296,35 +330,42 @@ button:hover{
 }
 
 .mapPanel{
-    width:min(1000px,92vw);
+    width:min(1000px,94vw);
     height:min(850px,90vh);
-    padding:20px;
-    background:#080806;
-    border:1px solid #77704b;
     display:flex;
     flex-direction:column;
+    background:#080808;
+    border:1px solid #666;
+    padding:15px;
 }
 
-.mapPanel h2{
-    color:#c9c07a;
-    font:20px monospace;
-    letter-spacing:3px;
+.mapHeader{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:#aaa;
+    font:14px monospace;
+    padding-bottom:10px;
 }
 
 #mapCanvas{
-    flex:1;
     width:100%;
+    height:100%;
     min-height:0;
     object-fit:contain;
     image-rendering:pixelated;
-    background:#111;
-    border:1px solid #333;
+    background:#020202;
 }
 
-.mapPanel button{
-    margin-top:12px;
-    padding:12px;
+.mapClose{
+    width:auto!important;
+    padding:8px 18px!important;
+    margin:0!important;
 }
+
+/* =========================================================
+   HUD
+========================================================= */
 
 #crosshair{
     position:fixed;
@@ -427,6 +468,19 @@ button:hover{
     letter-spacing:2px;
 }
 
+#noclipHud{
+    position:fixed;
+    z-index:200;
+    left:50%;
+    top:18px;
+    transform:translateX(-50%);
+    display:none;
+    color:#5cff75;
+    font:bold 13px monospace;
+    letter-spacing:2px;
+    text-shadow:0 0 10px #000;
+}
+
 #error{
     position:fixed;
     z-index:9999;
@@ -439,201 +493,245 @@ button:hover{
     font:13px monospace;
     white-space:pre-wrap;
 }
-
-#flyIndicator{
-    position:fixed;
-    z-index:110;
-    top:70px;
-    left:50%;
-    transform:translateX(-50%);
-    display:none;
-    padding:5px 10px;
-    background:rgba(0,0,0,.7);
-    color:#55ff77;
-    font:11px monospace;
-}
 </style>
 </head>
 
 <body>
 
+<!-- =======================================================
+     MAIN MENU
+======================================================== -->
+
 <div id="menu">
 
-<img class="menuImage active" src="./textures/menu1.jpg">
-<img class="menuImage" src="./textures/menu2.jpg">
-<img class="menuImage" src="./textures/menu3.jpg">
-<img class="menuImage" src="./textures/menu4.jpg">
-<img class="menuImage" src="./textures/menu5.jpg">
+    <img class="menuImage active" src="./textures/menu1.jpg">
+    <img class="menuImage" src="./textures/menu2.jpg">
+    <img class="menuImage" src="./textures/menu3.jpg">
+    <img class="menuImage" src="./textures/menu4.jpg">
+    <img class="menuImage" src="./textures/menu5.jpg">
 
-<div class="menuShade"></div>
-<div class="scanlines"></div>
+    <div class="menuShade"></div>
+    <div class="scanlines"></div>
 
-<div class="menuTitle">
-<h1>THE BACKROOMS</h1>
-<p>LEVEL 0 // FOUND FOOTAGE</p>
-<small>THE BUILDING DOES NOT HAVE A MAP</small>
+    <div class="menuTitle">
+        <h1>THE BACKROOMS</h1>
+        <p>LEVEL 0 // FOUND FOOTAGE</p>
+        <small>THE BUILDING DOES NOT HAVE A MAP</small>
+    </div>
+
+    <div class="menuButtons">
+
+        <div class="difficulties">
+            <button id="easy">EASY</button>
+            <button id="normal" class="selected">NORMAL</button>
+            <button id="hard">HARD</button>
+            <button id="nightmare">NIGHTMARE</button>
+        </div>
+
+        <button class="menuButton" id="start">
+            ENTER LEVEL 0
+        </button>
+
+        <button class="menuButton" id="controlsButton">
+            CONTROLS
+        </button>
+
+    </div>
 </div>
 
-<div class="menuButtons">
-
-<div class="difficulties">
-<button id="easy">EASY</button>
-<button id="normal" class="selected">NORMAL</button>
-<button id="hard">HARD</button>
-<button id="nightmare">NIGHTMARE</button>
-</div>
-
-<button class="menuButton" id="start">
-ENTER LEVEL 0
-</button>
-
-<button class="menuButton" id="controlsButton">
-CONTROLS
-</button>
-
-</div>
-</div>
+<!-- =======================================================
+     PAUSE
+======================================================== -->
 
 <div id="pause" class="overlay">
 
-<h1>PAUSED</h1>
+    <h1>PAUSED</h1>
 
-<button id="resume">RESUME</button>
-<button id="pauseControls">CONTROLS</button>
-<button id="restart">RESTART</button>
-<button id="mainMenu">MAIN MENU</button>
+    <button id="resume">RESUME</button>
+    <button id="pauseControls">CONTROLS</button>
+    <button id="restart">RESTART</button>
+    <button id="mainMenu">MAIN MENU</button>
 
 </div>
+
+<!-- =======================================================
+     DEATH
+======================================================== -->
 
 <div id="death" class="overlay">
 
-<div class="deathTitle">YOU DIED</div>
+    <div class="deathTitle">YOU DIED</div>
 
-<div id="deathReason" class="deathText">
-SOMETHING FOUND YOU.
+    <div id="deathReason" class="deathText">
+        SOMETHING FOUND YOU.
+    </div>
+
+    <button id="retry">RETRY</button>
+    <button id="deathMenu">MAIN MENU</button>
+
 </div>
 
-<button id="retry">RETRY</button>
-<button id="deathMenu">MAIN MENU</button>
-
-</div>
+<!-- =======================================================
+     CONTROLS
+======================================================== -->
 
 <div id="controls">
 
-<div class="controlsPanel">
+    <div class="controlsPanel">
 
-<h2>CONTROLS</h2>
+        <h2>CONTROLS</h2>
 
-<div class="control">
-<span>MOVE</span>
-<span>W A S D</span>
+        <div class="control">
+            <span>MOVE</span>
+            <span>W A S D</span>
+        </div>
+
+        <div class="control">
+            <span>LOOK</span>
+            <span>MOUSE</span>
+        </div>
+
+        <div class="control">
+            <span>SPRINT</span>
+            <span>SHIFT</span>
+        </div>
+
+        <div class="control">
+            <span>CROUCH / HIDE</span>
+            <span>C</span>
+        </div>
+
+        <div class="control">
+            <span>JUMP</span>
+            <span>SPACE</span>
+        </div>
+
+        <div class="control">
+            <span>PAUSE</span>
+            <span>ESC</span>
+        </div>
+
+        <button id="controlsBack">BACK</button>
+
+    </div>
 </div>
 
-<div class="control">
-<span>LOOK</span>
-<span>MOUSE</span>
-</div>
-
-<div class="control">
-<span>SPRINT</span>
-<span>SHIFT</span>
-</div>
-
-<div class="control">
-<span>CROUCH / HIDE</span>
-<span>C</span>
-</div>
-
-<div class="control">
-<span>JUMP</span>
-<span>SPACE</span>
-</div>
-
-<div class="control">
-<span>PAUSE</span>
-<span>ESC</span>
-</div>
-
-<button id="controlsBack">BACK</button>
-
-</div>
-</div>
+<!-- =======================================================
+     DEV TOOLS
+======================================================== -->
 
 <div id="devTools">
 
-<div class="devPanel">
+    <div class="devPanel">
 
-<h2>DEVELOPER TOOLS</h2>
+        <div class="devTitle">
+            DEVELOPER TOOLS
+        </div>
 
-<div class="devWarning">
-BACKSPACE TO CLOSE // NOT PART OF NORMAL CONTROLS
+        <div class="devSubtitle">
+            BACKSPACE TO CLOSE
+        </div>
+
+        <div class="devSection">
+
+            <div class="devSectionTitle">
+                ENTITY
+            </div>
+
+            <button class="devButton" id="devSpawnEntity">
+                SPAWN ENTITY
+            </button>
+
+            <button class="devButton" id="devRemoveEntity">
+                REMOVE ENTITY
+            </button>
+
+        </div>
+
+        <div class="devSection">
+
+            <div class="devSectionTitle">
+                MAP
+            </div>
+
+            <button class="devButton" id="devOpenMap">
+                OPEN MAP
+            </button>
+
+        </div>
+
+        <div class="devSection">
+
+            <div class="devSectionTitle">
+                PLAYER
+            </div>
+
+            <button class="devButton" id="devNoClip">
+                TOGGLE NO CLIP
+            </button>
+
+            <button class="devButton" id="devTeleportExit">
+                TELEPORT TO EXIT
+            </button>
+
+        </div>
+
+        <div class="devStatus" id="devStatus">
+            <strong>STATUS:</strong>
+            NO CLIP OFF
+        </div>
+
+        <button class="devButton" id="devClose">
+            CLOSE DEV TOOLS
+        </button>
+
+    </div>
 </div>
 
-<div class="devGrid">
+<!-- =======================================================
+     MAP SCREEN
+======================================================== -->
 
-<button id="devSpawn">
-SPAWN ENTITY NEAR PLAYER
-</button>
+<div id="mapScreen">
 
-<button id="devTeleportEntity">
-TELEPORT ENTITY TO PLAYER
-</button>
+    <div class="mapPanel">
 
-<button id="devMap">
-OPEN MAP
-</button>
+        <div class="mapHeader">
 
-<button id="devFly">
-TOGGLE FLY / NOCLIP
-</button>
+            <span>
+                LEVEL 0 MAP
+            </span>
 
-<button id="devEntityAI">
-TOGGLE ENTITY AI
-</button>
+            <button
+                class="mapClose"
+                id="mapClose"
+            >
+                CLOSE
+            </button>
 
-<button id="devResetEntity">
-RESET ENTITY
-</button>
+        </div>
 
-</div>
+        <canvas id="mapCanvas"></canvas>
 
-<div class="devStatus" id="devStatus">
-DEV TOOLS READY
-</div>
+    </div>
 
-</div>
-</div>
-
-<div id="mapViewer">
-
-<div class="mapPanel">
-
-<h2>LEVEL 0 MAP</h2>
-
-<canvas id="mapCanvas"></canvas>
-
-<button id="mapClose">
-CLOSE MAP
-</button>
-
-</div>
 </div>
 
 <div id="crosshair"></div>
 
-<div id="flyIndicator">
-NOCLIP / FLY MODE
+<div id="noclipHud">
+    NO CLIP // INVINCIBLE
 </div>
 
 <div id="hud">
-LEVEL 0
-<div id="hudDifficulty">NORMAL</div>
+    LEVEL 0
+    <div id="hudDifficulty">NORMAL</div>
 </div>
 
 <div id="message"></div>
 
 <div id="recording">
-<span id="recordDot"></span>REC
+    <span id="recordDot"></span>REC
 </div>
 
 <div id="time">00:00:00</div>
@@ -652,27 +750,47 @@ import * as THREE from "./three.module.js";
    SETTINGS
 ========================================================= */
 
-const TILE=3;
+const TILE = 3;
 
-const WALL_HEIGHT=9;
+const WALL_HEIGHT = 9;
 
-const PLAYER_HEIGHT=5.25;
-const ENTITY_HEIGHT=5.6;
+const PLAYER_HEIGHT = 5.25;
+const ENTITY_HEIGHT = 5.6;
 
-const PLAYER_RADIUS=.42;
+const PLAYER_RADIUS = .42;
 
-const CROUCH_HEIGHT=3.25;
+const CROUCH_HEIGHT = 3.25;
 
-const WALK_SPEED=8.5;
-const SPRINT_SPEED=13.5;
+const WALK_SPEED = 8.5;
+const SPRINT_SPEED = 13.5;
 
-const FLY_SPEED=24;
+const NOCLIP_SPEED = 20;
 
-const GRAVITY=21;
-const JUMP_POWER=7.5;
+const GRAVITY = 21;
+const JUMP_POWER = 7.5;
 
-const EXIT_WIDTH=2.8;
-const EXIT_HEIGHT=5.8;
+const EXIT_WIDTH = 2.8;
+const EXIT_HEIGHT = 5.8;
+
+/*
+    ENTITY AUDIO
+
+    Outside 40 units:
+        completely silent.
+
+    At 40 units:
+        entity = 25%
+        ambient = 75%
+
+    At 20 units:
+        entity = 50%
+        ambient = 50%
+
+    At 0:
+        entity = 100%
+        ambient = 0%
+*/
+const ENTITY_AUDIO_DISTANCE = 40;
 
 /* =========================================================
    STATE
@@ -702,9 +820,10 @@ let grounded=true;
 let entityTimer=0;
 let entityActive=false;
 
-let entityAI=true;
+let noClip=false;
+let devOpen=false;
 
-let flyMode=false;
+let mapOpen=false;
 
 let mapWidth=0;
 let mapHeight=0;
@@ -717,6 +836,8 @@ let entitySpawn=null;
 let exitPosition=null;
 let exitObject=null;
 
+let ceilingMesh=null;
+
 let wallColliders=[];
 let hideCells=[];
 let holeCells=[];
@@ -727,10 +848,7 @@ let entity=null;
 let entityTexture=null;
 let entityWidth=ENTITY_HEIGHT;
 
-let entityPath=[];
-let entityPathTimer=0;
-
-let audioStarted=false;
+let mapImage=null;
 
 const keys={};
 
@@ -738,97 +856,179 @@ const keys={};
    AUDIO
 ========================================================= */
 
-const entityAudio=new Audio(
-    "./sounds/entity.mp3"
-);
+let entityAudio=null;
+let ambientAudio=null;
 
-const ambientAudio=new Audio(
-    "./sounds/ambient.mp3"
-);
+let audioReady=false;
 
-entityAudio.loop=true;
-ambientAudio.loop=true;
+function setupAudio(){
 
-entityAudio.preload="auto";
-ambientAudio.preload="auto";
+    /*
+        Files expected:
 
-entityAudio.volume=0;
-ambientAudio.volume=.75;
+        sounds/entity.mp3
+        sounds/ambient.mp3
+    */
+
+    entityAudio =
+    new Audio("./sounds/entity.mp3");
+
+    ambientAudio =
+    new Audio("./sounds/ambient.mp3");
+
+    entityAudio.loop=true;
+    ambientAudio.loop=true;
+
+    entityAudio.preload="auto";
+    ambientAudio.preload="auto";
+
+    entityAudio.volume=0;
+    ambientAudio.volume=.75;
+
+    /*
+        We intentionally don't autoplay here.
+        Browsers block audio until the player interacts
+        with the page.
+    */
+
+    audioReady=true;
+}
 
 function startAudio(){
 
-    if(audioStarted)
+    if(!audioReady)
         return;
 
-    audioStarted=true;
+    /*
+        Calling play after the Start button has been
+        clicked counts as a user gesture.
+    */
 
-    ambientAudio.volume=.75;
+    entityAudio.play().catch(
+        ()=>{}
+    );
 
-    ambientAudio.play().catch(()=>{});
+    ambientAudio.play().catch(
+        ()=>{}
+    );
+}
+
+function stopAudio(){
+
+    if(entityAudio){
+
+        entityAudio.pause();
+        entityAudio.currentTime=0;
+        entityAudio.volume=0;
+    }
+
+    if(ambientAudio){
+
+        ambientAudio.pause();
+        ambientAudio.currentTime=0;
+        ambientAudio.volume=0;
+    }
 }
 
 function updateAudio(){
 
-    if(!started || dead || paused || !entity){
+    if(
+        !audioReady ||
+        !started ||
+        paused ||
+        dead ||
+        !entity ||
+        !entityActive
+    ){
 
-        entityAudio.volume=0;
+        if(entityAudio)
+            entityAudio.volume=0;
 
-        if(started && !dead && !paused)
+        if(
+            ambientAudio &&
+            started &&
+            !dead
+        )
             ambientAudio.volume=.75;
 
         return;
     }
 
-    const distance=Math.hypot(
-        player.position.x-entity.position.x,
-        player.position.z-entity.position.z
-    );
+    const dx =
+    player.position.x-
+    entity.position.x;
+
+    const dz =
+    player.position.z-
+    entity.position.z;
+
+    const distance =
+    Math.hypot(dx,dz);
 
     /*
-       ENTITY SOUND:
+        0 at 40 units.
+        1 at the entity.
 
-       40 units = 0%
-       20 units = 25%
-       10 units = 50%
-       0 units  = 100%
-
-       This gives the player plenty of warning.
+        This means the entity sound starts ONLY
+        when the entity reaches 40 units.
     */
+    let entityAmount =
+    1 -
+    distance /
+    ENTITY_AUDIO_DISTANCE;
 
-    const entityVolume=THREE.MathUtils.clamp(
-        1-distance/40,
+    entityAmount=
+    THREE.MathUtils.clamp(
+        entityAmount,
         0,
         1
     );
 
-    entityAudio.volume=entityVolume;
-
     /*
-       Ambient is the inverse.
+        25% at the outer edge.
+
+        So:
+        40 units = .25
+        20 units = .50
+        0 units  = 1.0
     */
+    if(distance<=ENTITY_AUDIO_DISTANCE){
 
-    ambientAudio.volume=
-        .75*(1-entityVolume);
-
-    if(entityVolume>.005){
-
-        entityAudio.play().catch(()=>{});
+        entityAmount =
+        .25 +
+        entityAmount*.75;
 
     }else{
 
-        entityAudio.pause();
-        entityAudio.currentTime=0;
+        entityAmount=0;
     }
 
-    if(ambientAudio.paused)
-        ambientAudio.play().catch(()=>{});
+    const ambientAmount =
+    1-entityAmount;
+
+    if(entityAudio)
+        entityAudio.volume =
+        THREE.MathUtils.clamp(
+            entityAmount,
+            0,
+            1
+        );
+
+    if(ambientAudio)
+        ambientAudio.volume =
+        THREE.MathUtils.clamp(
+            ambientAmount,
+            0,
+            1
+        );
 }
 
 /* =========================================================
    RENDERER
 ========================================================= */
 
-const renderer=new THREE.WebGLRenderer({
+const renderer =
+new THREE.WebGLRenderer({
     antialias:false,
     powerPreference:"high-performance",
     alpha:false
@@ -841,7 +1041,7 @@ renderer.setSize(
 
 renderer.setPixelRatio(
     Math.min(
-        window.devicePixelRatio||1,
+        window.devicePixelRatio || 1,
         1.15
     )
 );
@@ -859,7 +1059,8 @@ document.body.appendChild(
    SCENE
 ========================================================= */
 
-const scene=new THREE.Scene();
+const scene=
+new THREE.Scene();
 
 scene.background=
 new THREE.Color(0x080806);
@@ -871,20 +1072,23 @@ new THREE.Fog(
     52
 );
 
-const camera=new THREE.PerspectiveCamera(
+const camera=
+new THREE.PerspectiveCamera(
     78,
     innerWidth/innerHeight,
     .05,
     300
 );
 
-const player=new THREE.Object3D();
+const player=
+new THREE.Object3D();
 
 scene.add(player);
 
 player.add(camera);
 
-const world=new THREE.Group();
+const world=
+new THREE.Group();
 
 scene.add(world);
 
@@ -899,7 +1103,8 @@ scene.add(
    TEXTURES
 ========================================================= */
 
-const loader=new THREE.TextureLoader();
+const loader=
+new THREE.TextureLoader();
 
 let wallTexture;
 let floorTexture;
@@ -940,14 +1145,17 @@ function loadTexture(path){
                 path,
                 texture=>{
                     resolve(
-                        prepareTexture(texture)
+                        prepareTexture(
+                            texture
+                        )
                     );
                 },
                 undefined,
                 ()=>{
                     reject(
                         new Error(
-                            "Could not load:\n"+path
+                            "Could not load:\n"+
+                            path
                         )
                     );
                 }
@@ -966,7 +1174,8 @@ function loadEntityTexture(){
     return new Promise(
         (resolve,reject)=>{
 
-            const image=new Image();
+            const image=
+            new Image();
 
             image.onload=()=>{
 
@@ -975,7 +1184,8 @@ function loadEntityTexture(){
                 image.naturalHeight;
 
                 entityWidth=
-                ENTITY_HEIGHT*aspect;
+                ENTITY_HEIGHT*
+                aspect;
 
                 const texture=
                 new THREE.Texture(image);
@@ -1002,11 +1212,14 @@ function loadEntityTexture(){
                 resolve(texture);
             };
 
-            image.onerror=()=>reject(
-                new Error(
-                    "Could not load ./entity.png"
-                )
-            );
+            image.onerror=
+            ()=>{
+                reject(
+                    new Error(
+                        "Could not load ./entity.png"
+                    )
+                );
+            };
 
             image.src="./entity.png";
         }
@@ -1042,19 +1255,33 @@ new THREE.MeshBasicMaterial({
 function cellToWorld(x,y){
 
     return {
-        x:(x+.5)*TILE-mapWidth*TILE*.5,
-        z:(y+.5)*TILE-mapHeight*TILE*.5
+        x:
+        (x+.5)*TILE-
+        mapWidth*TILE*.5,
+
+        z:
+        (y+.5)*TILE-
+        mapHeight*TILE*.5
     };
 }
 
 function worldToCell(x,z){
 
     return {
-        x:Math.floor(
-            (x+mapWidth*TILE*.5)/TILE
+        x:
+        Math.floor(
+            (
+                x+
+                mapWidth*TILE*.5
+            )/TILE
         ),
-        y:Math.floor(
-            (z+mapHeight*TILE*.5)/TILE
+
+        y:
+        Math.floor(
+            (
+                z+
+                mapHeight*TILE*.5
+            )/TILE
         )
     };
 }
@@ -1073,50 +1300,59 @@ function isWalkable(x,y){
 
     return(
         inside(x,y)&&
-        map[y][x]!=="wall"&&
-        map[y][x]!=="hole"
+        map[y][x]!=="wall"
     );
 }
 
 /* =========================================================
-   MAP
+   MAP CLASSIFICATION
 ========================================================= */
 
 function classifyPixel(r,g,b,a){
 
-    if(a<20)return"floor";
+    if(a<20)
+        return "floor";
 
     if(
-        r<80&&
-        g<80&&
+        r<80 &&
+        g<80 &&
         b<80
-    )return"wall";
+    )
+        return "wall";
 
     if(
-        r>150&&
-        r>g*1.4&&
+        r>150 &&
+        r>g*1.4 &&
         r>b*1.4
-    )return"spawn";
+    )
+        return "spawn";
 
     if(
-        b>125&&
+        b>125 &&
         b>r*1.3
-    )return"entity";
+    )
+        return "entity";
 
     if(
-        r>105&&
-        b>105&&
+        r>105 &&
+        b>105 &&
         g<115
-    )return"hide";
+    )
+        return "hide";
 
     if(
-        r>135&&
-        g>115&&
+        r>135 &&
+        g>115 &&
         b<125
-    )return"hole";
+    )
+        return "hole";
 
-    return"floor";
+    return "floor";
 }
+
+/* =========================================================
+   LOAD MAP
+========================================================= */
 
 async function loadMap(){
 
@@ -1124,22 +1360,31 @@ async function loadMap(){
     await new Promise(
         (resolve,reject)=>{
 
-            const img=new Image();
+            const img=
+            new Image();
 
-            img.onload=()=>resolve(img);
+            img.onload=
+            ()=>resolve(img);
 
-            img.onerror=()=>reject(
+            img.onerror=
+            ()=>reject(
                 new Error(
                     "Could not load ./textures/map1.png"
                 )
             );
 
-            img.src="./textures/map1.png";
+            img.src=
+            "./textures/map1.png";
         }
     );
 
-    mapWidth=image.naturalWidth;
-    mapHeight=image.naturalHeight;
+    mapImage=image;
+
+    mapWidth=
+    image.naturalWidth;
+
+    mapHeight=
+    image.naturalHeight;
 
     const canvas=
     document.createElement("canvas");
@@ -1153,7 +1398,11 @@ async function loadMap(){
         {willReadFrequently:true}
     );
 
-    ctx.drawImage(image,0,0);
+    ctx.drawImage(
+        image,
+        0,
+        0
+    );
 
     const pixels=
     ctx.getImageData(
@@ -1169,14 +1418,24 @@ async function loadMap(){
     holeCells=[];
 
     playerSpawn=null;
+    entitySpawn=null;
 
-    for(let y=0;y<mapHeight;y++){
+    for(
+        let y=0;
+        y<mapHeight;
+        y++
+    ){
 
         const row=[];
 
-        for(let x=0;x<mapWidth;x++){
+        for(
+            let x=0;
+            x<mapWidth;
+            x++
+        ){
 
-            const i=(y*mapWidth+x)*4;
+            const i=
+            (y*mapWidth+x)*4;
 
             const type=
             classifyPixel(
@@ -1198,7 +1457,7 @@ async function loadMap(){
                 holeCells.push({x,y});
 
             if(
-                type==="spawn"&&
+                type==="spawn" &&
                 !playerSpawn
             ){
 
@@ -1220,24 +1479,37 @@ async function loadMap(){
         ];
 
         playerSpawn=
-        cellToWorld(c.x,c.y);
+        cellToWorld(
+            c.x,
+            c.y
+        );
     }
+
+    /*
+        Entity spawn is deliberately NOT fixed.
+
+        It will be randomized later around the player.
+    */
 
     findExit();
 }
+
+/* =========================================================
+   EXIT LOCATION
+========================================================= */
 
 function findExit(){
 
     const candidates=[];
 
-    for(const cell of walkable){
+    for(
+        const cell of walkable
+    ){
 
         if(
-            !isWalkable(
-                cell.x,
-                cell.y
-            )
-        )continue;
+            map[cell.y][cell.x]==="hole"
+        )
+            continue;
 
         let clear=true;
 
@@ -1253,11 +1525,16 @@ function findExit(){
                 xx++
             ){
 
+                const cx=
+                cell.x+xx;
+
+                const cy=
+                cell.y+yy;
+
                 if(
-                    !isWalkable(
-                        cell.x+xx,
-                        cell.y+yy
-                    )
+                    !inside(cx,cy)||
+                    map[cy][cx]==="wall"||
+                    map[cy][cx]==="hole"
                 ){
 
                     clear=false;
@@ -1265,10 +1542,12 @@ function findExit(){
                 }
             }
 
-            if(!clear)break;
+            if(!clear)
+                break;
         }
 
-        if(!clear)continue;
+        if(!clear)
+            continue;
 
         const p=
         cellToWorld(
@@ -1285,8 +1564,7 @@ function findExit(){
         if(distance>15){
 
             candidates.push({
-                x:cell.x,
-                y:cell.y,
+                cell,
                 distance
             });
         }
@@ -1299,12 +1577,10 @@ function findExit(){
 
     if(candidates.length){
 
-        const c=candidates[0];
-
         exitPosition=
         cellToWorld(
-            c.x,
-            c.y
+            candidates[0].cell.x,
+            candidates[0].cell.y
         );
 
     }else{
@@ -1323,22 +1599,31 @@ function findExit(){
 }
 
 /* =========================================================
-   IMPROVED ENTITY SPAWN
+   RANDOM ENTITY SPAWN
 ========================================================= */
 
-function findGoodEntitySpawn(){
+function chooseEntitySpawn(){
 
-    const pc=
-    worldToCell(
-        player.position.x,
-        player.position.z
-    );
+    if(!playerSpawn||!walkable.length)
+        return;
 
     const candidates=[];
 
-    for(const cell of walkable){
+    /*
+        Prefer roughly 18-35 units away.
 
-        if(!isWalkable(cell.x,cell.y))
+        This makes the entity appear near enough
+        to matter without spawning directly on top
+        of the player.
+    */
+
+    for(
+        const cell of walkable
+    ){
+
+        if(
+            map[cell.y][cell.x]==="hole"
+        )
             continue;
 
         const p=
@@ -1353,62 +1638,74 @@ function findGoodEntitySpawn(){
             p.z-player.position.z
         );
 
-        /*
-           Entity should be near enough to matter,
-           but not spawn directly on top of the player.
-        */
-
         if(
-            distance>=10&&
-            distance<=30
+            distance>=18 &&
+            distance<=35
         ){
 
             candidates.push({
-                cell,
+                p,
                 distance
             });
         }
     }
 
-    if(!candidates.length){
+    if(candidates.length){
 
-        return cellToWorld(
-            pc.x,
-            pc.y
-        );
+        /*
+            Randomize between suitable positions.
+        */
+        const selected=
+        candidates[
+            Math.floor(
+                Math.random()*
+                candidates.length
+            )
+        ];
+
+        entitySpawn={
+            x:selected.p.x,
+            z:selected.p.z
+        };
+
+    }else{
+
+        /*
+            Fallback: farthest available location.
+        */
+
+        let farthest=null;
+        let max=-1;
+
+        for(
+            const cell of walkable
+        ){
+
+            const p=
+            cellToWorld(
+                cell.x,
+                cell.y
+            );
+
+            const d=
+            Math.hypot(
+                p.x-player.position.x,
+                p.z-player.position.z
+            );
+
+            if(d>max){
+
+                max=d;
+                farthest=p;
+            }
+        }
+
+        entitySpawn=farthest;
     }
-
-    /*
-       Prefer locations roughly 15-24 units away.
-    */
-
-    const preferred=
-    candidates.filter(
-        c=>
-        c.distance>=15&&
-        c.distance<=24
-    );
-
-    const list=
-    preferred.length?
-    preferred:
-    candidates;
-
-    const chosen=
-    list[
-        Math.floor(
-            Math.random()*list.length
-        )
-    ];
-
-    return cellToWorld(
-        chosen.cell.x,
-        chosen.cell.y
-    );
 }
 
 /* =========================================================
-   WALLS
+   WALL GEOMETRY
 ========================================================= */
 
 function createWallGeometry(){
@@ -1421,12 +1718,18 @@ function createWallGeometry(){
     const s=TILE/2;
     const h=WALL_HEIGHT;
 
-    function face(a,b,c,d,normal){
+    function face(
+        a,b,c,d,normal
+    ){
 
-        const base=p.length/3;
+        const base=
+        p.length/3;
 
         p.push(
-            ...a,...b,...c,...d
+            ...a,
+            ...b,
+            ...c,
+            ...d
         );
 
         n.push(
@@ -1490,17 +1793,23 @@ function createWallGeometry(){
 
     g.setAttribute(
         "position",
-        new THREE.Float32BufferAttribute(p,3)
+        new THREE.Float32BufferAttribute(
+            p,3
+        )
     );
 
     g.setAttribute(
         "normal",
-        new THREE.Float32BufferAttribute(n,3)
+        new THREE.Float32BufferAttribute(
+            n,3
+        )
     );
 
     g.setAttribute(
         "uv",
-        new THREE.Float32BufferAttribute(u,2)
+        new THREE.Float32BufferAttribute(
+            u,2
+        )
     );
 
     g.setIndex(i);
@@ -1515,11 +1824,21 @@ function buildWalls(){
 
     wallColliders=[];
 
-    for(let y=0;y<mapHeight;y++){
+    for(
+        let y=0;
+        y<mapHeight;
+        y++
+    ){
 
-        for(let x=0;x<mapWidth;x++){
+        for(
+            let x=0;
+            x<mapWidth;
+            x++
+        ){
 
-            if(map[y][x]!=="wall")
+            if(
+                map[y][x]!=="wall"
+            )
                 continue;
 
             const p=
@@ -1540,10 +1859,13 @@ function buildWalls(){
             world.add(mesh);
 
             wallColliders.push({
+
                 minX:p.x-TILE/2,
                 maxX:p.x+TILE/2,
+
                 minZ:p.z-TILE/2,
                 maxZ:p.z+TILE/2
+
             });
         }
     }
@@ -1551,7 +1873,9 @@ function buildWalls(){
 
 function collides(x,z,r=.42){
 
-    for(const wall of wallColliders){
+    for(
+        const wall of wallColliders
+    ){
 
         if(
             x+r>wall.minX&&
@@ -1579,14 +1903,23 @@ function buildOptimizedFloor(){
     let vertices=0;
     const h=TILE/2;
 
-    for(let y=0;y<mapHeight;y++){
+    for(
+        let y=0;
+        y<mapHeight;
+        y++
+    ){
 
-        for(let x=0;x<mapWidth;x++){
+        for(
+            let x=0;
+            x<mapWidth;
+            x++
+        ){
 
             if(
                 map[y][x]==="hole"||
                 map[y][x]==="wall"
-            )continue;
+            )
+                continue;
 
             const c=
             cellToWorld(x,y);
@@ -1616,6 +1949,7 @@ function buildOptimizedFloor(){
                 vertices,
                 vertices+1,
                 vertices+2,
+
                 vertices,
                 vertices+2,
                 vertices+3
@@ -1630,17 +1964,23 @@ function buildOptimizedFloor(){
 
     g.setAttribute(
         "position",
-        new THREE.Float32BufferAttribute(p,3)
+        new THREE.Float32BufferAttribute(
+            p,3
+        )
     );
 
     g.setAttribute(
         "normal",
-        new THREE.Float32BufferAttribute(n,3)
+        new THREE.Float32BufferAttribute(
+            n,3
+        )
     );
 
     g.setAttribute(
         "uv",
-        new THREE.Float32BufferAttribute(u,2)
+        new THREE.Float32BufferAttribute(
+            u,2
+        )
     );
 
     g.setIndex(i);
@@ -1669,21 +2009,43 @@ function buildOptimizedCeiling(){
     let vertices=0;
     const h=TILE/2;
 
-    for(let y=0;y<mapHeight;y++){
+    for(
+        let y=0;
+        y<mapHeight;
+        y++
+    ){
 
-        for(let x=0;x<mapWidth;x++){
+        for(
+            let x=0;
+            x<mapWidth;
+            x++
+        ){
 
-            if(map[y][x]==="wall")
+            if(
+                map[y][x]==="wall"
+            )
                 continue;
 
             const c=
             cellToWorld(x,y);
 
             p.push(
-                c.x-h,WALL_HEIGHT,c.z-h,
-                c.x+h,WALL_HEIGHT,c.z-h,
-                c.x+h,WALL_HEIGHT,c.z+h,
-                c.x-h,WALL_HEIGHT,c.z+h
+
+                c.x-h,
+                WALL_HEIGHT,
+                c.z-h,
+
+                c.x+h,
+                WALL_HEIGHT,
+                c.z-h,
+
+                c.x+h,
+                WALL_HEIGHT,
+                c.z+h,
+
+                c.x-h,
+                WALL_HEIGHT,
+                c.z+h
             );
 
             n.push(
@@ -1704,6 +2066,7 @@ function buildOptimizedCeiling(){
                 vertices,
                 vertices+2,
                 vertices+1,
+
                 vertices,
                 vertices+3,
                 vertices+2
@@ -1718,29 +2081,85 @@ function buildOptimizedCeiling(){
 
     g.setAttribute(
         "position",
-        new THREE.Float32BufferAttribute(p,3)
+        new THREE.Float32BufferAttribute(
+            p,3
+        )
     );
 
     g.setAttribute(
         "normal",
-        new THREE.Float32BufferAttribute(n,3)
+        new THREE.Float32BufferAttribute(
+            n,3
+        )
     );
 
     g.setAttribute(
         "uv",
-        new THREE.Float32BufferAttribute(u,2)
+        new THREE.Float32BufferAttribute(
+            u,2
+        )
     );
 
     g.setIndex(i);
 
     g.computeBoundingSphere();
 
-    world.add(
-        new THREE.Mesh(
-            g,
-            ceilingMaterial
-        )
+    ceilingMesh=
+    new THREE.Mesh(
+        g,
+        ceilingMaterial
     );
+
+    world.add(
+        ceilingMesh
+    );
+}
+
+/* =========================================================
+   CEILING VISIBILITY
+========================================================= */
+
+function updateCeilingVisibility(){
+
+    if(!ceilingMesh)
+        return;
+
+    /*
+        Map world boundaries.
+    */
+
+    const minX=
+    -mapWidth*TILE*.5;
+
+    const maxX=
+    mapWidth*TILE*.5;
+
+    const minZ=
+    -mapHeight*TILE*.5;
+
+    const maxZ=
+    mapHeight*TILE*.5;
+
+    const margin=2;
+
+    const insideMap=
+    camera.getWorldPosition(
+        new THREE.Vector3()
+    );
+
+    const visible=
+    insideMap.x>=minX-margin&&
+    insideMap.x<=maxX+margin&&
+    insideMap.z>=minZ-margin&&
+    insideMap.z<=maxZ+margin;
+
+    /*
+        When flying outside the map, remove the ceiling
+        completely so the player can look down at the map.
+    */
+
+    ceilingMesh.visible=
+    !noClip || visible;
 }
 
 /* =========================================================
@@ -1755,7 +2174,9 @@ function buildHoles(){
         side:THREE.BackSide
     });
 
-    for(const cell of holeCells){
+    for(
+        const cell of holeCells
+    ){
 
         const p=
         cellToWorld(
@@ -1789,19 +2210,32 @@ function buildHoles(){
 
 function buildLights(){
 
-    for(let y=2;y<mapHeight;y+=6){
+    for(
+        let y=2;
+        y<mapHeight;
+        y+=6
+    ){
 
-        for(let x=2;x<mapWidth;x+=6){
+        for(
+            let x=2;
+            x<mapWidth;
+            x+=6
+        ){
 
             if(
                 !map[y]||
                 !map[y][x]||
                 map[y][x]==="wall"||
                 map[y][x]==="hole"
-            )continue;
+            )
+                continue;
 
             const p=
             cellToWorld(x,y);
+
+            /*
+                EXACTLY 1 TILE.
+            */
 
             const fixture=
             new THREE.Mesh(
@@ -1858,7 +2292,8 @@ function buildHideSpots(){
         i++
     ){
 
-        const cell=hideCells[i];
+        const cell=
+        hideCells[i];
 
         const p=
         cellToWorld(
@@ -1873,8 +2308,80 @@ function buildHideSpots(){
     }
 }
 
+function updateHiding(){
+
+    if(noClip){
+
+        hidden=false;
+
+        document.getElementById(
+            "hideText"
+        ).style.opacity="0";
+
+        document.getElementById(
+            "hiddenText"
+        ).style.opacity="0";
+
+        return;
+    }
+
+    let closest=null;
+    let closestDistance=Infinity;
+
+    for(
+        const spot of hideSpots
+    ){
+
+        const d=
+        Math.hypot(
+            player.position.x-spot.x,
+            player.position.z-spot.z
+        );
+
+        if(d<closestDistance){
+
+            closestDistance=d;
+            closest=spot;
+        }
+    }
+
+    const hideText=
+    document.getElementById(
+        "hideText"
+    );
+
+    const hiddenText=
+    document.getElementById(
+        "hiddenText"
+    );
+
+    if(
+        closest&&
+        closestDistance<2.4&&
+        !crouching
+    )
+        hideText.style.opacity="1";
+    else
+        hideText.style.opacity="0";
+
+    if(
+        closest&&
+        closestDistance<1.5&&
+        crouching
+    ){
+
+        hidden=true;
+        hiddenText.style.opacity="1";
+
+    }else{
+
+        hidden=false;
+        hiddenText.style.opacity="0";
+    }
+}
+
 /* =========================================================
-   EXIT
+   GREEN EXIT
 ========================================================= */
 
 function createExit(){
@@ -1895,7 +2402,10 @@ function createExit(){
     const dz=-exitPosition.z;
 
     group.rotation.y=
-    Math.atan2(dx,dz);
+    Math.atan2(
+        dx,
+        dz
+    );
 
     const darkMetal=
     new THREE.MeshBasicMaterial({
@@ -1928,10 +2438,21 @@ function createExit(){
 
     group.add(left);
 
-    const right=left.clone();
+    const right=
+    new THREE.Mesh(
+        new THREE.BoxGeometry(
+            postWidth,
+            EXIT_HEIGHT,
+            postDepth
+        ),
+        darkMetal
+    );
 
-    right.position.x=
-    EXIT_WIDTH/2;
+    right.position.set(
+        EXIT_WIDTH/2,
+        EXIT_HEIGHT/2,
+        0
+    );
 
     group.add(right);
 
@@ -1971,7 +2492,8 @@ function createExit(){
 
     group.add(leftLight);
 
-    const rightLight=leftLight.clone();
+    const rightLight=
+    leftLight.clone();
 
     rightLight.position.x=
     EXIT_WIDTH/2+.17;
@@ -2072,7 +2594,10 @@ function createExit(){
 
     const sign=
     new THREE.Mesh(
-        new THREE.PlaneGeometry(1.7,.42),
+        new THREE.PlaneGeometry(
+            1.7,
+            .42
+        ),
         new THREE.MeshBasicMaterial({
             map:signTexture,
             transparent:true
@@ -2102,7 +2627,9 @@ function createExit(){
         })
     );
 
-    floorGlow.rotation.x=-Math.PI/2;
+    floorGlow.rotation.x=
+    -Math.PI/2;
+
     floorGlow.position.y=.025;
 
     group.add(floorGlow);
@@ -2122,7 +2649,7 @@ function createExit(){
 
 function createEntity(){
 
-    if(!entityTexture)
+    if(!entityTexture||!entitySpawn)
         return;
 
     const geometry=
@@ -2152,6 +2679,49 @@ function createEntity(){
     );
 
     world.add(entity);
+
+    updateEntityFacing();
+}
+
+function removeEntity(){
+
+    if(!entity)
+        return;
+
+    world.remove(entity);
+
+    if(entity.geometry)
+        entity.geometry.dispose();
+
+    if(entity.material)
+        entity.material.dispose();
+
+    entity=null;
+
+    entityActive=false;
+    entityTimer=0;
+
+    if(entityAudio)
+        entityAudio.volume=0;
+}
+
+function spawnEntityNearPlayer(){
+
+    removeEntity();
+
+    chooseEntitySpawn();
+
+    createEntity();
+
+    if(entity){
+
+        entityActive=true;
+        entityTimer=0;
+
+        showMessage(
+            "ENTITY SPAWNED."
+        );
+    }
 }
 
 function updateEntityFacing(){
@@ -2168,136 +2738,14 @@ function updateEntityFacing(){
     entity.position.z;
 
     entity.rotation.y=
-    Math.atan2(dx,dz);
+    Math.atan2(
+        dx,
+        dz
+    );
 }
 
 /* =========================================================
-   ENTITY PATHFINDING
-========================================================= */
-
-function findPath(start,end){
-
-    if(
-        !inside(start.x,start.y)||
-        !inside(end.x,end.y)
-    )
-        return [];
-
-    const queue=[];
-    const visited=new Set();
-    const parent=new Map();
-
-    const key=(x,y)=>x+","+y;
-
-    const startKey=
-    key(start.x,start.y);
-
-    const endKey=
-    key(end.x,end.y);
-
-    queue.push(start);
-    visited.add(startKey);
-
-    const dirs=[
-        {x:1,y:0},
-        {x:-1,y:0},
-        {x:0,y:1},
-        {x:0,y:-1}
-    ];
-
-    while(queue.length){
-
-        const current=
-        queue.shift();
-
-        const currentKey=
-        key(current.x,current.y);
-
-        if(currentKey===endKey)
-            break;
-
-        for(const d of dirs){
-
-            const nx=
-            current.x+d.x;
-
-            const ny=
-            current.y+d.y;
-
-            const k=key(nx,ny);
-
-            if(
-                visited.has(k)||
-                !isWalkable(nx,ny)
-            )
-                continue;
-
-            visited.add(k);
-
-            parent.set(
-                k,
-                currentKey
-            );
-
-            queue.push({
-                x:nx,
-                y:ny
-            });
-        }
-    }
-
-    if(!visited.has(endKey))
-        return [];
-
-    const result=[];
-
-    let current=endKey;
-
-    while(current!==startKey){
-
-        const parts=
-        current.split(",").map(Number);
-
-        result.unshift({
-            x:parts[0],
-            y:parts[1]
-        });
-
-        current=
-        parent.get(current);
-
-        if(!current)
-            return [];
-    }
-
-    return result;
-}
-
-function updateEntityPath(){
-
-    if(!entity)
-        return;
-
-    const start=
-    worldToCell(
-        entity.position.x,
-        entity.position.z
-    );
-
-    const end=
-    worldToCell(
-        player.position.x,
-        player.position.z
-    );
-
-    entityPath=
-    findPath(start,end);
-
-    entityPathTimer=0;
-}
-
-/* =========================================================
-   ENTITY AI
+   ENTITY SPEED
 ========================================================= */
 
 function getEntitySpeed(){
@@ -2314,6 +2762,10 @@ function getEntitySpeed(){
     return 6.7;
 }
 
+/* =========================================================
+   ENTITY AI
+========================================================= */
+
 function updateEntity(dt){
 
     if(
@@ -2321,6 +2773,7 @@ function updateEntity(dt){
         paused||
         dead||
         falling||
+        noClip||
         !entity
     )
         return;
@@ -2347,155 +2800,56 @@ function updateEntity(dt){
             showMessage(
                 "SOMETHING IS HERE."
             );
-
-            updateEntityPath();
         }
 
         return;
     }
 
-    if(!entityAI)
-        return;
+    const dx=
+    player.position.x-
+    entity.position.x;
 
-    entityPathTimer+=dt;
+    const dz=
+    player.position.z-
+    entity.position.z;
 
-    /*
-       Recalculate periodically so the entity
-       keeps updating its route as the player moves.
-    */
+    const distance=
+    Math.hypot(dx,dz);
 
-    if(
-        entityPathTimer>.65||
-        !entityPath.length
-    ){
+    if(distance>.5){
 
-        updateEntityPath();
-    }
+        const nx=
+        entity.position.x+
+        (dx/distance)*
+        getEntitySpeed()*
+        dt;
 
-    if(!entityPath.length){
+        const nz=
+        entity.position.z+
+        (dz/distance)*
+        getEntitySpeed()*
+        dt;
 
-        /*
-           Emergency direct movement if pathfinding
-           cannot find a route.
-        */
-
-        const dx=
-        player.position.x-
-        entity.position.x;
-
-        const dz=
-        player.position.z-
-        entity.position.z;
-
-        const distance=
-        Math.hypot(dx,dz);
-
-        if(distance>.5){
-
-            const speed=
-            getEntitySpeed()*dt;
-
-            const nx=
-            entity.position.x+
-            dx/distance*speed;
-
-            const nz=
-            entity.position.z+
-            dz/distance*speed;
-
-            if(
-                !collides(
-                    nx,
-                    entity.position.z,
-                    .35
-                )
+        if(
+            !collides(
+                nx,
+                entity.position.z,
+                .35
             )
-                entity.position.x=nx;
+        )
+            entity.position.x=nx;
 
-            if(
-                !collides(
-                    entity.position.x,
-                    nz,
-                    .35
-                )
+        if(
+            !collides(
+                entity.position.x,
+                nz,
+                .35
             )
-                entity.position.z=nz;
-        }
-
-    }else{
-
-        const next=
-        entityPath[0];
-
-        const target=
-        cellToWorld(
-            next.x,
-            next.y
-        );
-
-        const dx=
-        target.x-
-        entity.position.x;
-
-        const dz=
-        target.z-
-        entity.position.z;
-
-        const distance=
-        Math.hypot(dx,dz);
-
-        const speed=
-        getEntitySpeed();
-
-        if(distance<.25){
-
-            entityPath.shift();
-
-        }else{
-
-            const step=
-            Math.min(
-                distance,
-                speed*dt
-            );
-
-            const nx=
-            entity.position.x+
-            dx/distance*step;
-
-            const nz=
-            entity.position.z+
-            dz/distance*step;
-
-            if(
-                !collides(
-                    nx,
-                    entity.position.z,
-                    .35
-                )
-            )
-                entity.position.x=nx;
-
-            if(
-                !collides(
-                    entity.position.x,
-                    nz,
-                    .35
-                )
-            )
-                entity.position.z=nz;
-        }
+        )
+            entity.position.z=nz;
     }
 
     updateEntityFacing();
-
-    const distance=
-    Math.hypot(
-        player.position.x-
-        entity.position.x,
-        player.position.z-
-        entity.position.z
-    );
 
     if(
         distance<1.15&&
@@ -2538,61 +2892,45 @@ function movePlayer(dx,dz){
 }
 
 /* =========================================================
-   FLY MODE
+   NO CLIP
 ========================================================= */
 
-function updateFly(dt){
+function toggleNoClip(){
 
-    if(!flyMode)
-        return;
+    noClip=!noClip;
 
-    let forward=0;
-    let strafe=0;
-    let vertical=0;
+    document.getElementById(
+        "noclipHud"
+    ).style.display=
+    noClip
+    ? "block"
+    : "none";
 
-    if(keys.w)forward++;
-    if(keys.s)forward--;
-
-    if(keys.d)strafe++;
-    if(keys.a)strafe--;
-
-    if(keys.space)vertical++;
-    if(keys.shift)vertical--;
-
-    const len=
-    Math.hypot(
-        forward,
-        strafe,
-        vertical
+    document.getElementById(
+        "devStatus"
+    ).innerHTML=
+    "<strong>STATUS:</strong> "+
+    (
+        noClip
+        ? "NO CLIP ON // INVINCIBLE"
+        : "NO CLIP OFF"
     );
 
-    if(!len)
-        return;
+    if(noClip){
 
-    forward/=len;
-    strafe/=len;
-    vertical/=len;
+        falling=false;
+        velocityY=0;
 
-    const speed=
-    FLY_SPEED*dt;
+        showMessage(
+            "NO CLIP ENABLED."
+        );
 
-    const sin=Math.sin(yaw);
-    const cos=Math.cos(yaw);
+    }else{
 
-    player.position.x+=
-    (
-        strafe*cos-
-        forward*sin
-    )*speed;
-
-    player.position.z+=
-    (
-        -forward*cos-
-        strafe*sin
-    )*speed;
-
-    player.position.y+=
-    vertical*speed;
+        showMessage(
+            "NO CLIP DISABLED."
+        );
+    }
 }
 
 /* =========================================================
@@ -2600,6 +2938,9 @@ function updateFly(dt){
 ========================================================= */
 
 function playerOverHole(){
+
+    if(noClip)
+        return false;
 
     const cell=
     worldToCell(
@@ -2622,7 +2963,11 @@ function playerOverHole(){
 
 function startFalling(){
 
-    if(falling||dead||flyMode)
+    if(
+        falling||
+        dead||
+        noClip
+    )
         return;
 
     falling=true;
@@ -2674,62 +3019,100 @@ function updateFalling(dt){
 }
 
 /* =========================================================
-   HIDING
+   NO CLIP MOVEMENT
 ========================================================= */
 
-function updateHiding(){
+function updateNoClip(dt){
 
-    let closest=null;
-    let closestDistance=Infinity;
+    if(
+        !noClip||
+        !started||
+        paused||
+        dead
+    )
+        return;
 
-    for(const spot of hideSpots){
+    let forward=0;
+    let strafe=0;
+    let vertical=0;
 
-        const d=
+    if(keys.w)forward++;
+    if(keys.s)forward--;
+
+    if(keys.d)strafe++;
+    if(keys.a)strafe--;
+
+    if(keys.space)vertical++;
+    if(keys.control)vertical--;
+
+    if(
+        forward||
+        strafe||
+        vertical
+    ){
+
+        const length=
         Math.hypot(
-            player.position.x-spot.x,
-            player.position.z-spot.z
+            forward,
+            strafe,
+            vertical
         );
 
-        if(d<closestDistance){
+        if(length){
 
-            closestDistance=d;
-            closest=spot;
+            forward/=length;
+            strafe/=length;
+            vertical/=length;
+
+            const sin=
+            Math.sin(yaw);
+
+            const cos=
+            Math.cos(yaw);
+
+            const speed=
+            keys.shift
+            ? NOCLIP_SPEED*2
+            : NOCLIP_SPEED;
+
+            player.position.x+=
+            (
+                strafe*cos-
+                forward*sin
+            )*
+            speed*
+            dt;
+
+            player.position.z+=
+            (
+                -forward*cos-
+                strafe*sin
+            )*
+            speed*
+            dt;
+
+            /*
+                Vertical movement follows camera
+                height directly.
+            */
+            player.position.y+=
+            vertical*
+            speed*
+            dt;
         }
     }
 
-    const hideText=
-    document.getElementById(
-        "hideText"
-    );
+    /*
+        No gravity while flying.
+    */
+    velocityY=0;
 
-    const hiddenText=
-    document.getElementById(
-        "hiddenText"
-    );
-
-    if(
-        closest&&
-        closestDistance<2.4&&
-        !crouching
-    )
-        hideText.style.opacity="1";
-    else
-        hideText.style.opacity="0";
-
-    if(
-        closest&&
-        closestDistance<1.5&&
-        crouching
-    ){
-
-        hidden=true;
-        hiddenText.style.opacity="1";
-
-    }else{
-
-        hidden=false;
-        hiddenText.style.opacity="0";
-    }
+    /*
+        No collision.
+        No holes.
+        No entity damage.
+        No exit triggering.
+    */
 }
 
 /* =========================================================
@@ -2741,7 +3124,8 @@ function checkExit(){
     if(
         !exitObject||
         dead||
-        falling
+        falling||
+        noClip
     )
         return;
 
@@ -2751,9 +3135,13 @@ function checkExit(){
     const local=
     new THREE.Vector3();
 
-    local.copy(player.position);
+    local.copy(
+        player.position
+    );
 
-    exit.worldToLocal(local);
+    exit.worldToLocal(
+        local
+    );
 
     const insideDoor=
     Math.abs(local.x)<
@@ -2782,18 +3170,17 @@ function winGame(){
 
     dead=true;
 
-    entityAudio.pause();
-    entityAudio.volume=0;
-
-    ambientAudio.pause();
+    stopAudio();
 
     document.querySelector(
         "#death .deathTitle"
-    ).textContent="ESCAPED";
+    ).textContent=
+    "ESCAPED";
 
     document.querySelector(
         "#death .deathTitle"
-    ).style.color="#39ff62";
+    ).style.color=
+    "#39ff62";
 
     document.getElementById(
         "deathReason"
@@ -2802,14 +3189,17 @@ function winGame(){
 
     document.getElementById(
         "death"
-    ).style.display="flex";
+    ).style.display=
+    "flex";
 
-    if(document.pointerLockElement)
+    if(
+        document.pointerLockElement
+    )
         document.exitPointerLock();
 }
 
 /* =========================================================
-   PLAYER UPDATE
+   PLAYER
 ========================================================= */
 
 function updatePlayer(dt){
@@ -2821,9 +3211,14 @@ function updatePlayer(dt){
     )
         return;
 
-    if(flyMode){
+    /*
+        No clip completely replaces normal movement.
+    */
+    if(noClip){
 
-        updateFly(dt);
+        updateNoClip(dt);
+        updateCeilingVisibility();
+
         return;
     }
 
@@ -2838,12 +3233,13 @@ function updatePlayer(dt){
 
     if(keys.w)forward++;
     if(keys.s)forward--;
+
     if(keys.d)strafe++;
     if(keys.a)strafe--;
 
     if(
-        forward!==0||
-        strafe!==0
+        forward||
+        strafe
     ){
 
         const length=
@@ -2856,15 +3252,18 @@ function updatePlayer(dt){
         strafe/=length;
 
         let speed=
-        keys.shift?
-        SPRINT_SPEED:
-        WALK_SPEED;
+        keys.shift
+        ? SPRINT_SPEED
+        : WALK_SPEED;
 
         if(crouching)
             speed*=.55;
 
-        const sin=Math.sin(yaw);
-        const cos=Math.cos(yaw);
+        const sin=
+        Math.sin(yaw);
+
+        const cos=
+        Math.cos(yaw);
 
         const dx=
         (
@@ -2882,10 +3281,14 @@ function updatePlayer(dt){
         speed*
         dt;
 
-        movePlayer(dx,dz);
+        movePlayer(
+            dx,
+            dz
+        );
     }
 
-    velocityY-=GRAVITY*dt;
+    velocityY-=
+    GRAVITY*dt;
 
     player.position.y+=
     velocityY*dt;
@@ -2909,7 +3312,8 @@ function updatePlayer(dt){
         !crouching
     ){
 
-        velocityY=JUMP_POWER;
+        velocityY=
+        JUMP_POWER;
 
         grounded=false;
 
@@ -2917,9 +3321,9 @@ function updatePlayer(dt){
     }
 
     const targetHeight=
-    crouching?
-    CROUCH_HEIGHT:
-    PLAYER_HEIGHT;
+    crouching
+    ? CROUCH_HEIGHT
+    : PLAYER_HEIGHT;
 
     camera.position.y=
     THREE.MathUtils.lerp(
@@ -2976,13 +3380,15 @@ function updateMessage(dt){
 
 function die(reason){
 
-    if(dead)
+    if(
+        dead||
+        noClip
+    )
         return;
 
     dead=true;
 
-    entityAudio.pause();
-    entityAudio.volume=0;
+    stopAudio();
 
     document.getElementById(
         "deathReason"
@@ -2990,67 +3396,23 @@ function die(reason){
 
     document.querySelector(
         "#death .deathTitle"
-    ).textContent="YOU DIED";
+    ).textContent=
+    "YOU DIED";
 
     document.querySelector(
         "#death .deathTitle"
-    ).style.color="#850000";
+    ).style.color=
+    "#850000";
 
     document.getElementById(
         "death"
-    ).style.display="flex";
+    ).style.display=
+    "flex";
 
-    if(document.pointerLockElement)
+    if(
+        document.pointerLockElement
+    )
         document.exitPointerLock();
-}
-
-/* =========================================================
-   ENTITY RESET / SPAWN
-========================================================= */
-
-function removeEntity(){
-
-    if(!entity)
-        return;
-
-    world.remove(entity);
-
-    entity.geometry.dispose();
-
-    entity.material.dispose();
-
-    entity=null;
-
-    entityAudio.pause();
-    entityAudio.currentTime=0;
-    entityAudio.volume=0;
-}
-
-function spawnEntityNearPlayer(){
-
-    removeEntity();
-
-    entitySpawn=
-    findGoodEntitySpawn();
-
-    createEntity();
-
-    entityTimer=0;
-    entityActive=true;
-    entityAI=true;
-
-    updateEntityPath();
-
-    showMessage(
-        "ENTITY SPAWNED."
-    );
-
-    devStatus(
-        "ENTITY SPAWNED AT "+
-        entitySpawn.x.toFixed(1)+
-        ", "+
-        entitySpawn.z.toFixed(1)
-    );
 }
 
 /* =========================================================
@@ -3065,7 +3427,11 @@ function resetGame(){
         playerSpawn.z
     );
 
-    player.rotation.set(0,0,0);
+    player.rotation.set(
+        0,
+        0,
+        0
+    );
 
     camera.position.set(
         0,
@@ -3073,7 +3439,11 @@ function resetGame(){
         0
     );
 
-    camera.rotation.set(0,0,0);
+    camera.rotation.set(
+        0,
+        0,
+        0
+    );
 
     yaw=0;
     pitch=0;
@@ -3092,30 +3462,27 @@ function resetGame(){
     entityTimer=0;
     entityActive=false;
 
-    flyMode=false;
+    noClip=false;
 
     document.getElementById(
-        "flyIndicator"
+        "noclipHud"
     ).style.display="none";
+
+    chooseEntitySpawn();
 
     removeEntity();
 
-    /*
-       Randomize every normal game restart.
-    */
-
-    entitySpawn=
-    findGoodEntitySpawn();
-
     createEntity();
 
-    ambientAudio.volume=.75;
+    if(entityAudio)
+        entityAudio.volume=0;
 
-    startAudio();
+    if(ambientAudio)
+        ambientAudio.volume=.75;
 }
 
 /* =========================================================
-   START / PAUSE
+   START
 ========================================================= */
 
 function startGame(){
@@ -3144,9 +3511,14 @@ function startGame(){
     paused=false;
     dead=false;
 
-    startAudio();
-
     resetGame();
+
+    /*
+        IMPORTANT:
+        This is called from the Start button,
+        allowing the browser to start the audio.
+    */
+    startAudio();
 
     renderer.domElement
     .requestPointerLock()
@@ -3158,13 +3530,9 @@ function goMainMenu(){
     started=false;
     paused=false;
     dead=false;
+    noClip=false;
 
-    flyMode=false;
-
-    entityAudio.pause();
-    entityAudio.volume=0;
-
-    ambientAudio.pause();
+    stopAudio();
 
     document.getElementById(
         "pause"
@@ -3183,14 +3551,16 @@ function goMainMenu(){
     ).style.display="none";
 
     document.getElementById(
-        "mapViewer"
+        "mapScreen"
     ).style.display="none";
 
     document.getElementById(
         "menu"
     ).style.display="block";
 
-    if(document.pointerLockElement)
+    if(
+        document.pointerLockElement
+    )
         document.exitPointerLock();
 }
 
@@ -3199,7 +3569,8 @@ function pauseGame(){
     if(
         !started||
         dead||
-        falling
+        falling||
+        devOpen
     )
         return;
 
@@ -3209,7 +3580,9 @@ function pauseGame(){
         "pause"
     ).style.display="flex";
 
-    if(document.pointerLockElement)
+    if(
+        document.pointerLockElement
+    )
         document.exitPointerLock();
 }
 
@@ -3217,232 +3590,243 @@ function pauseGame(){
    DEV TOOLS
 ========================================================= */
 
-const devTools=
-document.getElementById(
-    "devTools"
-);
+function openDevTools(){
 
-const devStatusBox=
-document.getElementById(
-    "devStatus"
-);
-
-function devStatus(text){
-
-    devStatusBox.textContent=
-    text;
-}
-
-function toggleDevTools(){
-
-    if(!started)
+    if(
+        !started||
+        dead
+    )
         return;
 
-    const open=
-    devTools.style.display==="flex";
-
-    if(open){
-
-        devTools.style.display="none";
-
-        if(!flyMode&&!dead)
-            renderer.domElement
-            .requestPointerLock()
-            .catch(()=>{});
-
-    }else{
-
-        devTools.style.display="flex";
-
-        if(document.pointerLockElement)
-            document.exitPointerLock();
-
-        devStatus(
-            "PLAYER "+
-            player.position.x.toFixed(1)+
-            ", "+
-            player.position.y.toFixed(1)+
-            ", "+
-            player.position.z.toFixed(1)
-        );
-    }
-}
-
-function toggleFly(){
-
-    flyMode=!flyMode;
+    devOpen=true;
 
     document.getElementById(
-        "flyIndicator"
-    ).style.display=
-    flyMode?"block":"none";
+        "devTools"
+    ).style.display="block";
 
-    devStatus(
-        flyMode?
-        "FLY / NOCLIP ENABLED":
-        "FLY / NOCLIP DISABLED"
-    );
+    if(
+        document.pointerLockElement
+    )
+        document.exitPointerLock();
+}
 
-    if(flyMode){
+function closeDevTools(){
 
-        velocityY=0;
+    devOpen=false;
 
-        camera.position.y=
-        PLAYER_HEIGHT;
+    document.getElementById(
+        "devTools"
+    ).style.display="none";
+
+    if(
+        started&&
+        !paused&&
+        !dead
+    ){
+
+        renderer.domElement
+        .requestPointerLock()
+        .catch(()=>{});
     }
 }
-
-function teleportEntityToPlayer(){
-
-    if(!entity)
-        createEntity();
-
-    entity.position.set(
-        player.position.x+1,
-        ENTITY_HEIGHT/2,
-        player.position.z+1
-    );
-
-    entityActive=true;
-
-    updateEntityPath();
-
-    devStatus(
-        "ENTITY TELEPORTED NEAR PLAYER"
-    );
-}
-
-function resetEntityDev(){
-
-    entityActive=false;
-    entityTimer=0;
-
-    removeEntity();
-
-    entitySpawn=
-    findGoodEntitySpawn();
-
-    createEntity();
-
-    devStatus(
-        "ENTITY RESET AND RANDOMIZED"
-    );
-}
-
-/* =========================================================
-   MAP VIEWER
-========================================================= */
 
 function openMap(){
 
-    const viewer=
-    document.getElementById(
-        "mapViewer"
-    );
+    if(!mapImage)
+        return;
 
-    viewer.style.display="flex";
+    mapOpen=true;
+
+    document.getElementById(
+        "mapScreen"
+    ).style.display="flex";
+
+    drawMap();
+}
+
+function closeMap(){
+
+    mapOpen=false;
+
+    document.getElementById(
+        "mapScreen"
+    ).style.display="none";
+}
+
+function drawMap(){
+
+    if(!mapImage)
+        return;
 
     const canvas=
     document.getElementById(
         "mapCanvas"
     );
 
+    const rect=
+    canvas.getBoundingClientRect();
+
+    const dpr=
+    window.devicePixelRatio||1;
+
+    canvas.width=
+    rect.width*dpr;
+
+    canvas.height=
+    rect.height*dpr;
+
     const ctx=
     canvas.getContext("2d");
 
-    const img=
-    new Image();
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
 
-    img.onload=()=>{
+    const w=rect.width;
+    const h=rect.height;
 
-        const maxW=canvas.clientWidth;
-        const maxH=canvas.clientHeight;
+    ctx.fillStyle="#020202";
 
-        const scale=
-        Math.min(
-            maxW/img.width,
-            maxH/img.height
-        );
+    ctx.fillRect(
+        0,
+        0,
+        w,
+        h
+    );
 
-        canvas.width=
-        Math.max(
-            1,
-            Math.floor(
-                img.width*scale
-            )
-        );
+    /*
+        Preserve the original map aspect ratio.
+    */
 
-        canvas.height=
-        Math.max(
-            1,
-            Math.floor(
-                img.height*scale
-            )
-        );
+    const scale=
+    Math.min(
+        w/mapImage.naturalWidth,
+        h/mapImage.naturalHeight
+    )*.92;
 
-        ctx.imageSmoothingEnabled=false;
+    const drawW=
+    mapImage.naturalWidth*scale;
 
-        ctx.drawImage(
-            img,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
+    const drawH=
+    mapImage.naturalHeight*scale;
 
-        /*
-           Draw player marker.
-        */
+    const ox=
+    (w-drawW)/2;
 
-        const pc=
-        worldToCell(
-            player.position.x,
-            player.position.z
-        );
+    const oy=
+    (h-drawH)/2;
+
+    ctx.imageSmoothingEnabled=false;
+
+    ctx.drawImage(
+        mapImage,
+        ox,
+        oy,
+        drawW,
+        drawH
+    );
+
+    /*
+        Player marker.
+    */
+
+    const cell=
+    worldToCell(
+        player.position.x,
+        player.position.z
+    );
+
+    if(
+        inside(
+            cell.x,
+            cell.y
+        )
+    ){
 
         const px=
-        (pc.x/mapWidth)*
-        canvas.width;
+        ox+
+        (cell.x+.5)*
+        scale;
 
         const py=
-        (pc.y/mapHeight)*
-        canvas.height;
-
-        ctx.fillStyle="#00ff55";
+        oy+
+        (cell.y+.5)*
+        scale;
 
         ctx.beginPath();
 
         ctx.arc(
             px,
             py,
-            5,
+            6,
             0,
             Math.PI*2
         );
 
+        ctx.fillStyle="#ffffff";
         ctx.fill();
 
         /*
-           Draw entity marker.
+            Direction indicator.
         */
 
-        if(entity){
+        const dx=
+        Math.sin(yaw)*12;
 
-            const ec=
-            worldToCell(
-                entity.position.x,
-                entity.position.z
-            );
+        const dy=
+        -Math.cos(yaw)*12;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            px,
+            py
+        );
+
+        ctx.lineTo(
+            px+dx,
+            py+dy
+        );
+
+        ctx.strokeStyle="#ffffff";
+        ctx.lineWidth=2;
+
+        ctx.stroke();
+    }
+
+    /*
+        Entity marker.
+    */
+
+    if(entity){
+
+        const ecell=
+        worldToCell(
+            entity.position.x,
+            entity.position.z
+        );
+
+        if(
+            inside(
+                ecell.x,
+                ecell.y
+            )
+        ){
 
             const ex=
-            (ec.x/mapWidth)*
-            canvas.width;
+            ox+
+            (ecell.x+.5)*
+            scale;
 
             const ey=
-            (ec.y/mapHeight)*
-            canvas.height;
-
-            ctx.fillStyle="#ff2222";
+            oy+
+            (ecell.y+.5)*
+            scale;
 
             ctx.beginPath();
 
@@ -3454,42 +3838,114 @@ function openMap(){
                 Math.PI*2
             );
 
+            ctx.fillStyle="#ff2222";
             ctx.fill();
         }
+    }
 
-        /*
-           Draw exit marker.
-        */
+    /*
+        Exit marker.
+    */
 
-        if(exitPosition){
+    if(exitPosition){
 
-            const xc=
-            worldToCell(
-                exitPosition.x,
-                exitPosition.z
-            );
+        const ecell=
+        worldToCell(
+            exitPosition.x,
+            exitPosition.z
+        );
 
-            const xx=
-            (xc.x/mapWidth)*
-            canvas.width;
+        if(
+            inside(
+                ecell.x,
+                ecell.y
+            )
+        ){
 
-            const xy=
-            (xc.y/mapHeight)*
-            canvas.height;
+            const ex=
+            ox+
+            (ecell.x+.5)*
+            scale;
 
-            ctx.fillStyle="#39ff62";
+            const ey=
+            oy+
+            (ecell.y+.5)*
+            scale;
+
+            ctx.fillStyle="#35ff63";
 
             ctx.fillRect(
-                xx-4,
-                xy-4,
-                8,
-                8
+                ex-5,
+                ey-5,
+                10,
+                10
             );
         }
-    };
-
-    img.src="./textures/map1.png";
+    }
 }
+
+document.getElementById(
+    "devSpawnEntity"
+).onclick=()=>{
+
+    spawnEntityNearPlayer();
+
+    document.getElementById(
+        "devStatus"
+    ).innerHTML=
+    "<strong>STATUS:</strong> ENTITY SPAWNED";
+};
+
+document.getElementById(
+    "devRemoveEntity"
+).onclick=()=>{
+
+    removeEntity();
+
+    document.getElementById(
+        "devStatus"
+    ).innerHTML=
+    "<strong>STATUS:</strong> ENTITY REMOVED";
+};
+
+document.getElementById(
+    "devOpenMap"
+).onclick=openMap;
+
+document.getElementById(
+    "devNoClip"
+).onclick=toggleNoClip;
+
+document.getElementById(
+    "devTeleportExit"
+).onclick=()=>{
+
+    if(exitPosition){
+
+        player.position.x=
+        exitPosition.x;
+
+        player.position.z=
+        exitPosition.z;
+
+        player.position.y=
+        0;
+
+        showMessage(
+            "TELEPORTED TO EXIT."
+        );
+    }
+};
+
+document.getElementById(
+    "devClose"
+).onclick=
+closeDevTools;
+
+document.getElementById(
+    "mapClose"
+).onclick=
+closeMap;
 
 /* =========================================================
    KEYBOARD
@@ -3502,24 +3958,44 @@ window.addEventListener(
         const key=
         e.key.toLowerCase();
 
+        /*
+            BACKSPACE DEV TOOLS
+
+            It is intentionally NOT in the Controls menu.
+        */
+
         if(key==="backspace"){
 
             e.preventDefault();
 
-            toggleDevTools();
+            if(
+                mapOpen
+            ){
+
+                closeMap();
+                return;
+            }
+
+            if(devOpen){
+
+                closeDevTools();
+
+            }else{
+
+                openDevTools();
+            }
 
             return;
         }
 
-        if(
-            devTools.style.display==="flex"
-        )
-            return;
+        /*
+            Don't let gameplay keys affect things
+            while dev tools or map are open.
+        */
 
         if(
-            document.getElementById(
-                "mapViewer"
-            ).style.display==="flex"
+            devOpen||
+            mapOpen
         )
             return;
 
@@ -3555,6 +4031,10 @@ window.addEventListener(
 
             keys.space=true;
 
+        }else if(key==="control"){
+
+            keys.control=true;
+
         }else{
 
             keys[key]=true;
@@ -3574,6 +4054,8 @@ window.addEventListener(
 
         if(key===" ")
             keys.space=false;
+        else if(key==="control")
+            keys.control=false;
         else
             keys[key]=false;
 
@@ -3593,7 +4075,10 @@ document.addEventListener(
         if(
             !started||
             paused||
-            dead
+            dead||
+            falling||
+            devOpen||
+            mapOpen
         )
             return;
 
@@ -3617,7 +4102,6 @@ document.addEventListener(
         );
 
         player.rotation.y=yaw;
-
         camera.rotation.x=pitch;
     }
 );
@@ -3639,8 +4123,6 @@ document.getElementById(
     document.getElementById(
         "pause"
     ).style.display="none";
-
-    startAudio();
 
     renderer.domElement
     .requestPointerLock()
@@ -3687,65 +4169,6 @@ document.getElementById(
 
     document.getElementById(
         "controls"
-    ).style.display="none";
-};
-
-/* DEV BUTTONS */
-
-document.getElementById(
-    "devSpawn"
-).onclick=()=>{
-
-    spawnEntityNearPlayer();
-};
-
-document.getElementById(
-    "devTeleportEntity"
-).onclick=()=>{
-
-    teleportEntityToPlayer();
-};
-
-document.getElementById(
-    "devMap"
-).onclick=()=>{
-
-    openMap();
-};
-
-document.getElementById(
-    "devFly"
-).onclick=()=>{
-
-    toggleFly();
-};
-
-document.getElementById(
-    "devEntityAI"
-).onclick=()=>{
-
-    entityAI=!entityAI;
-
-    devStatus(
-        entityAI?
-        "ENTITY AI ENABLED":
-        "ENTITY AI DISABLED"
-    );
-};
-
-document.getElementById(
-    "devResetEntity"
-).onclick=()=>{
-
-    resetEntityDev();
-};
-
-document.getElementById(
-    "mapClose"
-).onclick=()=>{
-
-    document.getElementById(
-        "mapViewer"
     ).style.display="none";
 };
 
@@ -3878,6 +4301,9 @@ window.addEventListener(
             innerWidth,
             innerHeight
         );
+
+        if(mapOpen)
+            drawMap();
     }
 );
 
@@ -3912,6 +4338,8 @@ function showError(error){
 async function init(){
 
     try{
+
+        setupAudio();
 
         wallTexture=
         await loadTexture(
@@ -3960,15 +4388,6 @@ async function init(){
 
         createExit();
 
-        /*
-           Initial randomized entity spawn.
-        */
-
-        entitySpawn=
-        findGoodEntitySpawn();
-
-        createEntity();
-
         console.log(
             "BACKROOMS READY"
         );
@@ -3979,8 +4398,9 @@ async function init(){
         );
 
         console.log(
-            "Entity spawn:",
-            entitySpawn
+            "Audio:",
+            "./sounds/entity.mp3",
+            "./sounds/ambient.mp3"
         );
 
     }catch(error){
@@ -4027,18 +4447,28 @@ function animate(now){
 
     updateHUD();
 
+    updateCeilingVisibility();
+
+    /*
+        Exit light pulse.
+    */
+
     if(exitObject){
 
         const pulse=
         1+
-        Math.sin(now*.004)*.16;
+        Math.sin(
+            now*.004
+        )*.16;
 
         exitObject.light.intensity=
         2.4*pulse;
 
         exitObject.glow.material.opacity=
         .12+
-        Math.sin(now*.003)*.035;
+        Math.sin(
+            now*.003
+        )*.035;
     }
 
     renderer.render(
