@@ -1313,19 +1313,6 @@ function classifyPixel(r,g,b,a){
     if(a<20)
         return "floor";
 
-    /*
-        GREEN PIXEL = EXIT
-
-        This specifically looks for the small bright-green
-        marker in map1.png.
-    */
-    if(
-        g>120 &&
-        g>r*1.35 &&
-        g>b*1.25
-    )
-        return "exit";
-
     if(
         r<80 &&
         g<80 &&
@@ -1362,6 +1349,7 @@ function classifyPixel(r,g,b,a){
 
     return "floor";
 }
+
 /* =========================================================
    LOAD MAP
 ========================================================= */
@@ -1431,7 +1419,6 @@ async function loadMap(){
 
     playerSpawn=null;
     entitySpawn=null;
-    let exitCell = null;
 
     for(
         let y=0;
@@ -1481,32 +1468,6 @@ async function loadMap(){
 
         map.push(row);
     }
-    if(exitCell){
-
-    exitPosition =
-        cellToWorld(
-            exitCell.x,
-            exitCell.y
-        );
-
-    console.log(
-        "EXIT FOUND AT MAP PIXEL:",
-        exitCell.x,
-        exitCell.y
-    );
-
-    console.log(
-        "EXIT WORLD POSITION:",
-        exitPosition.x,
-        exitPosition.z
-    );
-
-}else{
-
-    console.warn(
-        "NO GREEN EXIT PIXEL FOUND IN MAP."
-    );
-}
 
     if(!playerSpawn){
 
@@ -1533,6 +1494,109 @@ async function loadMap(){
     findExit();
 }
 
+/* =========================================================
+   EXIT LOCATION
+========================================================= */
+
+function findExit(){
+
+    const candidates=[];
+
+    for(
+        const cell of walkable
+    ){
+
+        if(
+            map[cell.y][cell.x]==="hole"
+        )
+            continue;
+
+        let clear=true;
+
+        for(
+            let yy=-2;
+            yy<=2;
+            yy++
+        ){
+
+            for(
+                let xx=-2;
+                xx<=2;
+                xx++
+            ){
+
+                const cx=
+                cell.x+xx;
+
+                const cy=
+                cell.y+yy;
+
+                if(
+                    !inside(cx,cy)||
+                    map[cy][cx]==="wall"||
+                    map[cy][cx]==="hole"
+                ){
+
+                    clear=false;
+                    break;
+                }
+            }
+
+            if(!clear)
+                break;
+        }
+
+        if(!clear)
+            continue;
+
+        const p=
+        cellToWorld(
+            cell.x,
+            cell.y
+        );
+
+        const distance=
+        Math.hypot(
+            p.x-playerSpawn.x,
+            p.z-playerSpawn.z
+        );
+
+        if(distance>15){
+
+            candidates.push({
+                cell,
+                distance
+            });
+        }
+    }
+
+    candidates.sort(
+        (a,b)=>
+        b.distance-a.distance
+    );
+
+    if(candidates.length){
+
+        exitPosition=
+        cellToWorld(
+            candidates[0].cell.x,
+            candidates[0].cell.y
+        );
+
+    }else{
+
+        const c=
+        walkable[
+            walkable.length-1
+        ];
+
+        exitPosition=
+        cellToWorld(
+            c.x,
+            c.y
+        );
+    }
+}
 
 /* =========================================================
    RANDOM ENTITY SPAWN
