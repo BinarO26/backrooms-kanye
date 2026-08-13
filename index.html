@@ -995,6 +995,13 @@ button:hover{
                 REMOVE ENTITY
             </button>
 
+            <button
+                class="devButton"
+                id="devTeleportEntity"
+            >
+                TELEPORT PLAYER TO ENTITY
+            </button>
+
         </div>
 
         <div class="devSection">
@@ -4957,6 +4964,61 @@ document.getElementById(
 
         showMessage(
             "TELEPORTED TO EXIT."
+        );
+    };
+
+document.getElementById(
+    "devTeleportEntity"
+).onclick =
+    ()=>{
+
+        if(!entity){
+
+            showMessage(
+                "NO ENTITY TO TELEPORT TO."
+            );
+
+            return;
+        }
+
+        /*
+            Drop the player right in front
+            of the entity instead of exactly
+            on top of it.
+        */
+
+        const dx =
+            player.position.x -
+            entity.position.x;
+
+        const dz =
+            player.position.z -
+            entity.position.z;
+
+        const distance =
+            Math.hypot(
+                dx,
+                dz
+            ) || 1;
+
+        const offset = 1.5;
+
+        player.position.set(
+            entity.position.x +
+                (dx / distance) *
+                offset,
+
+            crouching
+                ? CROUCH_HEIGHT
+                : PLAYER_HEIGHT,
+
+            entity.position.z +
+                (dz / distance) *
+                offset
+        );
+
+        showMessage(
+            "TELEPORTED TO ENTITY."
         );
     };
 
