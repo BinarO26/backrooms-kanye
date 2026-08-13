@@ -943,27 +943,27 @@ button:hover{
             <div class="selectionGrid">
 
                 <button class="entityChoice selected" data-entity="1">
-                    <img src="/entities/entity1.png" alt="Entity 1">
+                    <img src="./entities/entity1.png" alt="Entity 1">
                     <span>ENTITY 1</span>
                 </button>
 
                 <button class="entityChoice" data-entity="2">
-                    <img src="/entities/entity2.png" alt="Entity 2">
+                    <img src="./entities/entity2.png" alt="Entity 2">
                     <span>ENTITY 2</span>
                 </button>
 
                 <button class="entityChoice" data-entity="3">
-                    <img src="/entities/entity3.png" alt="Entity 3">
+                    <img src="./entities/entity3.png" alt="Entity 3">
                     <span>ENTITY 3</span>
                 </button>
 
                 <button class="entityChoice" data-entity="4">
-                    <img src="/entities/entity4.png" alt="Entity 4">
+                    <img src="./entities/entity4.png" alt="Entity 4">
                     <span>ENTITY 4</span>
                 </button>
 
                 <button class="entityChoice" data-entity="5">
-                    <img src="/entities/entity5.png" alt="Entity 5">
+                    <img src="./entities/entity5.png" alt="Entity 5">
                     <span>ENTITY 5</span>
                 </button>
 
@@ -1401,7 +1401,7 @@ import * as THREE
 ========================================================= */
 
 let selectedEntity =
-    "/entities/entity1.png";
+    "./entities/entity1.png";
 
 let selectedEntitySound =
     "/sounds/entity1.mp3";
@@ -1440,7 +1440,7 @@ entityChoices.forEach(
                     button.dataset.entity;
 
                 selectedEntity =
-                    "/entities/entity" +
+                    "./entities/entity" +
                     number +
                     ".png";
 
@@ -1473,7 +1473,7 @@ soundChoices.forEach(
                     button.dataset.sound;
 
                 selectedEntitySound =
-                    "/sounds/entity" +
+                    "./sounds/entity" +
                     number +
                     ".mp3";
 
@@ -1790,24 +1790,6 @@ async function loadEntityTexture(){
 
 }
 
-    for(
-        const path of paths
-    ){
-
-        try{
-
-            return await loadTexture(
-                path
-            );
-
-        }catch(error){}
-
-    }
-
-    throw new Error(
-        "Could not find entity texture."
-    );
-}
 
 /* =========================================================
    MAP HELPERS
@@ -5235,13 +5217,30 @@ document.getElementById(
 document.getElementById(
     "selectionContinue"
 ).onclick =
-    ()=>{
+    async ()=>{
 
-        document.getElementById(
-            "selectionScreen"
-        ).style.display = "none";
+        try{
 
-        startGame();
+            /* Load the entity/sound chosen on the selection screen
+               before the game starts, instead of keeping entity 1
+               from initial page load. */
+            entityTexture =
+                await loadEntityTexture();
+
+            stopAudio();
+            setupAudio();
+
+            document.getElementById(
+                "selectionScreen"
+            ).style.display = "none";
+
+            startGame();
+
+        }catch(error){
+
+            showError(error);
+
+        }
 
     };
 
