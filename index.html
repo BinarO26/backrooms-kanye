@@ -10,7 +10,8 @@
     box-sizing:border-box;
 }
 
-html,body{
+html,
+body{
     margin:0;
     width:100%;
     height:100%;
@@ -19,16 +20,176 @@ html,body{
     font-family:Arial,Helvetica,sans-serif;
 }
 
-canvas{
+body{
+    position:relative;
+}
+
+button{
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(0,0,0,.8);
+    color:#aaa;
+    cursor:pointer;
+}
+
+button:hover{
+    color:#eee;
+    border-color:#bcb56c;
+    background:rgba(45,42,20,.85);
+}
+
+/* =========================================================
+   GAME CANVAS / CRT WRAPPER
+========================================================= */
+
+.crt-overlay-wrapper{
     position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    z-index:1;
+    pointer-events:none;
+    background:#000;
+}
+
+.crt-overlay-wrapper canvas{
+    position:absolute;
     inset:0;
     width:100%;
     height:100%;
     display:block;
 }
 
+/*
+    Dark edges around the camera image.
+*/
+.crt-vignette{
+    position:absolute;
+    inset:0;
+    z-index:3;
+    pointer-events:none;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            transparent 38%,
+            rgba(0,0,0,.06) 54%,
+            rgba(0,0,0,.18) 72%,
+            rgba(0,0,0,.55) 91%,
+            rgba(0,0,0,.82) 100%
+        );
+}
+
+/*
+    Horizontal scanlines.
+
+    Kept subtle so they don't make the game
+    look like it is being rendered at a very
+    low resolution.
+*/
+.crt-scanlines{
+    position:absolute;
+    inset:0;
+    z-index:4;
+    pointer-events:none;
+
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(0,0,0,.16) 0px,
+            rgba(0,0,0,.16) 1px,
+            transparent 2px,
+            transparent 4px
+        );
+
+    opacity:.32;
+}
+
+/*
+    Very subtle camera flicker.
+*/
+.crt-flicker{
+    position:absolute;
+    inset:0;
+    z-index:5;
+    pointer-events:none;
+
+    background:
+        rgba(255,255,255,.018);
+
+    animation:
+        crtFlicker
+        .13s
+        infinite;
+}
+
+@keyframes crtFlicker{
+
+    0%{
+        opacity:.20;
+    }
+
+    15%{
+        opacity:.08;
+    }
+
+    30%{
+        opacity:.16;
+    }
+
+    45%{
+        opacity:.05;
+    }
+
+    60%{
+        opacity:.13;
+    }
+
+    75%{
+        opacity:.07;
+    }
+
+    100%{
+        opacity:.18;
+    }
+}
+
+/*
+    Very subtle color separation.
+*/
+.crt-color-shift{
+    position:absolute;
+    inset:0;
+    z-index:6;
+    pointer-events:none;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,0,0,.018),
+            transparent 18%,
+            transparent 82%,
+            rgba(0,80,255,.022)
+        );
+
+    mix-blend-mode:screen;
+}
+
+/*
+    Tiny amount of image softness.
+    This is deliberately extremely subtle.
+*/
+.crt-soft{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    box-shadow:
+        inset 0 0 18px rgba(0,0,0,.18);
+}
+
 /* =========================================================
-   MAIN MENU
+   MENU
 ========================================================= */
 
 #menu{
@@ -46,7 +207,10 @@ canvas{
     object-fit:cover;
     opacity:0;
     transition:opacity 1.2s;
-    filter:brightness(.28) contrast(1.2) saturate(.6);
+    filter:
+        brightness(.28)
+        contrast(1.2)
+        saturate(.6);
 }
 
 .menuImage.active{
@@ -56,6 +220,7 @@ canvas{
 .menuShade{
     position:absolute;
     inset:0;
+
     background:
         linear-gradient(
             90deg,
@@ -75,6 +240,7 @@ canvas{
     inset:0;
     pointer-events:none;
     opacity:.13;
+
     background:
         repeating-linear-gradient(
             0deg,
@@ -119,22 +285,10 @@ canvas{
     width:340px;
 }
 
-button{
-    border:1px solid rgba(255,255,255,.25);
-    background:rgba(0,0,0,.8);
-    color:#aaa;
-    cursor:pointer;
-}
-
-button:hover{
-    color:#eee;
-    border-color:#bcb56c;
-    background:rgba(45,42,20,.85);
-}
-
 .difficulties{
     display:grid;
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:
+        repeat(4,1fr);
     gap:4px;
     margin-bottom:10px;
 }
@@ -159,7 +313,7 @@ button:hover{
 }
 
 /* =========================================================
-   OVERLAYS
+   PAUSE / DEATH
 ========================================================= */
 
 .overlay{
@@ -170,12 +324,14 @@ button:hover{
     align-items:center;
     justify-content:center;
     flex-direction:column;
+
     background:
         radial-gradient(
             ellipse,
             rgba(25,24,15,.72),
             rgba(0,0,0,.99)
         );
+
     color:#fff;
 }
 
@@ -234,7 +390,9 @@ button:hover{
     display:flex;
     justify-content:space-between;
     padding:10px 4px;
-    border-bottom:1px solid rgba(255,255,255,.07);
+    border-bottom:
+        1px solid rgba(255,255,255,.07);
+
     color:#777;
     font:14px monospace;
 }
@@ -267,13 +425,18 @@ button:hover{
     position:absolute;
     left:50%;
     top:50%;
-    transform:translate(-50%,-50%);
+    transform:
+        translate(-50%,-50%);
+
     width:min(720px,92vw);
     max-height:88vh;
     overflow:auto;
+
     background:#090909;
     border:1px solid #777;
-    box-shadow:0 0 40px rgba(0,0,0,.8);
+    box-shadow:
+        0 0 40px rgba(0,0,0,.8);
+
     padding:24px;
 }
 
@@ -281,6 +444,7 @@ button:hover{
     font-size:22px;
     color:#ddd;
     margin-bottom:8px;
+    letter-spacing:3px;
 }
 
 .devSubtitle{
@@ -337,8 +501,10 @@ button:hover{
 .mapPanel{
     width:min(1000px,94vw);
     height:min(850px,90vh);
+
     display:flex;
     flex-direction:column;
+
     background:#080808;
     border:1px solid #666;
     padding:15px;
@@ -348,8 +514,10 @@ button:hover{
     display:flex;
     justify-content:space-between;
     align-items:center;
+
     color:#aaa;
     font:14px monospace;
+
     padding-bottom:10px;
 }
 
@@ -375,24 +543,35 @@ button:hover{
 #crosshair{
     position:fixed;
     z-index:100;
+
     left:50%;
     top:50%;
+
     width:5px;
     height:5px;
+
     margin:-2px;
-    border:1px solid rgba(255,255,255,.7);
+
+    border:
+        1px solid rgba(255,255,255,.7);
+
     border-radius:50%;
+
     pointer-events:none;
 }
 
 #hud{
     position:fixed;
     z-index:100;
+
     left:18px;
     bottom:18px;
+
     color:#aaa;
     font:12px monospace;
-    text-shadow:2px 2px 7px #000;
+
+    text-shadow:
+        2px 2px 7px #000;
 }
 
 #hudDifficulty{
@@ -403,44 +582,70 @@ button:hover{
 #message{
     position:fixed;
     z-index:100;
+
     top:44px;
     left:50%;
-    transform:translateX(-50%);
+
+    transform:
+        translateX(-50%);
+
     color:#bbb;
     font:14px monospace;
-    text-shadow:2px 2px 8px #000;
+
+    text-shadow:
+        2px 2px 8px #000;
 }
 
 #recording{
     position:fixed;
     z-index:100;
+
     right:18px;
     top:16px;
+
     color:#aaa;
     font:13px monospace;
-    text-shadow:2px 2px 6px #000;
+
+    text-shadow:
+        2px 2px 6px #000;
 }
 
 #recordDot{
     display:inline-block;
+
     width:9px;
     height:9px;
+
     margin-right:6px;
+
     border-radius:50%;
+
     background:#a00000;
-    animation:recordBlink .9s infinite;
+
+    animation:
+        recordBlink
+        .9s
+        infinite;
 }
 
 @keyframes recordBlink{
-    0%,45%{opacity:1}
-    46%,100%{opacity:.15}
+
+    0%,45%{
+        opacity:1;
+    }
+
+    46%,100%{
+        opacity:.15;
+    }
 }
 
 #time{
     position:fixed;
     z-index:100;
+
     right:18px;
     top:38px;
+
     color:#777;
     font:11px monospace;
 }
@@ -448,8 +653,10 @@ button:hover{
 #battery{
     position:fixed;
     z-index:100;
+
     right:18px;
     bottom:18px;
+
     color:#777;
     font:11px monospace;
 }
@@ -458,44 +665,69 @@ button:hover{
 #hiddenText{
     position:fixed;
     z-index:100;
+
     left:50%;
-    transform:translateX(-50%);
+
+    transform:
+        translateX(-50%);
+
     bottom:24%;
+
     color:#aaa;
     font:12px monospace;
-    text-shadow:2px 2px 8px #000;
+
+    text-shadow:
+        2px 2px 8px #000;
+
     opacity:0;
 }
 
 #hiddenText{
     bottom:17%;
+
     color:#b8ad5f;
+
     letter-spacing:2px;
 }
 
 #noclipHud{
     position:fixed;
     z-index:200;
+
     left:50%;
     top:18px;
-    transform:translateX(-50%);
+
+    transform:
+        translateX(-50%);
+
     display:none;
+
     color:#5cff75;
     font:bold 13px monospace;
+
     letter-spacing:2px;
-    text-shadow:0 0 10px #000;
+
+    text-shadow:
+        0 0 10px #000;
 }
 
 #error{
     position:fixed;
     z-index:9999;
-    inset:auto 10px 10px 10px;
+
+    inset:
+        auto 10px 10px 10px;
+
     display:none;
+
     padding:16px;
+
     background:#350000;
     border:1px solid #900;
+
     color:#fff;
     font:13px monospace;
+
     white-space:pre-wrap;
 }
 </style>
@@ -504,58 +736,136 @@ button:hover{
 <body>
 
 <!-- =======================================================
-     MENU
+     CRT + THREE.JS GAME
+======================================================== -->
+
+<div class="crt-overlay-wrapper">
+
+    <div class="crt-soft"></div>
+    <div class="crt-vignette"></div>
+    <div class="crt-scanlines"></div>
+    <div class="crt-flicker"></div>
+    <div class="crt-color-shift"></div>
+
+</div>
+
+<!-- =======================================================
+     MAIN MENU
 ======================================================== -->
 
 <div id="menu">
 
-    <img class="menuImage active" src="./textures/menu1.jpg">
-    <img class="menuImage" src="./textures/menu2.jpg">
-    <img class="menuImage" src="./textures/menu3.jpg">
-    <img class="menuImage" src="./textures/menu4.jpg">
-    <img class="menuImage" src="./textures/menu5.jpg">
+    <img
+        class="menuImage active"
+        src="./textures/menu1.jpg"
+    >
+
+    <img
+        class="menuImage"
+        src="./textures/menu2.jpg"
+    >
+
+    <img
+        class="menuImage"
+        src="./textures/menu3.jpg"
+    >
+
+    <img
+        class="menuImage"
+        src="./textures/menu4.jpg"
+    >
+
+    <img
+        class="menuImage"
+        src="./textures/menu5.jpg"
+    >
 
     <div class="menuShade"></div>
     <div class="scanlines"></div>
 
     <div class="menuTitle">
+
         <h1>THE BACKROOMS</h1>
-        <p>LEVEL 0 // FOUND FOOTAGE</p>
-        <small>THE BUILDING DOES NOT HAVE A MAP</small>
+
+        <p>
+            LEVEL 0 // FOUND FOOTAGE
+        </p>
+
+        <small>
+            THE BUILDING DOES NOT HAVE A MAP
+        </small>
+
     </div>
 
     <div class="menuButtons">
 
         <div class="difficulties">
-            <button id="easy">EASY</button>
-            <button id="normal" class="selected">NORMAL</button>
-            <button id="hard">HARD</button>
-            <button id="nightmare">NIGHTMARE</button>
+
+            <button id="easy">
+                EASY
+            </button>
+
+            <button
+                id="normal"
+                class="selected"
+            >
+                NORMAL
+            </button>
+
+            <button id="hard">
+                HARD
+            </button>
+
+            <button id="nightmare">
+                NIGHTMARE
+            </button>
+
         </div>
 
-        <button class="menuButton" id="start">
+        <button
+            class="menuButton"
+            id="start"
+        >
             ENTER LEVEL 0
         </button>
 
-        <button class="menuButton" id="controlsButton">
+        <button
+            class="menuButton"
+            id="controlsButton"
+        >
             CONTROLS
         </button>
 
     </div>
+
 </div>
 
 <!-- =======================================================
      PAUSE
 ======================================================== -->
 
-<div id="pause" class="overlay">
+<div
+    id="pause"
+    class="overlay"
+>
 
     <h1>PAUSED</h1>
 
-    <button id="resume">RESUME</button>
-    <button id="pauseControls">CONTROLS</button>
-    <button id="restart">RESTART</button>
-    <button id="mainMenu">MAIN MENU</button>
+    <button id="resume">
+        RESUME
+    </button>
+
+    <button id="pauseControls">
+        CONTROLS
+    </button>
+
+    <button id="restart">
+        RESTART
+    </button>
+
+    <button id="mainMenu">
+        MAIN MENU
+    </button>
 
 </div>
 
@@ -563,16 +873,29 @@ button:hover{
      DEATH
 ======================================================== -->
 
-<div id="death" class="overlay">
+<div
+    id="death"
+    class="overlay"
+>
 
-    <div class="deathTitle">YOU DIED</div>
+    <div class="deathTitle">
+        YOU DIED
+    </div>
 
-    <div id="deathReason" class="deathText">
+    <div
+        id="deathReason"
+        class="deathText"
+    >
         SOMETHING FOUND YOU.
     </div>
 
-    <button id="retry">RETRY</button>
-    <button id="deathMenu">MAIN MENU</button>
+    <button id="retry">
+        RETRY
+    </button>
+
+    <button id="deathMenu">
+        MAIN MENU
+    </button>
 
 </div>
 
@@ -584,7 +907,9 @@ button:hover{
 
     <div class="controlsPanel">
 
-        <h2>CONTROLS</h2>
+        <h2>
+            CONTROLS
+        </h2>
 
         <div class="control">
             <span>MOVE</span>
@@ -616,19 +941,12 @@ button:hover{
             <span>ESC</span>
         </div>
 
-        <div class="control">
-            <span>DEVELOPER TOOLS</span>
-            <span>BACKSPACE</span>
-        </div>
-
-        <div class="control">
-            <span>MAP</span>
-            <span>M</span>
-        </div>
-
-        <button id="controlsBack">BACK</button>
+        <button id="controlsBack">
+            BACK
+        </button>
 
     </div>
+
 </div>
 
 <!-- =======================================================
@@ -653,11 +971,17 @@ button:hover{
                 ENTITY
             </div>
 
-            <button class="devButton" id="devSpawnEntity">
+            <button
+                class="devButton"
+                id="devSpawnEntity"
+            >
                 SPAWN ENTITY
             </button>
 
-            <button class="devButton" id="devRemoveEntity">
+            <button
+                class="devButton"
+                id="devRemoveEntity"
+            >
                 REMOVE ENTITY
             </button>
 
@@ -669,7 +993,10 @@ button:hover{
                 MAP
             </div>
 
-            <button class="devButton" id="devOpenMap">
+            <button
+                class="devButton"
+                id="devOpenMap"
+            >
                 OPEN MAP
             </button>
 
@@ -681,30 +1008,43 @@ button:hover{
                 PLAYER
             </div>
 
-            <button class="devButton" id="devNoClip">
+            <button
+                class="devButton"
+                id="devNoClip"
+            >
                 TOGGLE NO CLIP
             </button>
 
-            <button class="devButton" id="devTeleportExit">
+            <button
+                class="devButton"
+                id="devTeleportExit"
+            >
                 TELEPORT TO EXIT
             </button>
 
         </div>
 
-        <div class="devStatus" id="devStatus">
+        <div
+            class="devStatus"
+            id="devStatus"
+        >
             <strong>STATUS:</strong>
             NO CLIP OFF
         </div>
 
-        <button class="devButton" id="devClose">
+        <button
+            class="devButton"
+            id="devClose"
+        >
             CLOSE DEV TOOLS
         </button>
 
     </div>
+
 </div>
 
 <!-- =======================================================
-     MAP SCREEN
+     MAP
 ======================================================== -->
 
 <div id="mapScreen">
@@ -717,16 +1057,26 @@ button:hover{
                 LEVEL 0 MAP
             </span>
 
-            <button class="mapClose" id="mapClose">
+            <button
+                class="mapClose"
+                id="mapClose"
+            >
                 CLOSE
             </button>
 
         </div>
 
-        <canvas id="mapCanvas"></canvas>
+        <canvas
+            id="mapCanvas"
+        ></canvas>
 
     </div>
+
 </div>
+
+<!-- =======================================================
+     HUD
+======================================================== -->
 
 <div id="crosshair"></div>
 
@@ -735,18 +1085,31 @@ button:hover{
 </div>
 
 <div id="hud">
+
     LEVEL 0
-    <div id="hudDifficulty">NORMAL</div>
+
+    <div id="hudDifficulty">
+        NORMAL
+    </div>
+
 </div>
 
 <div id="message"></div>
 
 <div id="recording">
-    <span id="recordDot"></span>REC
+
+    <span id="recordDot"></span>
+    REC
+
 </div>
 
-<div id="time">00:00:00</div>
-<div id="battery">BAT 87%</div>
+<div id="time">
+    00:00:00
+</div>
+
+<div id="battery">
+    BAT 87%
+</div>
 
 <div id="hideText">
     CROUCH TO HIDE
@@ -760,7 +1123,8 @@ button:hover{
 
 <script type="module">
 
-import * as THREE from "./three.module.js";
+import * as THREE
+    from "./three.module.js";
 
 /* =========================================================
    SETTINGS
@@ -807,15 +1171,19 @@ let dead = false;
 let difficulty = "normal";
 
 let elapsed = 0;
+
 let messageTimer = 0;
 
 let falling = false;
+
 let fallTime = 0;
 
 let crouching = false;
+
 let hidden = false;
 
 let yaw = 0;
+
 let pitch = 0;
 
 let velocityY = 0;
@@ -833,6 +1201,7 @@ let devOpen = false;
 let mapOpen = false;
 
 let mapWidth = 0;
+
 let mapHeight = 0;
 
 let map = [];
@@ -844,23 +1213,13 @@ let hideCells = [];
 let holeCells = [];
 
 /*
-    NEW:
-
-    Every blue circle on map1.png becomes a possible
-    entity spawn location.
-
-    The old version detected blue pixels but then threw
-    that information away.
+    BLUE MARKERS
 */
-
 let entitySpawnCells = [];
 
 /*
-    NEW:
-
-    The green circle on map1.png is the exact exit.
+    GREEN MARKER
 */
-
 let exitCell = null;
 
 let playerSpawn = null;
@@ -889,10 +1248,13 @@ const keys = {};
    THREE.JS
 ========================================================= */
 
-const scene = new THREE.Scene();
+const scene =
+    new THREE.Scene();
 
 scene.background =
-    new THREE.Color(0x17170f);
+    new THREE.Color(
+        0x17170f
+    );
 
 scene.fog =
     new THREE.Fog(
@@ -927,16 +1289,22 @@ player.add(camera);
 
 scene.add(player);
 
+/* =========================================================
+   RENDERER
+========================================================= */
+
 const renderer =
     new THREE.WebGLRenderer({
         antialias:false,
-        powerPreference:"high-performance"
+        powerPreference:
+            "high-performance",
+        alpha:false
     });
 
 renderer.setPixelRatio(
     Math.min(
         window.devicePixelRatio || 1,
-        1.5
+        1.15
     )
 );
 
@@ -948,11 +1316,27 @@ renderer.setSize(
 renderer.outputColorSpace =
     THREE.SRGBColorSpace;
 
-renderer.domElement.id =
-    "gameCanvas";
+renderer.shadowMap.enabled =
+    false;
 
-document.body.appendChild(
-    renderer.domElement
+/*
+    IMPORTANT:
+
+    The Three.js canvas goes INSIDE the CRT wrapper.
+
+    The CRT elements were already placed in the wrapper
+    before this script runs. The canvas is inserted
+    underneath them.
+*/
+
+const crtWrapper =
+    document.querySelector(
+        ".crt-overlay-wrapper"
+    );
+
+crtWrapper.insertBefore(
+    renderer.domElement,
+    crtWrapper.firstChild
 );
 
 /* =========================================================
@@ -978,19 +1362,21 @@ const ceilingMaterial =
     });
 
 /* =========================================================
-   TEXTURE LOADING
+   TEXTURES
 ========================================================= */
 
 const textureLoader =
     new THREE.TextureLoader();
 
-async function loadTexture(path){
+function loadTexture(path){
 
-    return await new Promise(
+    return new Promise(
         (resolve,reject)=>{
 
             textureLoader.load(
+
                 path,
+
                 texture=>{
 
                     texture.colorSpace =
@@ -1010,7 +1396,9 @@ async function loadTexture(path){
 
                     texture.anisotropy =
                         Math.min(
-                            renderer.capabilities.getMaxAnisotropy(),
+                            renderer
+                                .capabilities
+                                .getMaxAnisotropy(),
                             4
                         );
 
@@ -1038,15 +1426,17 @@ async function loadTexture(path){
 
 async function loadEntityTexture(){
 
-    const possible = [
+    const paths = [
+
         "./textures/entity.png",
         "./textures/entity.jpg",
         "./textures/entity.webp",
         "./entity.png"
+
     ];
 
     for(
-        const path of possible
+        const path of paths
     ){
 
         try{
@@ -1055,7 +1445,7 @@ async function loadEntityTexture(){
                 path
             );
 
-        }catch(e){}
+        }catch(error){}
 
     }
 
@@ -1073,12 +1463,12 @@ function cellToWorld(x,y){
     return {
 
         x:
-        (x + .5) * TILE -
-        mapWidth * TILE * .5,
+            (x + .5) * TILE -
+            mapWidth * TILE * .5,
 
         z:
-        (y + .5) * TILE -
-        mapHeight * TILE * .5
+            (y + .5) * TILE -
+            mapHeight * TILE * .5
 
     };
 }
@@ -1088,20 +1478,24 @@ function worldToCell(x,z){
     return {
 
         x:
-        Math.floor(
-            (
-                x +
-                mapWidth * TILE * .5
-            ) / TILE
-        ),
+            Math.floor(
+                (
+                    x +
+                    mapWidth *
+                    TILE *
+                    .5
+                ) / TILE
+            ),
 
         y:
-        Math.floor(
-            (
-                z +
-                mapHeight * TILE * .5
-            ) / TILE
-        )
+            Math.floor(
+                (
+                    z +
+                    mapHeight *
+                    TILE *
+                    .5
+                ) / TILE
+            )
 
     };
 }
@@ -1109,18 +1503,12 @@ function worldToCell(x,z){
 function inside(x,y){
 
     return (
+
         x >= 0 &&
         y >= 0 &&
         x < mapWidth &&
         y < mapHeight
-    );
-}
 
-function isWalkable(x,y){
-
-    return (
-        inside(x,y) &&
-        map[y][x] !== "wall"
     );
 }
 
@@ -1128,7 +1516,12 @@ function isWalkable(x,y){
    MAP PIXEL CLASSIFICATION
 ========================================================= */
 
-function classifyPixel(r,g,b,a){
+function classifyPixel(
+    r,
+    g,
+    b,
+    a
+){
 
     if(a < 20)
         return "floor";
@@ -1142,11 +1535,12 @@ function classifyPixel(r,g,b,a){
         g < 70 &&
         b < 70
     ){
+
         return "wall";
     }
 
     /*
-        RED / ORANGE = PLAYER SPAWN
+        RED = PLAYER SPAWN
     */
 
     if(
@@ -1154,14 +1548,12 @@ function classifyPixel(r,g,b,a){
         r > g * 1.35 &&
         r > b * 1.35
     ){
+
         return "spawn";
     }
 
     /*
         BLUE = ENTITY SPAWN
-
-        Deliberately broad because the blue circles
-        may have anti-aliased edges.
     */
 
     if(
@@ -1169,13 +1561,12 @@ function classifyPixel(r,g,b,a){
         b > r * 1.25 &&
         b > g * 1.12
     ){
+
         return "entity";
     }
 
     /*
         GREEN = EXIT
-
-        This is the important new marker.
     */
 
     if(
@@ -1183,11 +1574,12 @@ function classifyPixel(r,g,b,a){
         g > r * 1.18 &&
         g > b * 1.05
     ){
+
         return "exit";
     }
 
     /*
-        PURPLE / PINK = HIDING SPOT
+        PURPLE = HIDING
     */
 
     if(
@@ -1195,11 +1587,12 @@ function classifyPixel(r,g,b,a){
         b > 105 &&
         g < 125
     ){
+
         return "hide";
     }
 
     /*
-        YELLOW / ORANGE = HOLE
+        YELLOW = HOLE
     */
 
     if(
@@ -1207,6 +1600,7 @@ function classifyPixel(r,g,b,a){
         g > 110 &&
         b < 125
     ){
+
         return "hole";
     }
 
@@ -1232,12 +1626,14 @@ async function loadMap(){
                 img.onerror =
                     ()=>reject(
                         new Error(
-                            "Could not load ./textures/map1.png"
+                            "Could not load " +
+                            "./textures/map1.png"
                         )
                     );
 
                 img.src =
                     "./textures/map1.png";
+
             }
         );
 
@@ -1292,9 +1688,9 @@ async function loadMap(){
 
     entitySpawnCells = [];
 
-    playerSpawn = null;
-
     exitCell = null;
+
+    playerSpawn = null;
 
     for(
         let y = 0;
@@ -1311,7 +1707,11 @@ async function loadMap(){
         ){
 
             const i =
-                (y * mapWidth + x) * 4;
+                (
+                    y *
+                    mapWidth +
+                    x
+                ) * 4;
 
             const type =
                 classifyPixel(
@@ -1323,14 +1723,9 @@ async function loadMap(){
 
             row.push(type);
 
-            /*
-                Everything except walls can be walked on.
-
-                Markers themselves are therefore still
-                valid floor cells.
-            */
-
-            if(type !== "wall"){
+            if(
+                type !== "wall"
+            ){
 
                 walkable.push({
                     x,
@@ -1339,7 +1734,9 @@ async function loadMap(){
 
             }
 
-            if(type === "hide"){
+            if(
+                type === "hide"
+            ){
 
                 hideCells.push({
                     x,
@@ -1348,7 +1745,9 @@ async function loadMap(){
 
             }
 
-            if(type === "hole"){
+            if(
+                type === "hole"
+            ){
 
                 holeCells.push({
                     x,
@@ -1371,15 +1770,16 @@ async function loadMap(){
                         x,
                         y
                     );
+
             }
 
             /*
-                NEW ENTITY SPAWN SYSTEM
-
-                Store every blue marker.
+                EVERY BLUE MARKER
             */
 
-            if(type === "entity"){
+            if(
+                type === "entity"
+            ){
 
                 entitySpawnCells.push({
                     x,
@@ -1389,9 +1789,7 @@ async function loadMap(){
             }
 
             /*
-                NEW EXIT SYSTEM
-
-                Store the green marker.
+                FIRST GREEN MARKER
             */
 
             if(
@@ -1412,24 +1810,24 @@ async function loadMap(){
     }
 
     /*
-        PLAYER FALLBACK
+        FALLBACK PLAYER SPAWN
     */
 
     if(!playerSpawn){
 
-        const c =
+        const center =
             walkable[
                 Math.floor(
                     walkable.length / 2
                 )
             ];
 
-        if(c){
+        if(center){
 
             playerSpawn =
                 cellToWorld(
-                    c.x,
-                    c.y
+                    center.x,
+                    center.y
                 );
 
         }else{
@@ -1442,44 +1840,34 @@ async function loadMap(){
         }
     }
 
-    /*
-        NEW:
-
-        Use the exact green circle for the exit.
-        Only fall back to an automatically selected
-        location if there is somehow no green marker.
-    */
-
     findExit();
 
     console.log(
-        "MAP SIZE:",
+        "MAP:",
         mapWidth,
         "x",
         mapHeight
     );
 
     console.log(
-        "ENTITY SPAWN MARKERS:",
+        "BLUE ENTITY MARKERS:",
         entitySpawnCells.length
     );
 
     console.log(
-        "EXIT MARKER:",
+        "GREEN EXIT:",
         exitCell
     );
 }
 
 /* =========================================================
-   EXIT LOCATION
+   EXIT
 ========================================================= */
 
 function findExit(){
 
     /*
-        NEW MAP SYSTEM:
-
-        If a green marker exists, ALWAYS use it.
+        ALWAYS prefer the green marker.
     */
 
     if(exitCell){
@@ -1494,9 +1882,7 @@ function findExit(){
     }
 
     /*
-        FALLBACK ONLY
-
-        This keeps older maps working.
+        Fallback for maps without a green marker.
     */
 
     const candidates = [];
@@ -1506,7 +1892,8 @@ function findExit(){
     ){
 
         if(
-            map[cell.y][cell.x] === "hole"
+            map[cell.y][cell.x] ===
+            "hole"
         )
             continue;
 
@@ -1522,14 +1909,17 @@ function findExit(){
                 p.z - playerSpawn.z
             );
 
-        if(distance > 15){
+        if(
+            distance > 15
+        ){
 
             candidates.push({
-                cell,
+                p,
                 distance
             });
 
         }
+
     }
 
     candidates.sort(
@@ -1541,10 +1931,7 @@ function findExit(){
     if(candidates.length){
 
         exitPosition =
-            cellToWorld(
-                candidates[0].cell.x,
-                candidates[0].cell.y
-            );
+            candidates[0].p;
 
     }else{
 
@@ -1558,6 +1945,7 @@ function findExit(){
                 c.x,
                 c.y
             );
+
     }
 }
 
@@ -1567,24 +1955,20 @@ function findExit(){
 
 function chooseEntitySpawn(){
 
-    if(!playerSpawn)
-        return;
-
     /*
-        NEW:
-
-        Prefer the blue circles from the map.
-
-        We first build a list of markers that aren't
-        directly beside the player.
+        BLUE MARKERS ARE NOW THE PRIMARY
+        ENTITY SPAWN SYSTEM.
     */
 
-    if(entitySpawnCells.length){
+    if(
+        entitySpawnCells.length
+    ){
 
         const valid = [];
 
         for(
-            const cell of entitySpawnCells
+            const cell of
+            entitySpawnCells
         ){
 
             const p =
@@ -1595,11 +1979,16 @@ function chooseEntitySpawn(){
 
             const distance =
                 Math.hypot(
-                    p.x - player.position.x,
-                    p.z - player.position.z
+                    p.x -
+                        player.position.x,
+
+                    p.z -
+                        player.position.z
                 );
 
-            if(distance >= 12){
+            if(
+                distance >= 12
+            ){
 
                 valid.push({
                     p,
@@ -1611,12 +2000,6 @@ function chooseEntitySpawn(){
         }
 
         if(valid.length){
-
-            /*
-                Shuffle the valid blue markers so
-                the entity doesn't always use the same
-                one.
-            */
 
             const selected =
                 valid[
@@ -1635,15 +2018,18 @@ function chooseEntitySpawn(){
         }
 
         /*
-            If the player happens to be too close to
-            every blue marker, use the farthest marker.
+            If all blue points are too close,
+            choose the farthest one.
         */
 
         let farthest = null;
-        let maxDistance = -Infinity;
+
+        let farthestDistance =
+            -Infinity;
 
         for(
-            const cell of entitySpawnCells
+            const cell of
+            entitySpawnCells
         ){
 
             const p =
@@ -1654,17 +2040,25 @@ function chooseEntitySpawn(){
 
             const distance =
                 Math.hypot(
-                    p.x - player.position.x,
-                    p.z - player.position.z
+                    p.x -
+                        player.position.x,
+
+                    p.z -
+                        player.position.z
                 );
 
-            if(distance > maxDistance){
+            if(
+                distance >
+                farthestDistance
+            ){
 
-                maxDistance =
+                farthestDistance =
                     distance;
 
                 farthest = p;
+
             }
+
         }
 
         if(farthest){
@@ -1679,7 +2073,7 @@ function chooseEntitySpawn(){
     }
 
     /*
-        FALLBACK FOR OLD MAPS WITHOUT BLUE MARKERS
+        OLD-MAP FALLBACK
     */
 
     const candidates = [];
@@ -1689,7 +2083,8 @@ function chooseEntitySpawn(){
     ){
 
         if(
-            map[cell.y][cell.x] === "hole"
+            map[cell.y][cell.x] ===
+            "hole"
         )
             continue;
 
@@ -1701,8 +2096,11 @@ function chooseEntitySpawn(){
 
         const distance =
             Math.hypot(
-                p.x - player.position.x,
-                p.z - player.position.z
+                p.x -
+                    player.position.x,
+
+                p.z -
+                    player.position.z
             );
 
         if(
@@ -1716,6 +2114,7 @@ function chooseEntitySpawn(){
             });
 
         }
+
     }
 
     if(candidates.length){
@@ -1737,7 +2136,9 @@ function chooseEntitySpawn(){
     }
 
     let farthest = null;
-    let max = -Infinity;
+
+    let maxDistance =
+        -Infinity;
 
     for(
         const cell of walkable
@@ -1751,19 +2152,26 @@ function chooseEntitySpawn(){
 
         const d =
             Math.hypot(
-                p.x - player.position.x,
-                p.z - player.position.z
+                p.x -
+                    player.position.x,
+
+                p.z -
+                    player.position.z
             );
 
-        if(d > max){
+        if(
+            d > maxDistance
+        ){
 
-            max = d;
+            maxDistance = d;
+
             farthest = p;
-
         }
+
     }
 
-    entitySpawn = farthest;
+    entitySpawn =
+        farthest;
 }
 
 /* =========================================================
@@ -1773,8 +2181,11 @@ function chooseEntitySpawn(){
 function createWallGeometry(){
 
     const p = [];
+
     const n = [];
+
     const u = [];
+
     const i = [];
 
     const s =
@@ -1784,7 +2195,11 @@ function createWallGeometry(){
         WALL_HEIGHT;
 
     function face(
-        a,b,c,d,normal
+        a,
+        b,
+        c,
+        d,
+        normal
     ){
 
         const base =
@@ -1804,12 +2219,6 @@ function createWallGeometry(){
             ...normal
         );
 
-        /*
-            UVs are normalized here.
-
-            The texture itself is configured to repeat.
-        */
-
         u.push(
             0,0,
             1,0,
@@ -1818,6 +2227,7 @@ function createWallGeometry(){
         );
 
         i.push(
+
             base,
             base + 1,
             base + 2,
@@ -1825,6 +2235,7 @@ function createWallGeometry(){
             base,
             base + 2,
             base + 3
+
         );
     }
 
@@ -1860,10 +2271,10 @@ function createWallGeometry(){
         [0,0,-1]
     );
 
-    const g =
+    const geometry =
         new THREE.BufferGeometry();
 
-    g.setAttribute(
+    geometry.setAttribute(
         "position",
         new THREE.Float32BufferAttribute(
             p,
@@ -1871,7 +2282,7 @@ function createWallGeometry(){
         )
     );
 
-    g.setAttribute(
+    geometry.setAttribute(
         "normal",
         new THREE.Float32BufferAttribute(
             n,
@@ -1879,7 +2290,7 @@ function createWallGeometry(){
         )
     );
 
-    g.setAttribute(
+    geometry.setAttribute(
         "uv",
         new THREE.Float32BufferAttribute(
             u,
@@ -1887,9 +2298,9 @@ function createWallGeometry(){
         )
     );
 
-    g.setIndex(i);
+    geometry.setIndex(i);
 
-    return g;
+    return geometry;
 }
 
 const wallGeometry =
@@ -1916,7 +2327,8 @@ function buildWalls(){
         ){
 
             if(
-                map[y][x] !== "wall"
+                map[y][x] !==
+                "wall"
             )
                 continue;
 
@@ -1943,19 +2355,25 @@ function buildWalls(){
             wallColliders.push({
 
                 minX:
-                    p.x - TILE / 2,
+                    p.x -
+                    TILE / 2,
 
                 maxX:
-                    p.x + TILE / 2,
+                    p.x +
+                    TILE / 2,
 
                 minZ:
-                    p.z - TILE / 2,
+                    p.z -
+                    TILE / 2,
 
                 maxZ:
-                    p.z + TILE / 2
+                    p.z +
+                    TILE / 2
 
             });
+
         }
+
     }
 }
 
@@ -1970,19 +2388,30 @@ function collides(
 ){
 
     for(
-        const wall of wallColliders
+        const wall of
+        wallColliders
     ){
 
         if(
-            x + radius > wall.minX &&
-            x - radius < wall.maxX &&
-            z + radius > wall.minZ &&
-            z - radius < wall.maxZ
+
+            x + radius >
+                wall.minX &&
+
+            x - radius <
+                wall.maxX &&
+
+            z + radius >
+                wall.minZ &&
+
+            z - radius <
+                wall.maxZ
+
         ){
 
             return true;
 
         }
+
     }
 
     return false;
@@ -1995,8 +2424,11 @@ function collides(
 function buildFloor(){
 
     const p = [];
+
     const n = [];
+
     const u = [];
+
     const i = [];
 
     let vertices = 0;
@@ -2017,8 +2449,10 @@ function buildFloor(){
         ){
 
             if(
-                map[y][x] === "hole" ||
-                map[y][x] === "wall"
+                map[y][x] ===
+                "hole" ||
+                map[y][x] ===
+                "wall"
             )
                 continue;
 
@@ -2045,23 +2479,29 @@ function buildFloor(){
                 c.x - h,
                 0,
                 c.z + h
+
             );
 
             n.push(
+
                 0,1,0,
                 0,1,0,
                 0,1,0,
                 0,1,0
+
             );
 
             u.push(
+
                 0,0,
                 1,0,
                 1,1,
                 0,1
+
             );
 
             i.push(
+
                 vertices,
                 vertices + 1,
                 vertices + 2,
@@ -2069,16 +2509,19 @@ function buildFloor(){
                 vertices,
                 vertices + 2,
                 vertices + 3
+
             );
 
             vertices += 4;
+
         }
+
     }
 
-    const g =
+    const geometry =
         new THREE.BufferGeometry();
 
-    g.setAttribute(
+    geometry.setAttribute(
         "position",
         new THREE.Float32BufferAttribute(
             p,
@@ -2086,7 +2529,7 @@ function buildFloor(){
         )
     );
 
-    g.setAttribute(
+    geometry.setAttribute(
         "normal",
         new THREE.Float32BufferAttribute(
             n,
@@ -2094,7 +2537,7 @@ function buildFloor(){
         )
     );
 
-    g.setAttribute(
+    geometry.setAttribute(
         "uv",
         new THREE.Float32BufferAttribute(
             u,
@@ -2102,11 +2545,11 @@ function buildFloor(){
         )
     );
 
-    g.setIndex(i);
+    geometry.setIndex(i);
 
     world.add(
         new THREE.Mesh(
-            g,
+            geometry,
             floorMaterial
         )
     );
@@ -2119,8 +2562,11 @@ function buildFloor(){
 function buildCeiling(){
 
     const p = [];
+
     const n = [];
+
     const u = [];
+
     const i = [];
 
     let vertices = 0;
@@ -2141,7 +2587,8 @@ function buildCeiling(){
         ){
 
             if(
-                map[y][x] === "wall"
+                map[y][x] ===
+                "wall"
             )
                 continue;
 
@@ -2168,23 +2615,29 @@ function buildCeiling(){
                 c.x - h,
                 WALL_HEIGHT,
                 c.z + h
+
             );
 
             n.push(
+
                 0,-1,0,
                 0,-1,0,
                 0,-1,0,
                 0,-1,0
+
             );
 
             u.push(
+
                 0,0,
                 1,0,
                 1,1,
                 0,1
+
             );
 
             i.push(
+
                 vertices,
                 vertices + 2,
                 vertices + 1,
@@ -2192,16 +2645,17 @@ function buildCeiling(){
                 vertices,
                 vertices + 3,
                 vertices + 2
+
             );
 
             vertices += 4;
         }
     }
 
-    const g =
+    const geometry =
         new THREE.BufferGeometry();
 
-    g.setAttribute(
+    geometry.setAttribute(
         "position",
         new THREE.Float32BufferAttribute(
             p,
@@ -2209,7 +2663,7 @@ function buildCeiling(){
         )
     );
 
-    g.setAttribute(
+    geometry.setAttribute(
         "normal",
         new THREE.Float32BufferAttribute(
             n,
@@ -2217,7 +2671,7 @@ function buildCeiling(){
         )
     );
 
-    g.setAttribute(
+    geometry.setAttribute(
         "uv",
         new THREE.Float32BufferAttribute(
             u,
@@ -2225,11 +2679,11 @@ function buildCeiling(){
         )
     );
 
-    g.setIndex(i);
+    geometry.setIndex(i);
 
     ceilingMesh =
         new THREE.Mesh(
-            g,
+            geometry,
             ceilingMaterial
         );
 
@@ -2251,7 +2705,8 @@ function buildHoles(){
         });
 
     for(
-        const cell of holeCells
+        const cell of
+        holeCells
     ){
 
         const p =
@@ -2286,11 +2741,6 @@ function buildHoles(){
 
 function buildLights(){
 
-    /*
-        Keep lights sparse so the large map doesn't
-        become unnecessarily expensive.
-    */
-
     for(
         let y = 2;
         y < mapHeight;
@@ -2306,8 +2756,10 @@ function buildLights(){
             if(
                 !map[y] ||
                 !map[y][x] ||
-                map[y][x] === "wall" ||
-                map[y][x] === "hole"
+                map[y][x] ===
+                    "wall" ||
+                map[y][x] ===
+                    "hole"
             )
                 continue;
 
@@ -2351,7 +2803,9 @@ function buildLights(){
             );
 
             scene.add(light);
+
         }
+
     }
 }
 
@@ -2365,7 +2819,8 @@ function buildHideSpots(){
 
     for(
         let i = 0;
-        i < Math.min(
+        i <
+        Math.min(
             hideCells.length,
             40
         );
@@ -2385,6 +2840,7 @@ function buildHideSpots(){
             x:p.x,
             z:p.z
         });
+
     }
 }
 
@@ -2419,16 +2875,19 @@ function updateHiding(){
         Infinity;
 
     for(
-        const spot of hideSpots
+        const spot of
+        hideSpots
     ){
 
         const d =
             Math.hypot(
+
                 player.position.x -
                     spot.x,
 
                 player.position.z -
                     spot.z
+
             );
 
         if(
@@ -2478,7 +2937,7 @@ function updateHiding(){
 }
 
 /* =========================================================
-   EXIT
+   EXIT OBJECT
 ========================================================= */
 
 function createExit(){
@@ -2495,22 +2954,12 @@ function createExit(){
         exitPosition.z
     );
 
-    /*
-        Face roughly toward the center of the map.
-    */
-
-    group.rotation.y =
-        Math.atan2(
-            -exitPosition.x,
-            -exitPosition.z
-        );
-
     const darkMetal =
         new THREE.MeshBasicMaterial({
             color:0x11120f
         });
 
-    const brightGreen =
+    const green =
         new THREE.MeshBasicMaterial({
             color:0x63ff82
         });
@@ -2559,75 +3008,49 @@ function createExit(){
 
     group.add(top);
 
-    const leftLight =
+    const leftGlow =
         new THREE.Mesh(
             new THREE.BoxGeometry(
                 .12,
                 EXIT_HEIGHT - .2,
                 .13
             ),
-            brightGreen
+            green
         );
 
-    leftLight.position.set(
+    leftGlow.position.set(
         -EXIT_WIDTH / 2 - .17,
         EXIT_HEIGHT / 2,
         -.05
     );
 
-    group.add(leftLight);
+    group.add(leftGlow);
 
-    const rightLight =
-        leftLight.clone();
+    const rightGlow =
+        leftGlow.clone();
 
-    rightLight.position.x =
+    rightGlow.position.x =
         EXIT_WIDTH / 2 + .17;
 
-    group.add(rightLight);
+    group.add(rightGlow);
 
-    const topLight =
+    const topGlow =
         new THREE.Mesh(
             new THREE.BoxGeometry(
                 EXIT_WIDTH + .55,
                 .13,
                 .13
             ),
-            brightGreen
+            green
         );
 
-    topLight.position.set(
+    topGlow.position.set(
         0,
         EXIT_HEIGHT + .19,
         -.05
     );
 
-    group.add(topLight);
-
-    const glowMaterial =
-        new THREE.MeshBasicMaterial({
-            color:0x21ff52,
-            transparent:true,
-            opacity:.14,
-            side:THREE.DoubleSide,
-            depthWrite:false
-        });
-
-    const glowMesh =
-        new THREE.Mesh(
-            new THREE.PlaneGeometry(
-                EXIT_WIDTH,
-                EXIT_HEIGHT
-            ),
-            glowMaterial
-        );
-
-    glowMesh.position.set(
-        0,
-        EXIT_HEIGHT / 2,
-        .04
-    );
-
-    group.add(glowMesh);
+    group.add(topGlow);
 
     const light =
         new THREE.PointLight(
@@ -2643,14 +3066,6 @@ function createExit(){
     );
 
     group.add(light);
-
-    /*
-        Floor circle.
-
-        This makes the exit location much easier
-        to see in the actual level while preserving
-        the green-marker position from the map.
-    */
 
     const floorGlow =
         new THREE.Mesh(
@@ -2685,10 +3100,13 @@ function createExit(){
         );
 
     canvas.width = 512;
+
     canvas.height = 128;
 
     const ctx =
-        canvas.getContext("2d");
+        canvas.getContext(
+            "2d"
+        );
 
     ctx.fillStyle =
         "#063d12";
@@ -2815,9 +3233,7 @@ function removeEntity(){
     if(!entity)
         return;
 
-    world.remove(
-        entity
-    );
+    world.remove(entity);
 
     if(entity.geometry)
         entity.geometry.dispose();
@@ -2876,7 +3292,7 @@ function updateEntityFacing(){
 }
 
 /* =========================================================
-   ENTITY SPEED
+   ENTITY AI
 ========================================================= */
 
 function getEntitySpeed(){
@@ -2898,10 +3314,6 @@ function getEntitySpeed(){
 
     return 6.7;
 }
-
-/* =========================================================
-   ENTITY AI
-========================================================= */
 
 function updateEntity(dt){
 
@@ -2950,14 +3362,6 @@ function updateEntity(dt){
         return;
     }
 
-    /*
-        Basic chase.
-
-        The existing game already uses wall collision
-        while moving the entity, allowing the player to
-        juke around corners.
-    */
-
     const dx =
         player.position.x -
         entity.position.x;
@@ -2972,20 +3376,26 @@ function updateEntity(dt){
             dz
         );
 
-    if(distance > .5){
+    if(
+        distance > .5
+    ){
 
         const speed =
             getEntitySpeed();
 
         const nx =
             entity.position.x +
-            (dx / distance) *
+            (
+                dx / distance
+            ) *
             speed *
             dt;
 
         const nz =
             entity.position.z +
-            (dz / distance) *
+            (
+                dz / distance
+            ) *
             speed *
             dt;
 
@@ -3028,418 +3438,6 @@ function updateEntity(dt){
 }
 
 /* =========================================================
-   MOVEMENT
-========================================================= */
-
-function movePlayer(dx,dz){
-
-    const nx =
-        player.position.x +
-        dx;
-
-    const nz =
-        player.position.z +
-        dz;
-
-    if(
-        !collides(
-            nx,
-            player.position.z
-        )
-    ){
-
-        player.position.x =
-            nx;
-    }
-
-    if(
-        !collides(
-            player.position.x,
-            nz
-        )
-    ){
-
-        player.position.z =
-            nz;
-    }
-}
-
-/* =========================================================
-   NO CLIP
-========================================================= */
-
-function toggleNoClip(){
-
-    noClip = !noClip;
-
-    document.getElementById(
-        "noclipHud"
-    ).style.display =
-        noClip
-        ? "block"
-        : "none";
-
-    document.getElementById(
-        "devStatus"
-    ).innerHTML =
-        "<strong>STATUS:</strong> " +
-        (
-            noClip
-            ? "NO CLIP ON // INVINCIBLE"
-            : "NO CLIP OFF"
-        );
-
-    if(noClip){
-
-        falling = false;
-
-        velocityY = 0;
-
-        showMessage(
-            "NO CLIP ENABLED."
-        );
-
-    }else{
-
-        showMessage(
-            "NO CLIP DISABLED."
-        );
-    }
-}
-
-/* =========================================================
-   HOLES / FALLING
-========================================================= */
-
-function playerOverHole(){
-
-    if(noClip)
-        return false;
-
-    const cell =
-        worldToCell(
-            player.position.x,
-            player.position.z
-        );
-
-    if(
-        !inside(
-            cell.x,
-            cell.y
-        )
-    )
-        return false;
-
-    return (
-        map[cell.y][cell.x] ===
-        "hole"
-    );
-}
-
-function startFalling(){
-
-    if(falling)
-        return;
-
-    falling = true;
-
-    fallTime = 0;
-
-    velocityY = 0;
-
-    showMessage(
-        "THE FLOOR IS GONE."
-    );
-}
-
-function updateFalling(dt){
-
-    if(!falling)
-        return;
-
-    fallTime += dt;
-
-    velocityY -=
-        GRAVITY * dt;
-
-    player.position.y +=
-        velocityY * dt;
-
-    player.rotation.x =
-        Math.min(
-            pitch +
-            fallTime * .5,
-            1.45
-        );
-
-    camera.position.y =
-        0;
-
-    if(
-        fallTime > 1.6
-    ){
-
-        die(
-            "YOU FELL INTO THE DARK."
-        );
-    }
-}
-
-/* =========================================================
-   PLAYER
-========================================================= */
-
-function updatePlayer(dt){
-
-    if(
-        !started ||
-        paused ||
-        dead
-    )
-        return;
-
-    if(falling){
-
-        updateFalling(dt);
-
-        return;
-    }
-
-    if(noClip){
-
-        let forward = 0;
-        let side = 0;
-
-        if(keys.w)
-            forward += 1;
-
-        if(keys.s)
-            forward -= 1;
-
-        if(keys.d)
-            side += 1;
-
-        if(keys.a)
-            side -= 1;
-
-        const length =
-            Math.hypot(
-                forward,
-                side
-            );
-
-        if(length > 0){
-
-            forward /= length;
-            side /= length;
-
-            const speed =
-                NOCLIP_SPEED * dt;
-
-            const sin =
-                Math.sin(yaw);
-
-            const cos =
-                Math.cos(yaw);
-
-            player.position.x +=
-                (
-                    side * cos -
-                    forward * sin
-                ) * speed;
-
-            player.position.z +=
-                (
-                    -side * sin -
-                    forward * cos
-                ) * speed;
-        }
-
-        if(keys.space)
-            player.position.y +=
-                NOCLIP_SPEED * dt;
-
-        if(keys.control)
-            player.position.y -=
-                NOCLIP_SPEED * dt;
-
-        camera.position.y =
-            0;
-
-        updateHiding();
-
-        return;
-    }
-
-    /*
-        NORMAL MOVEMENT
-    */
-
-    let forward = 0;
-    let side = 0;
-
-    if(keys.w)
-        forward += 1;
-
-    if(keys.s)
-        forward -= 1;
-
-    if(keys.d)
-        side += 1;
-
-    if(keys.a)
-        side -= 1;
-
-    const length =
-        Math.hypot(
-            forward,
-            side
-        );
-
-    if(length > 0){
-
-        forward /= length;
-        side /= length;
-
-        let speed =
-            WALK_SPEED;
-
-        if(
-            keys.shift &&
-            !crouching
-        ){
-
-            speed =
-                SPRINT_SPEED;
-        }
-
-        const amount =
-            speed * dt;
-
-        const sin =
-            Math.sin(yaw);
-
-        const cos =
-            Math.cos(yaw);
-
-        movePlayer(
-
-            (
-                side * cos -
-                forward * sin
-            ) * amount,
-
-            (
-                -side * sin -
-                forward * cos
-            ) * amount
-        );
-    }
-
-    /*
-        Crouch changes camera height.
-    */
-
-    const targetHeight =
-        crouching
-        ? CROUCH_HEIGHT
-        : PLAYER_HEIGHT;
-
-    const targetCameraY =
-        targetHeight -
-        PLAYER_HEIGHT;
-
-    camera.position.y +=
-        (
-            targetCameraY -
-            camera.position.y
-        ) *
-        Math.min(
-            dt * 12,
-            1
-        );
-
-    /*
-        Jump
-    */
-
-    if(
-        keys.spacePressed &&
-        grounded &&
-        !crouching
-    ){
-
-        velocityY =
-            JUMP_POWER;
-
-        grounded = false;
-
-        keys.spacePressed =
-            false;
-    }
-
-    velocityY -=
-        GRAVITY * dt;
-
-    player.position.y +=
-        velocityY * dt;
-
-    if(
-        player.position.y <=
-        targetHeight
-    ){
-
-        player.position.y =
-            targetHeight;
-
-        velocityY = 0;
-
-        grounded = true;
-    }
-
-    /*
-        Holes
-    */
-
-    if(
-        playerOverHole()
-    ){
-
-        startFalling();
-
-        return;
-    }
-
-    /*
-        Exit trigger
-
-        The exit is based on the exact green marker.
-    */
-
-    if(exitPosition){
-
-        const distance =
-            Math.hypot(
-                player.position.x -
-                    exitPosition.x,
-
-                player.position.z -
-                    exitPosition.z
-            );
-
-        if(
-            distance < 2.2 &&
-            player.position.y < WALL_HEIGHT
-        ){
-
-            winGame();
-        }
-    }
-
-    updateHiding();
-}
-
-/* =========================================================
    AUDIO
 ========================================================= */
 
@@ -3461,17 +3459,23 @@ function setupAudio(){
             "./sounds/ambient.mp3"
         );
 
-    entityAudio.loop = true;
+    entityAudio.loop =
+        true;
 
-    ambientAudio.loop = true;
+    ambientAudio.loop =
+        true;
 
-    entityAudio.preload = "auto";
+    entityAudio.preload =
+        "auto";
 
-    ambientAudio.preload = "auto";
+    ambientAudio.preload =
+        "auto";
 
-    entityAudio.volume = 0;
+    entityAudio.volume =
+        0;
 
-    ambientAudio.volume = .75;
+    ambientAudio.volume =
+        .75;
 
     audioReady = true;
 }
@@ -3496,18 +3500,22 @@ function stopAudio(){
 
         entityAudio.pause();
 
-        entityAudio.currentTime = 0;
+        entityAudio.currentTime =
+            0;
 
-        entityAudio.volume = 0;
+        entityAudio.volume =
+            0;
     }
 
     if(ambientAudio){
 
         ambientAudio.pause();
 
-        ambientAudio.currentTime = 0;
+        ambientAudio.currentTime =
+            0;
 
-        ambientAudio.volume = 0;
+        ambientAudio.volume =
+            0;
     }
 }
 
@@ -3523,7 +3531,8 @@ function updateAudio(){
     ){
 
         if(entityAudio)
-            entityAudio.volume = 0;
+            entityAudio.volume =
+                0;
 
         if(
             ambientAudio &&
@@ -3593,7 +3602,385 @@ function updateAudio(){
 }
 
 /* =========================================================
-   MESSAGE
+   PLAYER
+========================================================= */
+
+function movePlayer(
+    dx,
+    dz
+){
+
+    const nx =
+        player.position.x +
+        dx;
+
+    const nz =
+        player.position.z +
+        dz;
+
+    if(
+        !collides(
+            nx,
+            player.position.z
+        )
+    ){
+
+        player.position.x =
+            nx;
+    }
+
+    if(
+        !collides(
+            player.position.x,
+            nz
+        )
+    ){
+
+        player.position.z =
+            nz;
+    }
+}
+
+function playerOverHole(){
+
+    if(noClip)
+        return false;
+
+    const cell =
+        worldToCell(
+            player.position.x,
+            player.position.z
+        );
+
+    if(
+        !inside(
+            cell.x,
+            cell.y
+        )
+    )
+        return false;
+
+    return (
+        map[cell.y][cell.x] ===
+        "hole"
+    );
+}
+
+function startFalling(){
+
+    if(falling)
+        return;
+
+    falling = true;
+
+    fallTime = 0;
+
+    velocityY = 0;
+
+    showMessage(
+        "THE FLOOR IS GONE."
+    );
+}
+
+function updateFalling(dt){
+
+    if(!falling)
+        return;
+
+    fallTime += dt;
+
+    velocityY -=
+        GRAVITY * dt;
+
+    player.position.y +=
+        velocityY * dt;
+
+    camera.position.y =
+        0;
+
+    if(
+        fallTime > 1.6
+    ){
+
+        die(
+            "YOU FELL INTO THE DARK."
+        );
+    }
+}
+
+function updatePlayer(dt){
+
+    if(
+        !started ||
+        paused ||
+        dead
+    )
+        return;
+
+    if(falling){
+
+        updateFalling(dt);
+
+        return;
+    }
+
+    if(noClip){
+
+        let forward = 0;
+
+        let side = 0;
+
+        if(keys.w)
+            forward += 1;
+
+        if(keys.s)
+            forward -= 1;
+
+        if(keys.d)
+            side += 1;
+
+        if(keys.a)
+            side -= 1;
+
+        const length =
+            Math.hypot(
+                forward,
+                side
+            );
+
+        if(length > 0){
+
+            forward /= length;
+
+            side /= length;
+
+            const speed =
+                NOCLIP_SPEED *
+                dt;
+
+            const sin =
+                Math.sin(yaw);
+
+            const cos =
+                Math.cos(yaw);
+
+            player.position.x +=
+                (
+                    side * cos -
+                    forward * sin
+                ) *
+                speed;
+
+            player.position.z +=
+                (
+                    -side * sin -
+                    forward * cos
+                ) *
+                speed;
+        }
+
+        if(keys.space)
+            player.position.y +=
+                NOCLIP_SPEED * dt;
+
+        if(keys.control)
+            player.position.y -=
+                NOCLIP_SPEED * dt;
+
+        camera.position.y =
+            0;
+
+        updateHiding();
+
+        return;
+    }
+
+    let forward = 0;
+
+    let side = 0;
+
+    if(keys.w)
+        forward += 1;
+
+    if(keys.s)
+        forward -= 1;
+
+    if(keys.d)
+        side += 1;
+
+    if(keys.a)
+        side -= 1;
+
+    const length =
+        Math.hypot(
+            forward,
+            side
+        );
+
+    if(length > 0){
+
+        forward /= length;
+
+        side /= length;
+
+        let speed =
+            WALK_SPEED;
+
+        if(
+            keys.shift &&
+            !crouching
+        ){
+
+            speed =
+                SPRINT_SPEED;
+        }
+
+        const amount =
+            speed * dt;
+
+        const sin =
+            Math.sin(yaw);
+
+        const cos =
+            Math.cos(yaw);
+
+        movePlayer(
+
+            (
+                side * cos -
+                forward * sin
+            ) *
+            amount,
+
+            (
+                -side * sin -
+                forward * cos
+            ) *
+            amount
+
+        );
+    }
+
+    const targetHeight =
+        crouching
+        ? CROUCH_HEIGHT
+        : PLAYER_HEIGHT;
+
+    const targetCameraY =
+        targetHeight -
+        PLAYER_HEIGHT;
+
+    camera.position.y +=
+        (
+            targetCameraY -
+            camera.position.y
+        ) *
+        Math.min(
+            dt * 12,
+            1
+        );
+
+    if(
+        keys.spacePressed &&
+        grounded &&
+        !crouching
+    ){
+
+        velocityY =
+            JUMP_POWER;
+
+        grounded = false;
+
+        keys.spacePressed =
+            false;
+    }
+
+    velocityY -=
+        GRAVITY * dt;
+
+    player.position.y +=
+        velocityY * dt;
+
+    if(
+        player.position.y <=
+        targetHeight
+    ){
+
+        player.position.y =
+            targetHeight;
+
+        velocityY = 0;
+
+        grounded = true;
+    }
+
+    if(
+        playerOverHole()
+    ){
+
+        startFalling();
+
+        return;
+    }
+
+    if(exitPosition){
+
+        const distance =
+            Math.hypot(
+
+                player.position.x -
+                    exitPosition.x,
+
+                player.position.z -
+                    exitPosition.z
+
+            );
+
+        if(
+            distance < 2.2
+        ){
+
+            winGame();
+        }
+    }
+
+    updateHiding();
+}
+
+/* =========================================================
+   HIDING / NOCLIP
+========================================================= */
+
+function toggleNoClip(){
+
+    noClip = !noClip;
+
+    document.getElementById(
+        "noclipHud"
+    ).style.display =
+        noClip
+        ? "block"
+        : "none";
+
+    document.getElementById(
+        "devStatus"
+    ).innerHTML =
+        "<strong>STATUS:</strong> " +
+        (
+            noClip
+            ? "NO CLIP ON // INVINCIBLE"
+            : "NO CLIP OFF"
+        );
+
+    showMessage(
+        noClip
+        ? "NO CLIP ENABLED."
+        : "NO CLIP DISABLED."
+    );
+}
+
+/* =========================================================
+   MESSAGES
 ========================================================= */
 
 function showMessage(text){
@@ -3624,12 +4011,13 @@ function updateMessage(dt){
 
         document.getElementById(
             "message"
-        ).textContent = "";
+        ).textContent =
+            "";
     }
 }
 
 /* =========================================================
-   DEATH
+   DEATH / WIN
 ========================================================= */
 
 function die(reason){
@@ -3659,12 +4047,9 @@ function die(reason){
     }
 
     if(entityAudio)
-        entityAudio.volume = 0;
+        entityAudio.volume =
+            0;
 }
-
-/* =========================================================
-   WIN
-========================================================= */
 
 function winGame(){
 
@@ -3679,10 +4064,6 @@ function winGame(){
 
         document.exitPointerLock();
     }
-
-    showMessage(
-        "YOU FOUND THE EXIT."
-    );
 
     document.getElementById(
         "deathReason"
@@ -3700,11 +4081,12 @@ function winGame(){
         "flex";
 
     if(entityAudio)
-        entityAudio.volume = 0;
+        entityAudio.volume =
+            0;
 }
 
 /* =========================================================
-   GAME START
+   GAME STATE
 ========================================================= */
 
 function resetWorldState(){
@@ -3787,10 +4169,6 @@ function startGame(){
 
     startAudio();
 
-    /*
-        Entity uses the BLUE map markers.
-    */
-
     spawnEntityNearPlayer();
 
     renderer.domElement
@@ -3801,10 +4179,6 @@ function startGame(){
         "FIND THE EXIT."
     );
 }
-
-/* =========================================================
-   MAIN MENU
-========================================================= */
 
 function goMainMenu(){
 
@@ -3860,10 +4234,6 @@ function goMainMenu(){
     }
 }
 
-/* =========================================================
-   PAUSE
-========================================================= */
-
 function pauseGame(){
 
     if(
@@ -3906,16 +4276,21 @@ function toggleDevTools(){
         ? "block"
         : "none";
 
-    if(devOpen){
+    if(
+        devOpen &&
+        document.pointerLockElement
+    ){
 
-        if(
-            document.pointerLockElement
-        ){
+        document.exitPointerLock();
+    }
 
-            document.exitPointerLock();
-        }
-
-    }else{
+    if(
+        !devOpen &&
+        started &&
+        !paused &&
+        !dead &&
+        !mapOpen
+    ){
 
         renderer.domElement
             .requestPointerLock()
@@ -3924,7 +4299,7 @@ function toggleDevTools(){
 }
 
 /* =========================================================
-   MAP SCREEN
+   MAP
 ========================================================= */
 
 function drawMap(){
@@ -3955,9 +4330,11 @@ function drawMap(){
             Math.floor(rect.height)
         );
 
-    canvas.width = width;
+    canvas.width =
+        width;
 
-    canvas.height = height;
+    canvas.height =
+        height;
 
     const ctx =
         canvas.getContext(
@@ -3987,10 +4364,14 @@ function drawMap(){
         mapHeight * scale;
 
     const offsetX =
-        (width - drawWidth) / 2;
+        (width -
+            drawWidth) /
+        2;
 
     const offsetY =
-        (height - drawHeight) / 2;
+        (height -
+            drawHeight) /
+        2;
 
     ctx.imageSmoothingEnabled =
         false;
@@ -4004,16 +4385,15 @@ function drawMap(){
     );
 
     /*
-        Draw the entity spawn markers on top.
-
-        Blue = entity spawn.
+        BLUE ENTITY SPAWN POINTS
     */
 
     ctx.fillStyle =
         "#248cff";
 
     for(
-        const cell of entitySpawnCells
+        const cell of
+        entitySpawnCells
     ){
 
         const x =
@@ -4046,9 +4426,7 @@ function drawMap(){
     }
 
     /*
-        Draw exact exit marker.
-
-        Green = exit.
+        GREEN EXIT
     */
 
     if(exitCell){
@@ -4090,7 +4468,7 @@ function drawMap(){
     }
 
     /*
-        Draw player position.
+        PLAYER
     */
 
     if(started){
@@ -4119,7 +4497,7 @@ function drawMap(){
                 scale;
 
             ctx.fillStyle =
-                "#ffffff";
+                "#fff";
 
             ctx.beginPath();
 
@@ -4137,10 +4515,6 @@ function drawMap(){
             ctx.fill();
         }
     }
-
-    /*
-        Legend
-    */
 
     ctx.font =
         "12px monospace";
@@ -4285,10 +4659,8 @@ window.addEventListener(
                 !dead
             ){
 
-                if(paused)
-                    return;
-
-                pauseGame();
+                if(!paused)
+                    pauseGame();
 
             }
 
@@ -4304,25 +4676,38 @@ window.addEventListener(
         )
             return;
 
-        if(key === " ")
+        if(
+            key === " "
+        ){
+
             e.preventDefault();
 
-        if(key === " ")
-            keys.spacePressed = true;
+            keys.spacePressed =
+                true;
 
-        if(key === " ")
-            keys.space = true;
+            keys.space =
+                true;
 
-        else if(
+        }else if(
             key === "control"
-        )
-            keys.control = true;
+        ){
 
-        else
-            keys[key] = true;
+            keys.control =
+                true;
 
-        if(key === "c")
-            crouching = true;
+        }else{
+
+            keys[key] =
+                true;
+        }
+
+        if(
+            key === "c"
+        ){
+
+            crouching =
+                true;
+        }
     }
 );
 
@@ -4333,24 +4718,38 @@ window.addEventListener(
         const key =
             e.key.toLowerCase();
 
-        if(key === " ")
-            keys.space = false;
+        if(
+            key === " "
+        ){
 
-        else if(
+            keys.space =
+                false;
+
+        }else if(
             key === "control"
-        )
-            keys.control = false;
+        ){
 
-        else
-            keys[key] = false;
+            keys.control =
+                false;
 
-        if(key === "c")
-            crouching = false;
+        }else{
+
+            keys[key] =
+                false;
+        }
+
+        if(
+            key === "c"
+        ){
+
+            crouching =
+                false;
+        }
     }
 );
 
 /* =========================================================
-   MOUSE LOOK
+   MOUSE
 ========================================================= */
 
 document.addEventListener(
@@ -4537,9 +4936,7 @@ document.getElementById(
 ).onclick =
     ()=>{
 
-        if(
-            !exitPosition
-        )
+        if(!exitPosition)
             return;
 
         player.position.set(
@@ -4578,11 +4975,15 @@ const difficultyButtons = {
         document.getElementById(
             "nightmare"
         )
+
 };
 
-function chooseDifficulty(value){
+function chooseDifficulty(
+    value
+){
 
-    difficulty = value;
+    difficulty =
+        value;
 
     for(
         const name in
@@ -4701,66 +5102,6 @@ function updateHUD(){
 }
 
 /* =========================================================
-   CEILING VISIBILITY
-========================================================= */
-
-function updateCeilingVisibility(){
-
-    if(!ceilingMesh)
-        return;
-
-    if(!noClip){
-
-        ceilingMesh.visible =
-            true;
-
-        return;
-    }
-
-    const position =
-        new THREE.Vector3();
-
-    camera.getWorldPosition(
-        position
-    );
-
-    const minX =
-        -mapWidth *
-        TILE *
-        .5;
-
-    const maxX =
-        mapWidth *
-        TILE *
-        .5;
-
-    const minZ =
-        -mapHeight *
-        TILE *
-        .5;
-
-    const maxZ =
-        mapHeight *
-        TILE *
-        .5;
-
-    const margin = 2;
-
-    ceilingMesh.visible =
-        position.x >=
-            minX - margin &&
-
-        position.x <=
-            maxX + margin &&
-
-        position.z >=
-            minZ - margin &&
-
-        position.z <=
-            maxZ + margin;
-}
-
-/* =========================================================
    RESIZE
 ========================================================= */
 
@@ -4782,7 +5123,7 @@ window.addEventListener(
         renderer.setPixelRatio(
             Math.min(
                 window.devicePixelRatio || 1,
-                1.5
+                1.15
             )
         );
 
@@ -4792,7 +5133,7 @@ window.addEventListener(
 );
 
 /* =========================================================
-   ERROR HANDLER
+   ERROR
 ========================================================= */
 
 function showError(error){
@@ -4827,9 +5168,7 @@ async function init(){
         setupAudio();
 
         /*
-            TEXTURES
-
-            These paths match the repository structure.
+            WALL TEXTURE
         */
 
         const wallTexture =
@@ -4837,10 +5176,18 @@ async function init(){
                 "./textures/wall.png"
             );
 
+        /*
+            FLOOR TEXTURE
+        */
+
         const floorTexture =
             await loadTexture(
                 "./textures/floor.png"
             );
+
+        /*
+            CEILING TEXTURE
+        */
 
         const ceilingTexture =
             await loadTexture(
@@ -4848,11 +5195,10 @@ async function init(){
             );
 
         /*
-            WALL TEXTURE FIX
+            WALLS:
 
-            Repeat horizontally and vertically instead
-            of allowing the same texture to be stretched
-            across the entire wall height.
+            Repeat vertically instead of stretching
+            the entire image over the wall.
         */
 
         wallTexture.wrapS =
@@ -4867,7 +5213,7 @@ async function init(){
         );
 
         /*
-            Floor / ceiling are tiled per map tile.
+            FLOOR
         */
 
         floorTexture.wrapS =
@@ -4880,6 +5226,10 @@ async function init(){
             1,
             1
         );
+
+        /*
+            CEILING
+        */
 
         ceilingTexture.wrapS =
             THREE.RepeatWrapping;
@@ -4910,10 +5260,22 @@ async function init(){
         ceilingMaterial.needsUpdate =
             true;
 
+        /*
+            ENTITY
+        */
+
         entityTexture =
             await loadEntityTexture();
 
+        /*
+            MAP
+        */
+
         await loadMap();
+
+        /*
+            WORLD
+        */
 
         buildWalls();
 
@@ -4928,7 +5290,7 @@ async function init(){
         buildLights();
 
         /*
-            Exact green circle location.
+            EXIT USES GREEN MAP MARKER
         */
 
         createExit();
@@ -4938,19 +5300,12 @@ async function init(){
         );
 
         console.log(
-            "Map:",
-            mapWidth,
-            "x",
-            mapHeight
-        );
-
-        console.log(
-            "Blue entity spawn points:",
+            "Blue entity points:",
             entitySpawnCells.length
         );
 
         console.log(
-            "Green exit marker:",
+            "Green exit:",
             exitCell
         );
 
@@ -5000,10 +5355,8 @@ function animate(now){
 
     updateHUD();
 
-    updateCeilingVisibility();
-
     /*
-        Exit pulse.
+        Exit light pulse.
     */
 
     if(exitObject){
