@@ -730,6 +730,182 @@ button:hover{
 
     white-space:pre-wrap;
 }
+    /* =========================================================
+   ENTITY / SOUND SELECTION
+========================================================= */
+
+#selectionScreen{
+    position:fixed;
+    inset:0;
+    z-index:5000;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            rgba(35,34,20,.75),
+            rgba(0,0,0,.98)
+        );
+
+    color:#aaa;
+}
+
+.selectionPanel{
+    width:min(900px,92vw);
+    max-height:92vh;
+    overflow:auto;
+
+    padding:32px;
+
+    background:rgba(5,5,5,.97);
+
+    border:1px solid rgba(190,180,100,.45);
+
+    box-shadow:
+        0 0 60px rgba(0,0,0,.9);
+}
+
+.selectionPanel h1{
+    margin:0 0 28px;
+
+    color:#bcb56c;
+
+    font-size:clamp(28px,4vw,48px);
+
+    letter-spacing:6px;
+}
+
+.selectionSection{
+    margin-bottom:26px;
+}
+
+.selectionSection h2{
+    margin:0 0 12px;
+
+    color:#777;
+
+    font:14px monospace;
+
+    letter-spacing:4px;
+}
+
+.selectionGrid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(5,1fr);
+
+    gap:8px;
+}
+
+.entityChoice{
+    min-height:180px;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:10px;
+
+    background:rgba(0,0,0,.75);
+
+    border:1px solid rgba(255,255,255,.14);
+
+    color:#777;
+}
+
+.entityChoice img{
+    width:100%;
+    height:135px;
+
+    object-fit:contain;
+
+    background:#111;
+
+    image-rendering:auto;
+}
+
+.entityChoice span{
+    margin-top:8px;
+
+    font:11px monospace;
+
+    letter-spacing:2px;
+}
+
+.entityChoice:hover,
+.soundChoice:hover{
+    border-color:#bcb56c;
+    color:#eee;
+}
+
+.entityChoice.selected,
+.soundChoice.selected{
+    color:#eee;
+
+    border-color:#bcb56c;
+
+    background:
+        rgba(65,59,20,.75);
+
+    box-shadow:
+        inset 0 0 20px rgba(188,181,108,.08);
+}
+
+.soundGrid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(5,1fr);
+
+    gap:6px;
+}
+
+.soundChoice{
+    padding:14px 8px;
+
+    font:11px monospace;
+
+    letter-spacing:1px;
+
+    color:#777;
+}
+
+#selectionContinue{
+    width:100%;
+
+    margin-top:10px;
+
+    padding:16px;
+
+    font:14px monospace;
+
+    letter-spacing:3px;
+
+    color:#ccc;
+}
+
+@media(max-width:700px){
+
+    .selectionPanel{
+        padding:20px;
+    }
+
+    .selectionGrid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .soundGrid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+}
 </style>
 </head>
 
@@ -752,7 +928,85 @@ button:hover{
 <!-- =======================================================
      MAIN MENU
 ======================================================== -->
+<!-- =======================================================
+     ENTITY / SOUND SELECTION
+======================================================== -->
+<div id="selectionScreen">
 
+    <div class="selectionPanel">
+
+        <h1>CUSTOMIZE ENTITY</h1>
+
+        <div class="selectionSection">
+            <h2>ENTITY</h2>
+
+            <div class="selectionGrid">
+
+                <button class="entityChoice selected" data-entity="1">
+                    <img src="/entities/entity1.png" alt="Entity 1">
+                    <span>ENTITY 1</span>
+                </button>
+
+                <button class="entityChoice" data-entity="2">
+                    <img src="/entities/entity2.png" alt="Entity 2">
+                    <span>ENTITY 2</span>
+                </button>
+
+                <button class="entityChoice" data-entity="3">
+                    <img src="/entities/entity3.png" alt="Entity 3">
+                    <span>ENTITY 3</span>
+                </button>
+
+                <button class="entityChoice" data-entity="4">
+                    <img src="/entities/entity4.png" alt="Entity 4">
+                    <span>ENTITY 4</span>
+                </button>
+
+                <button class="entityChoice" data-entity="5">
+                    <img src="/entities/entity5.png" alt="Entity 5">
+                    <span>ENTITY 5</span>
+                </button>
+
+            </div>
+        </div>
+
+        <div class="selectionSection">
+
+            <h2>ENTITY SOUND</h2>
+
+            <div class="soundGrid">
+
+                <button class="soundChoice selected" data-sound="1">
+                    ENTITY 1 SOUND
+                </button>
+
+                <button class="soundChoice" data-sound="2">
+                    ENTITY 2 SOUND
+                </button>
+
+                <button class="soundChoice" data-sound="3">
+                    ENTITY 3 SOUND
+                </button>
+
+                <button class="soundChoice" data-sound="4">
+                    ENTITY 4 SOUND
+                </button>
+
+                <button class="soundChoice" data-sound="5">
+                    ENTITY 5 SOUND
+                </button>
+
+            </div>
+
+        </div>
+
+        <button id="selectionContinue">
+            CONTINUE
+        </button>
+
+    </div>
+
+</div>
 <div id="menu">
 
     <img
@@ -1142,7 +1396,92 @@ button:hover{
 
 import * as THREE
     from "./three.module.js";
+/* =========================================================
+   ENTITY / SOUND SELECTION
+========================================================= */
 
+let selectedEntity =
+    "/entities/entity1.png";
+
+let selectedEntitySound =
+    "/sounds/entity1.mp3";
+
+
+const entityChoices =
+    document.querySelectorAll(
+        ".entityChoice"
+    );
+
+const soundChoices =
+    document.querySelectorAll(
+        ".soundChoice"
+    );
+
+
+entityChoices.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            ()=>{
+
+                entityChoices.forEach(
+                    b =>
+                        b.classList.remove(
+                            "selected"
+                        )
+                );
+
+                button.classList.add(
+                    "selected"
+                );
+
+                const number =
+                    button.dataset.entity;
+
+                selectedEntity =
+                    "/entities/entity" +
+                    number +
+                    ".png";
+
+            }
+        );
+
+    }
+);
+
+
+soundChoices.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            ()=>{
+
+                soundChoices.forEach(
+                    b =>
+                        b.classList.remove(
+                            "selected"
+                        )
+                );
+
+                button.classList.add(
+                    "selected"
+                );
+
+                const number =
+                    button.dataset.sound;
+
+                selectedEntitySound =
+                    "/sounds/entity" +
+                    number +
+                    ".mp3";
+
+            }
+        );
+
+    }
+);
 /* =========================================================
    SETTINGS
 ========================================================= */
@@ -1445,14 +1784,11 @@ function loadTexture(path){
 
 async function loadEntityTexture(){
 
-    const paths = [
+    return await loadTexture(
+        selectedEntity
+    );
 
-        "./textures/entity.png",
-        "./textures/entity.jpg",
-        "./textures/entity.webp",
-        "./entity.png"
-
-    ];
+}
 
     for(
         const path of paths
@@ -3469,9 +3805,9 @@ let audioReady = false;
 function setupAudio(){
 
     entityAudio =
-        new Audio(
-            "./sounds/entity.mp3"
-        );
+    new Audio(
+        selectedEntitySound
+    );
 
     ambientAudio =
         new Audio(
@@ -3691,6 +4027,19 @@ function movePlayer(
 function playerOverHole(){
 
     if(noClip)
+        return false;
+
+    /*
+        YOU CAN JUMP OVER HOLES.
+
+        While airborne, the hole does not
+        cause the player to fall.
+
+        Once the player lands on the hole,
+        falling begins normally.
+    */
+
+    if(!grounded)
         return false;
 
     const cell =
@@ -4872,7 +5221,29 @@ renderer.domElement.addEventListener(
 document.getElementById(
     "start"
 ).onclick =
-    startGame;
+    ()=>{
+        document.getElementById(
+            "menu"
+        ).style.display = "none";
+
+        document.getElementById(
+            "selectionScreen"
+        ).style.display = "flex";
+    };
+
+
+document.getElementById(
+    "selectionContinue"
+).onclick =
+    ()=>{
+
+        document.getElementById(
+            "selectionScreen"
+        ).style.display = "none";
+
+        startGame();
+
+    };
 
 document.getElementById(
     "resume"
