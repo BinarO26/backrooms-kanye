@@ -1175,7 +1175,9 @@ const EXIT_WIDTH = 2.8;
 
 const EXIT_HEIGHT = 5.8;
 
-const ENTITY_AUDIO_DISTANCE = 40;
+const ENTITY_AUDIO_DISTANCE = 50;
+
+const ENTITY_AUDIO_SMOOTHING = 4;
 
 /* =========================================================
    STATE
@@ -3536,86 +3538,114 @@ function stopAudio(){
     }
 }
 
-function updateAudio(){
+function updateAudio(dt){
+
+    if(!audioReady)
+        return;
+
+    /*
+        Figure out where the volumes SHOULD be
+        (the targets), then ease toward them
+        below instead of snapping straight there.
+    */
+
+    let entityTarget = 0;
+
+    let ambientTarget = 0;
 
     if(
-        !audioReady ||
-        !started ||
-        paused ||
-        dead ||
-        !entity ||
-        !entityActive
+        started &&
+        !dead
     ){
 
-        if(entityAudio)
-            entityAudio.volume =
-                0;
+        ambientTarget = .75;
 
         if(
-            ambientAudio &&
-            started &&
-            !dead
+            !paused &&
+            entity &&
+            entityActive
         ){
 
-            ambientAudio.volume =
-                .75;
+            const dx =
+                player.position.x -
+                entity.position.x;
+
+            const dz =
+                player.position.z -
+                entity.position.z;
+
+            const distance =
+                Math.hypot(
+                    dx,
+                    dz
+                );
+
+            /*
+                LINEAR FALLOFF:
+
+                50 units -> 0%
+                40 units -> 20%
+                30 units -> 40%
+                20 units -> 60%
+                10 units -> 80%
+                0  units -> 100%
+            */
+
+            entityTarget =
+                THREE.MathUtils.clamp(
+                    (
+                        ENTITY_AUDIO_DISTANCE -
+                        distance
+                    ) /
+                    ENTITY_AUDIO_DISTANCE,
+                    0,
+                    1
+                );
+
+            ambientTarget =
+                Math.max(
+                    0,
+                    .75 *
+                    (
+                        1 -
+                        entityTarget
+                    )
+                );
         }
-
-        return;
     }
 
-    const dx =
-        player.position.x -
-        entity.position.x;
+    /*
+        EASE toward the target volume
+        instead of snapping to it, so
+        the transition is smooth instead
+        of stepping/popping.
+    */
 
-    const dz =
-        player.position.z -
-        entity.position.z;
-
-    const distance =
-        Math.hypot(
-            dx,
-            dz
-        );
-
-    let amount =
-        1 -
-        distance /
-        ENTITY_AUDIO_DISTANCE;
-
-    amount =
-        THREE.MathUtils.clamp(
-            amount,
-            0,
-            1
-        );
-
-    if(
-        distance <=
-        ENTITY_AUDIO_DISTANCE
-    ){
-
-        amount =
-            .25 +
-            amount * .75;
-
-    }else{
-
-        amount = 0;
-    }
-
-    entityAudio.volume =
+    const ease =
         Math.min(
-            amount,
+            dt * ENTITY_AUDIO_SMOOTHING,
             1
         );
 
-    ambientAudio.volume =
-        Math.max(
-            0,
-            .75 *
-            (1 - amount)
-        );
+    if(entityAudio){
+
+        entityAudio.volume +=
+            (
+                entityTarget -
+                entityAudio.volume
+            ) *
+            ease;
+    }
+
+    if(ambientAudio){
+
+        ambientAudio.volume +=
+            (
+                ambientTarget -
+                ambientAudio.volume
+            ) *
+            ease;
+    }
 }
 
 /* =========================================================
@@ -5421,7 +5451,7 @@ function animate(now){
 
     updateEntity(dt);
 
-    updateAudio();
+    updateAudio(dt);
 
     updateMessage(dt);
 
