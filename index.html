@@ -233,6 +233,99 @@ button:hover{
     margin-top:20px;
 }
 
+#devTools{
+    position:fixed;
+    inset:0;
+    z-index:1800;
+    display:none;
+    background:rgba(0,0,0,.94);
+    align-items:center;
+    justify-content:center;
+}
+
+.devPanel{
+    width:min(760px,92vw);
+    max-height:88vh;
+    overflow:auto;
+    padding:25px;
+    background:#080806;
+    border:1px solid #77704b;
+}
+
+.devPanel h2{
+    margin:0 0 5px;
+    color:#c9c07a;
+    letter-spacing:4px;
+}
+
+.devWarning{
+    color:#666;
+    font:11px monospace;
+    margin-bottom:20px;
+}
+
+.devGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.devPanel button{
+    width:100%;
+    padding:13px;
+    font-family:monospace;
+}
+
+.devStatus{
+    margin-top:15px;
+    padding:12px;
+    background:#020202;
+    color:#777;
+    font:12px monospace;
+    min-height:40px;
+}
+
+#mapViewer{
+    position:fixed;
+    inset:0;
+    z-index:1900;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.96);
+}
+
+.mapPanel{
+    width:min(1000px,92vw);
+    height:min(850px,90vh);
+    padding:20px;
+    background:#080806;
+    border:1px solid #77704b;
+    display:flex;
+    flex-direction:column;
+}
+
+.mapPanel h2{
+    color:#c9c07a;
+    font:20px monospace;
+    letter-spacing:3px;
+}
+
+#mapCanvas{
+    flex:1;
+    width:100%;
+    min-height:0;
+    object-fit:contain;
+    image-rendering:pixelated;
+    background:#111;
+    border:1px solid #333;
+}
+
+.mapPanel button{
+    margin-top:12px;
+    padding:12px;
+}
+
 #crosshair{
     position:fixed;
     z-index:100;
@@ -346,6 +439,19 @@ button:hover{
     font:13px monospace;
     white-space:pre-wrap;
 }
+
+#flyIndicator{
+    position:fixed;
+    z-index:110;
+    top:70px;
+    left:50%;
+    transform:translateX(-50%);
+    display:none;
+    padding:5px 10px;
+    background:rgba(0,0,0,.7);
+    color:#55ff77;
+    font:11px monospace;
+}
 </style>
 </head>
 
@@ -353,117 +459,181 @@ button:hover{
 
 <div id="menu">
 
-    <img class="menuImage active" src="./textures/menu1.jpg">
-    <img class="menuImage" src="./textures/menu2.jpg">
-    <img class="menuImage" src="./textures/menu3.jpg">
-    <img class="menuImage" src="./textures/menu4.jpg">
-    <img class="menuImage" src="./textures/menu5.jpg">
+<img class="menuImage active" src="./textures/menu1.jpg">
+<img class="menuImage" src="./textures/menu2.jpg">
+<img class="menuImage" src="./textures/menu3.jpg">
+<img class="menuImage" src="./textures/menu4.jpg">
+<img class="menuImage" src="./textures/menu5.jpg">
 
-    <div class="menuShade"></div>
-    <div class="scanlines"></div>
+<div class="menuShade"></div>
+<div class="scanlines"></div>
 
-    <div class="menuTitle">
-        <h1>THE BACKROOMS</h1>
-        <p>LEVEL 0 // FOUND FOOTAGE</p>
-        <small>THE BUILDING DOES NOT HAVE A MAP</small>
-    </div>
+<div class="menuTitle">
+<h1>THE BACKROOMS</h1>
+<p>LEVEL 0 // FOUND FOOTAGE</p>
+<small>THE BUILDING DOES NOT HAVE A MAP</small>
+</div>
 
-    <div class="menuButtons">
+<div class="menuButtons">
 
-        <div class="difficulties">
-            <button id="easy">EASY</button>
-            <button id="normal" class="selected">NORMAL</button>
-            <button id="hard">HARD</button>
-            <button id="nightmare">NIGHTMARE</button>
-        </div>
+<div class="difficulties">
+<button id="easy">EASY</button>
+<button id="normal" class="selected">NORMAL</button>
+<button id="hard">HARD</button>
+<button id="nightmare">NIGHTMARE</button>
+</div>
 
-        <button class="menuButton" id="start">
-            ENTER LEVEL 0
-        </button>
+<button class="menuButton" id="start">
+ENTER LEVEL 0
+</button>
 
-        <button class="menuButton" id="controlsButton">
-            CONTROLS
-        </button>
+<button class="menuButton" id="controlsButton">
+CONTROLS
+</button>
 
-    </div>
+</div>
 </div>
 
 <div id="pause" class="overlay">
 
-    <h1>PAUSED</h1>
+<h1>PAUSED</h1>
 
-    <button id="resume">RESUME</button>
-    <button id="pauseControls">CONTROLS</button>
-    <button id="restart">RESTART</button>
-    <button id="mainMenu">MAIN MENU</button>
+<button id="resume">RESUME</button>
+<button id="pauseControls">CONTROLS</button>
+<button id="restart">RESTART</button>
+<button id="mainMenu">MAIN MENU</button>
 
 </div>
 
 <div id="death" class="overlay">
 
-    <div class="deathTitle">YOU DIED</div>
+<div class="deathTitle">YOU DIED</div>
 
-    <div id="deathReason" class="deathText">
-        SOMETHING FOUND YOU.
-    </div>
+<div id="deathReason" class="deathText">
+SOMETHING FOUND YOU.
+</div>
 
-    <button id="retry">RETRY</button>
-    <button id="deathMenu">MAIN MENU</button>
+<button id="retry">RETRY</button>
+<button id="deathMenu">MAIN MENU</button>
 
 </div>
 
 <div id="controls">
 
-    <div class="controlsPanel">
+<div class="controlsPanel">
 
-        <h2>CONTROLS</h2>
+<h2>CONTROLS</h2>
 
-        <div class="control">
-            <span>MOVE</span>
-            <span>W A S D</span>
-        </div>
+<div class="control">
+<span>MOVE</span>
+<span>W A S D</span>
+</div>
 
-        <div class="control">
-            <span>LOOK</span>
-            <span>MOUSE</span>
-        </div>
+<div class="control">
+<span>LOOK</span>
+<span>MOUSE</span>
+</div>
 
-        <div class="control">
-            <span>SPRINT</span>
-            <span>SHIFT</span>
-        </div>
+<div class="control">
+<span>SPRINT</span>
+<span>SHIFT</span>
+</div>
 
-        <div class="control">
-            <span>CROUCH / HIDE</span>
-            <span>C</span>
-        </div>
+<div class="control">
+<span>CROUCH / HIDE</span>
+<span>C</span>
+</div>
 
-        <div class="control">
-            <span>JUMP</span>
-            <span>SPACE</span>
-        </div>
+<div class="control">
+<span>JUMP</span>
+<span>SPACE</span>
+</div>
 
-        <div class="control">
-            <span>PAUSE</span>
-            <span>ESC</span>
-        </div>
+<div class="control">
+<span>PAUSE</span>
+<span>ESC</span>
+</div>
 
-        <button id="controlsBack">BACK</button>
+<button id="controlsBack">BACK</button>
 
-    </div>
+</div>
+</div>
+
+<div id="devTools">
+
+<div class="devPanel">
+
+<h2>DEVELOPER TOOLS</h2>
+
+<div class="devWarning">
+BACKSPACE TO CLOSE // NOT PART OF NORMAL CONTROLS
+</div>
+
+<div class="devGrid">
+
+<button id="devSpawn">
+SPAWN ENTITY NEAR PLAYER
+</button>
+
+<button id="devTeleportEntity">
+TELEPORT ENTITY TO PLAYER
+</button>
+
+<button id="devMap">
+OPEN MAP
+</button>
+
+<button id="devFly">
+TOGGLE FLY / NOCLIP
+</button>
+
+<button id="devEntityAI">
+TOGGLE ENTITY AI
+</button>
+
+<button id="devResetEntity">
+RESET ENTITY
+</button>
+
+</div>
+
+<div class="devStatus" id="devStatus">
+DEV TOOLS READY
+</div>
+
+</div>
+</div>
+
+<div id="mapViewer">
+
+<div class="mapPanel">
+
+<h2>LEVEL 0 MAP</h2>
+
+<canvas id="mapCanvas"></canvas>
+
+<button id="mapClose">
+CLOSE MAP
+</button>
+
+</div>
 </div>
 
 <div id="crosshair"></div>
 
+<div id="flyIndicator">
+NOCLIP / FLY MODE
+</div>
+
 <div id="hud">
-    LEVEL 0
-    <div id="hudDifficulty">NORMAL</div>
+LEVEL 0
+<div id="hudDifficulty">NORMAL</div>
 </div>
 
 <div id="message"></div>
 
 <div id="recording">
-    <span id="recordDot"></span>REC
+<span id="recordDot"></span>REC
 </div>
 
 <div id="time">00:00:00</div>
@@ -482,319 +652,183 @@ import * as THREE from "./three.module.js";
    SETTINGS
 ========================================================= */
 
-const TILE = 3;
+const TILE=3;
 
-const WALL_HEIGHT = 9;
+const WALL_HEIGHT=9;
 
-const PLAYER_HEIGHT = 5.25;
-const ENTITY_HEIGHT = 5.6;
+const PLAYER_HEIGHT=5.25;
+const ENTITY_HEIGHT=5.6;
 
-const PLAYER_RADIUS = .42;
+const PLAYER_RADIUS=.42;
 
-const CROUCH_HEIGHT = 3.25;
+const CROUCH_HEIGHT=3.25;
 
-const WALK_SPEED = 8.5;
-const SPRINT_SPEED = 13.5;
+const WALK_SPEED=8.5;
+const SPRINT_SPEED=13.5;
 
-const GRAVITY = 21;
-const JUMP_POWER = 7.5;
+const FLY_SPEED=24;
 
-const EXIT_WIDTH = 2.8;
-const EXIT_HEIGHT = 5.8;
+const GRAVITY=21;
+const JUMP_POWER=7.5;
 
-/*
-    Entity spawning.
-*/
-const ENTITY_MIN_SPAWN_DISTANCE = 25;
-const ENTITY_MAX_SPAWN_DISTANCE = 48;
-
-/*
-    Entity pathfinding.
-*/
-const ENTITY_PATH_RECALCULATE = .65;
-const ENTITY_PATH_TARGET_CHANGE = 2.0;
-const ENTITY_PATH_MAX_NODES = 18000;
-
-/*
-    Proximity audio.
-
-    50 units = silent
-    40 units = quiet
-    20 units = 25%
-    10 units = 55%
-    3 units = 100%
-*/
-const ENTITY_AUDIO_DISTANCE = 50;
-const ENTITY_AUDIO_FULL_DISTANCE = 3;
+const EXIT_WIDTH=2.8;
+const EXIT_HEIGHT=5.8;
 
 /* =========================================================
    STATE
 ========================================================= */
 
-let started = false;
-let paused = false;
-let dead = false;
+let started=false;
+let paused=false;
+let dead=false;
 
-let difficulty = "normal";
+let difficulty="normal";
 
-let elapsed = 0;
-let messageTimer = 0;
+let elapsed=0;
+let messageTimer=0;
 
-let falling = false;
-let fallTime = 0;
+let falling=false;
+let fallTime=0;
 
-let crouching = false;
-let hidden = false;
+let crouching=false;
+let hidden=false;
 
-let yaw = 0;
-let pitch = 0;
+let yaw=0;
+let pitch=0;
 
-let velocityY = 0;
-let grounded = true;
+let velocityY=0;
+let grounded=true;
 
-let entityTimer = 0;
-let entityActive = false;
+let entityTimer=0;
+let entityActive=false;
 
-let mapWidth = 0;
-let mapHeight = 0;
+let entityAI=true;
 
-let map = [];
+let flyMode=false;
 
-let playerSpawn = null;
-let entitySpawn = null;
+let mapWidth=0;
+let mapHeight=0;
 
-let exitPosition = null;
-let exitObject = null;
+let map=[];
 
-let wallColliders = [];
-let hideCells = [];
-let holeCells = [];
-let walkable = [];
-let hideSpots = [];
+let playerSpawn=null;
+let entitySpawn=null;
 
-let entity = null;
-let entityTexture = null;
-let entityWidth = ENTITY_HEIGHT;
+let exitPosition=null;
+let exitObject=null;
 
-/* =========================================================
-   ENTITY PATHFINDING STATE
-========================================================= */
+let wallColliders=[];
+let hideCells=[];
+let holeCells=[];
+let walkable=[];
+let hideSpots=[];
 
-let entityPath = [];
-let entityPathIndex = 0;
+let entity=null;
+let entityTexture=null;
+let entityWidth=ENTITY_HEIGHT;
 
-let entityPathTimer = 0;
+let entityPath=[];
+let entityPathTimer=0;
 
-let lastEntityTargetCell = {
-    x:-999999,
-    y:-999999
-};
+let audioStarted=false;
 
-/*
-    This prevents the entity from constantly recalculating
-    paths every frame.
-*/
-let entityPathGoal = null;
+const keys={};
 
 /* =========================================================
-   ENTITY AUDIO
+   AUDIO
 ========================================================= */
 
-let entityAudio = null;
-let audioUnlocked = false;
+const entityAudio=new Audio(
+    "./sounds/entity.mp3"
+);
 
-/*
-    Audio is loaded from:
+const ambientAudio=new Audio(
+    "./sounds/ambient.mp3"
+);
 
-        ./sounds/entity.mp3
-*/
-function setupEntityAudio(){
+entityAudio.loop=true;
+ambientAudio.loop=true;
 
-    entityAudio =
-    new Audio(
-        "./sounds/entity.mp3"
-    );
+entityAudio.preload="auto";
+ambientAudio.preload="auto";
 
-    entityAudio.loop = true;
+entityAudio.volume=0;
+ambientAudio.volume=.75;
 
-    entityAudio.preload = "auto";
+function startAudio(){
 
-    entityAudio.volume = 0;
-
-    entityAudio.addEventListener(
-        "error",
-        ()=>{
-            console.warn(
-                "Could not load ./sounds/entity.mp3"
-            );
-        }
-    );
-}
-
-/*
-    Browsers require audio to be started after a user
-    interaction. The start button provides that interaction.
-*/
-async function unlockEntityAudio(){
-
-    if(!entityAudio)
+    if(audioStarted)
         return;
 
-    try{
+    audioStarted=true;
 
-        entityAudio.volume = 0;
+    ambientAudio.volume=.75;
 
-        await entityAudio.play();
-
-        entityAudio.pause();
-
-        entityAudio.currentTime = 0;
-
-        audioUnlocked = true;
-
-    }catch(error){
-
-        console.warn(
-            "Audio unlock waiting for another interaction.",
-            error
-        );
-    }
+    ambientAudio.play().catch(()=>{});
 }
 
-function stopEntityAudio(){
+function updateAudio(){
 
-    if(!entityAudio)
-        return;
-
-    entityAudio.pause();
-
-    try{
-        entityAudio.currentTime=0;
-    }catch(e){}
-
-    entityAudio.volume=0;
-}
-
-function updateEntityAudio(){
-
-    if(
-        !entityAudio ||
-        !entityActive ||
-        !entity ||
-        !started ||
-        paused ||
-        dead ||
-        falling
-    ){
-
-        if(entityAudio)
-            entityAudio.volume=0;
-
-        return;
-    }
-
-    const distance =
-    Math.hypot(
-        player.position.x-
-        entity.position.x,
-
-        player.position.z-
-        entity.position.z
-    );
-
-    /*
-        Completely silent beyond the audio radius.
-    */
-    if(
-        distance >=
-        ENTITY_AUDIO_DISTANCE
-    ){
+    if(!started || dead || paused || !entity){
 
         entityAudio.volume=0;
 
-        if(!entityAudio.paused)
-            entityAudio.pause();
+        if(started && !dead && !paused)
+            ambientAudio.volume=.75;
 
         return;
     }
 
-    /*
-        Normalize distance.
+    const distance=Math.hypot(
+        player.position.x-entity.position.x,
+        player.position.z-entity.position.z
+    );
 
-        0 = entity is right next to player.
-        1 = entity is at maximum audible distance.
+    /*
+       ENTITY SOUND:
+
+       40 units = 0%
+       20 units = 25%
+       10 units = 50%
+       0 units  = 100%
+
+       This gives the player plenty of warning.
     */
-    const normalized =
-    THREE.MathUtils.clamp(
-        (
-            ENTITY_AUDIO_DISTANCE-
-            distance
-        )/
-        (
-            ENTITY_AUDIO_DISTANCE-
-            ENTITY_AUDIO_FULL_DISTANCE
-        ),
+
+    const entityVolume=THREE.MathUtils.clamp(
+        1-distance/40,
         0,
         1
     );
 
-    /*
-        Smooth curve so the audio doesn't abruptly
-        jump in volume.
-    */
-    let volume =
-    normalized * normalized;
+    entityAudio.volume=entityVolume;
 
     /*
-        At 20 units this gives roughly 25%.
+       Ambient is the inverse.
     */
-    if(
-        distance>=19 &&
-        distance<=21
-    ){
 
-        volume=.25;
+    ambientAudio.volume=
+        .75*(1-entityVolume);
+
+    if(entityVolume>.005){
+
+        entityAudio.play().catch(()=>{});
+
+    }else{
+
+        entityAudio.pause();
+        entityAudio.currentTime=0;
     }
 
-    /*
-        Make very close entity loud.
-    */
-    if(
-        distance<=ENTITY_AUDIO_FULL_DISTANCE
-    ){
-
-        volume=1;
-    }
-
-    entityAudio.volume =
-    THREE.MathUtils.clamp(
-        volume,
-        0,
-        1
-    );
-
-    if(
-        entityAudio.paused &&
-        audioUnlocked
-    ){
-
-        entityAudio.play()
-        .catch(()=>{});
-    }
+    if(ambientAudio.paused)
+        ambientAudio.play().catch(()=>{});
 }
-
-/* =========================================================
-   INPUT
-========================================================= */
-
-const keys = {};
 
 /* =========================================================
    RENDERER
 ========================================================= */
 
-const renderer =
-new THREE.WebGLRenderer({
+const renderer=new THREE.WebGLRenderer({
     antialias:false,
     powerPreference:"high-performance",
     alpha:false
@@ -807,15 +841,15 @@ renderer.setSize(
 
 renderer.setPixelRatio(
     Math.min(
-        window.devicePixelRatio || 1,
+        window.devicePixelRatio||1,
         1.15
     )
 );
 
-renderer.outputColorSpace =
+renderer.outputColorSpace=
 THREE.SRGBColorSpace;
 
-renderer.shadowMap.enabled = false;
+renderer.shadowMap.enabled=false;
 
 document.body.appendChild(
     renderer.domElement
@@ -825,36 +859,32 @@ document.body.appendChild(
    SCENE
 ========================================================= */
 
-const scene =
-new THREE.Scene();
+const scene=new THREE.Scene();
 
-scene.background =
+scene.background=
 new THREE.Color(0x080806);
 
-scene.fog =
+scene.fog=
 new THREE.Fog(
     0x080806,
     10,
     52
 );
 
-const camera =
-new THREE.PerspectiveCamera(
+const camera=new THREE.PerspectiveCamera(
     78,
-    innerWidth / innerHeight,
+    innerWidth/innerHeight,
     .05,
     300
 );
 
-const player =
-new THREE.Object3D();
+const player=new THREE.Object3D();
 
 scene.add(player);
 
 player.add(camera);
 
-const world =
-new THREE.Group();
+const world=new THREE.Group();
 
 scene.add(world);
 
@@ -869,8 +899,7 @@ scene.add(
    TEXTURES
 ========================================================= */
 
-const loader =
-new THREE.TextureLoader();
+const loader=new THREE.TextureLoader();
 
 let wallTexture;
 let floorTexture;
@@ -878,30 +907,26 @@ let ceilingTexture;
 
 function prepareTexture(texture){
 
-    texture.colorSpace =
+    texture.colorSpace=
     THREE.SRGBColorSpace;
 
-    texture.wrapS =
+    texture.wrapS=
     THREE.RepeatWrapping;
 
-    texture.wrapT =
+    texture.wrapT=
     THREE.RepeatWrapping;
 
-    texture.repeat.set(
-        1,
-        1
-    );
+    texture.repeat.set(1,1);
 
-    texture.magFilter =
+    texture.magFilter=
     THREE.LinearFilter;
 
-    texture.minFilter =
+    texture.minFilter=
     THREE.LinearFilter;
 
-    texture.generateMipmaps =
-    false;
+    texture.generateMipmaps=false;
 
-    texture.needsUpdate = true;
+    texture.needsUpdate=true;
 
     return texture;
 }
@@ -915,17 +940,14 @@ function loadTexture(path){
                 path,
                 texture=>{
                     resolve(
-                        prepareTexture(
-                            texture
-                        )
+                        prepareTexture(texture)
                     );
                 },
                 undefined,
                 ()=>{
                     reject(
                         new Error(
-                            "Could not load:\n"+
-                            path
+                            "Could not load:\n"+path
                         )
                     );
                 }
@@ -936,7 +958,7 @@ function loadTexture(path){
 }
 
 /* =========================================================
-   ENTITY PNG
+   ENTITY TEXTURE
 ========================================================= */
 
 function loadEntityTexture(){
@@ -944,56 +966,49 @@ function loadEntityTexture(){
     return new Promise(
         (resolve,reject)=>{
 
-            const image =
-            new Image();
+            const image=new Image();
 
-            image.onload = ()=>{
+            image.onload=()=>{
 
-                const aspect =
-                image.naturalWidth /
+                const aspect=
+                image.naturalWidth/
                 image.naturalHeight;
 
-                entityWidth =
-                ENTITY_HEIGHT *
-                aspect;
+                entityWidth=
+                ENTITY_HEIGHT*aspect;
 
-                const texture =
-                new THREE.Texture(
-                    image
-                );
+                const texture=
+                new THREE.Texture(image);
 
-                texture.colorSpace =
+                texture.colorSpace=
                 THREE.SRGBColorSpace;
 
-                texture.wrapS =
+                texture.wrapS=
                 THREE.ClampToEdgeWrapping;
 
-                texture.wrapT =
+                texture.wrapT=
                 THREE.ClampToEdgeWrapping;
 
-                texture.magFilter =
+                texture.magFilter=
                 THREE.LinearFilter;
 
-                texture.minFilter =
+                texture.minFilter=
                 THREE.LinearFilter;
 
-                texture.generateMipmaps =
-                false;
+                texture.generateMipmaps=false;
 
-                texture.needsUpdate = true;
+                texture.needsUpdate=true;
 
                 resolve(texture);
             };
 
-            image.onerror =
-            ()=>reject(
+            image.onerror=()=>reject(
                 new Error(
                     "Could not load ./entity.png"
                 )
             );
 
-            image.src =
-            "./entity.png";
+            image.src="./entity.png";
         }
     );
 }
@@ -1002,19 +1017,19 @@ function loadEntityTexture(){
    MATERIALS
 ========================================================= */
 
-const wallMaterial =
+const wallMaterial=
 new THREE.MeshBasicMaterial({
     color:0x858361,
     side:THREE.DoubleSide
 });
 
-const floorMaterial =
+const floorMaterial=
 new THREE.MeshBasicMaterial({
     color:0x69664b,
     side:THREE.DoubleSide
 });
 
-const ceilingMaterial =
+const ceilingMaterial=
 new THREE.MeshBasicMaterial({
     color:0x5e5c44,
     side:THREE.DoubleSide
@@ -1027,33 +1042,19 @@ new THREE.MeshBasicMaterial({
 function cellToWorld(x,y){
 
     return {
-        x:
-        (x+.5)*TILE -
-        mapWidth*TILE*.5,
-
-        z:
-        (y+.5)*TILE -
-        mapHeight*TILE*.5
+        x:(x+.5)*TILE-mapWidth*TILE*.5,
+        z:(y+.5)*TILE-mapHeight*TILE*.5
     };
 }
 
 function worldToCell(x,z){
 
     return {
-        x:
-        Math.floor(
-            (
-                x+
-                mapWidth*TILE*.5
-            )/TILE
+        x:Math.floor(
+            (x+mapWidth*TILE*.5)/TILE
         ),
-
-        y:
-        Math.floor(
-            (
-                z+
-                mapHeight*TILE*.5
-            )/TILE
+        y:Math.floor(
+            (z+mapHeight*TILE*.5)/TILE
         )
     };
 }
@@ -1071,118 +1072,90 @@ function inside(x,y){
 function isWalkable(x,y){
 
     return(
-        inside(x,y) &&
-        map[y][x] !== "wall" &&
-        map[y][x] !== "hole"
+        inside(x,y)&&
+        map[y][x]!=="wall"&&
+        map[y][x]!=="hole"
     );
 }
 
 /* =========================================================
-   MAP CLASSIFICATION
+   MAP
 ========================================================= */
 
-function classifyPixel(
-    r,g,b,a
-){
+function classifyPixel(r,g,b,a){
 
-    if(a<20)
-        return "floor";
+    if(a<20)return"floor";
 
     if(
-        r<80 &&
-        g<80 &&
+        r<80&&
+        g<80&&
         b<80
-    )
-        return "wall";
+    )return"wall";
 
     if(
-        r>150 &&
-        r>g*1.4 &&
+        r>150&&
+        r>g*1.4&&
         r>b*1.4
-    )
-        return "spawn";
+    )return"spawn";
 
     if(
-        b>125 &&
+        b>125&&
         b>r*1.3
-    )
-        return "entity";
+    )return"entity";
 
     if(
-        r>105 &&
-        b>105 &&
+        r>105&&
+        b>105&&
         g<115
-    )
-        return "hide";
+    )return"hide";
 
     if(
-        r>135 &&
-        g>115 &&
+        r>135&&
+        g>115&&
         b<125
-    )
-        return "hole";
+    )return"hole";
 
-    return "floor";
+    return"floor";
 }
-
-/* =========================================================
-   MAP LOADING
-========================================================= */
 
 async function loadMap(){
 
-    const image =
+    const image=
     await new Promise(
         (resolve,reject)=>{
 
-            const img =
-            new Image();
+            const img=new Image();
 
-            img.onload =
-            ()=>resolve(img);
+            img.onload=()=>resolve(img);
 
-            img.onerror =
-            ()=>reject(
+            img.onerror=()=>reject(
                 new Error(
                     "Could not load ./textures/map1.png"
                 )
             );
 
-            img.src =
-            "./textures/map1.png";
+            img.src="./textures/map1.png";
         }
     );
 
-    mapWidth =
-    image.naturalWidth;
+    mapWidth=image.naturalWidth;
+    mapHeight=image.naturalHeight;
 
-    mapHeight =
-    image.naturalHeight;
-
-    const canvas =
+    const canvas=
     document.createElement("canvas");
 
-    canvas.width =
-    mapWidth;
+    canvas.width=mapWidth;
+    canvas.height=mapHeight;
 
-    canvas.height =
-    mapHeight;
-
-    const ctx =
+    const ctx=
     canvas.getContext(
         "2d",
-        {
-            willReadFrequently:true
-        }
+        {willReadFrequently:true}
     );
 
-    ctx.drawImage(
-        image,
-        0,
-        0
-    );
+    ctx.drawImage(image,0,0);
 
-    const pixels =
+    const pixels=
     ctx.getImageData(
         0,
         0,
@@ -1190,33 +1163,22 @@ async function loadMap(){
         mapHeight
     ).data;
 
-    map = [];
+    map=[];
+    walkable=[];
+    hideCells=[];
+    holeCells=[];
 
-    walkable = [];
-    hideCells = [];
-    holeCells = [];
+    playerSpawn=null;
 
-    playerSpawn = null;
-    entitySpawn = null;
-
-    for(
-        let y=0;
-        y<mapHeight;
-        y++
-    ){
+    for(let y=0;y<mapHeight;y++){
 
         const row=[];
 
-        for(
-            let x=0;
-            x<mapWidth;
-            x++
-        ){
+        for(let x=0;x<mapWidth;x++){
 
-            const i =
-            (y*mapWidth+x)*4;
+            const i=(y*mapWidth+x)*4;
 
-            let type =
+            const type=
             classifyPixel(
                 pixels[i],
                 pixels[i+1],
@@ -1226,49 +1188,22 @@ async function loadMap(){
 
             row.push(type);
 
-            if(
-                type!=="wall" &&
-                type!=="hole"
-            )
-                walkable.push({
-                    x,
-                    y
-                });
+            if(type!=="wall")
+                walkable.push({x,y});
 
             if(type==="hide")
-                hideCells.push({
-                    x,
-                    y
-                });
+                hideCells.push({x,y});
 
             if(type==="hole")
-                holeCells.push({
-                    x,
-                    y
-                });
+                holeCells.push({x,y});
 
             if(
-                type==="spawn" &&
+                type==="spawn"&&
                 !playerSpawn
             ){
 
-                playerSpawn =
-                cellToWorld(
-                    x,
-                    y
-                );
-            }
-
-            if(
-                type==="entity" &&
-                !entitySpawn
-            ){
-
-                entitySpawn =
-                cellToWorld(
-                    x,
-                    y
-                );
+                playerSpawn=
+                cellToWorld(x,y);
             }
         }
 
@@ -1277,52 +1212,32 @@ async function loadMap(){
 
     if(!playerSpawn){
 
-        const c =
+        const c=
         walkable[
             Math.floor(
                 walkable.length/2
             )
         ];
 
-        playerSpawn =
-        cellToWorld(
-            c.x,
-            c.y
-        );
+        playerSpawn=
+        cellToWorld(c.x,c.y);
     }
 
-    /*
-        We don't permanently use the blue entity
-        marker as the spawn anymore.
+    findExit();
+}
 
-        It can still be used as a preferred spawn
-        if it happens to be a good distance away.
-    */
+function findExit(){
 
-    if(!entitySpawn){
+    const candidates=[];
 
-        entitySpawn =
-        findRandomEntitySpawn(
-            playerSpawn,
-            false
-        );
-    }
-
-    /*
-        Exit location.
-    */
-
-    let candidates=[];
-
-    for(
-        const cell of walkable
-    ){
+    for(const cell of walkable){
 
         if(
-            map[cell.y][cell.x]==="hole" ||
-            map[cell.y][cell.x]==="wall"
-        )
-            continue;
+            !isWalkable(
+                cell.x,
+                cell.y
+            )
+        )continue;
 
         let clear=true;
 
@@ -1338,16 +1253,11 @@ async function loadMap(){
                 xx++
             ){
 
-                const cx =
-                cell.x+xx;
-
-                const cy =
-                cell.y+yy;
-
                 if(
-                    !inside(cx,cy) ||
-                    map[cy][cx]==="wall" ||
-                    map[cy][cx]==="hole"
+                    !isWalkable(
+                        cell.x+xx,
+                        cell.y+yy
+                    )
                 ){
 
                     clear=false;
@@ -1355,20 +1265,18 @@ async function loadMap(){
                 }
             }
 
-            if(!clear)
-                break;
+            if(!clear)break;
         }
 
-        if(!clear)
-            continue;
+        if(!clear)continue;
 
-        const p =
+        const p=
         cellToWorld(
             cell.x,
             cell.y
         );
 
-        const distance =
+        const distance=
         Math.hypot(
             p.x-playerSpawn.x,
             p.z-playerSpawn.z
@@ -1391,10 +1299,9 @@ async function loadMap(){
 
     if(candidates.length){
 
-        const c =
-        candidates[0];
+        const c=candidates[0];
 
-        exitPosition =
+        exitPosition=
         cellToWorld(
             c.x,
             c.y
@@ -1402,12 +1309,12 @@ async function loadMap(){
 
     }else{
 
-        const c =
+        const c=
         walkable[
             walkable.length-1
         ];
 
-        exitPosition =
+        exitPosition=
         cellToWorld(
             c.x,
             c.y
@@ -1416,224 +1323,87 @@ async function loadMap(){
 }
 
 /* =========================================================
-   RANDOM ENTITY SPAWNING
+   IMPROVED ENTITY SPAWN
 ========================================================= */
 
-function findRandomEntitySpawn(
-    origin,
-    preferDistance=true
-){
+function findGoodEntitySpawn(){
 
-    if(!walkable.length)
-        return origin;
-
-    const originCell =
+    const pc=
     worldToCell(
-        origin.x,
-        origin.z
+        player.position.x,
+        player.position.z
     );
 
     const candidates=[];
 
-    /*
-        Gather possible cells.
+    for(const cell of walkable){
 
-        This uses actual map cells rather than choosing
-        an arbitrary world coordinate, so the entity
-        always begins inside a walkable area.
-    */
-    for(
-        const cell of walkable
-    ){
-
-        if(
-            map[cell.y][cell.x]==="hole" ||
-            map[cell.y][cell.x]==="wall"
-        )
+        if(!isWalkable(cell.x,cell.y))
             continue;
 
-        const p =
+        const p=
         cellToWorld(
             cell.x,
             cell.y
         );
 
-        const distance =
+        const distance=
         Math.hypot(
-            p.x-origin.x,
-            p.z-origin.z
+            p.x-player.position.x,
+            p.z-player.position.z
         );
+
+        /*
+           Entity should be near enough to matter,
+           but not spawn directly on top of the player.
+        */
 
         if(
-            distance>=
-            ENTITY_MIN_SPAWN_DISTANCE &&
-            distance<=
-            ENTITY_MAX_SPAWN_DISTANCE
+            distance>=10&&
+            distance<=30
         ){
 
-            /*
-                Don't spawn directly beside a wall.
-            */
-            let openNeighbors=0;
-
-            const dirs=[
-                [1,0],
-                [-1,0],
-                [0,1],
-                [0,-1]
-            ];
-
-            for(
-                const d of dirs
-            ){
-
-                if(
-                    isWalkable(
-                        cell.x+d[0],
-                        cell.y+d[1]
-                    )
-                )
-                    openNeighbors++;
-            }
-
-            if(openNeighbors>=2){
-
-                candidates.push({
-                    cell,
-                    position:p,
-                    distance
-                });
-            }
+            candidates.push({
+                cell,
+                distance
+            });
         }
+    }
+
+    if(!candidates.length){
+
+        return cellToWorld(
+            pc.x,
+            pc.y
+        );
     }
 
     /*
-        If there are good candidates, choose randomly
-        from them.
-
-        We don't simply choose the farthest because
-        that makes the entity appear in roughly the
-        same kind of location every time.
-    */
-    if(candidates.length){
-
-        /*
-            Shuffle first.
-        */
-        for(
-            let i=candidates.length-1;
-            i>0;
-            i--
-        ){
-
-            const j =
-            Math.floor(
-                Math.random()*(i+1)
-            );
-
-            [
-                candidates[i],
-                candidates[j]
-            ]=[
-                candidates[j],
-                candidates[i]
-            ];
-        }
-
-        /*
-            Prefer locations roughly 30-40 units away.
-        */
-        candidates.sort(
-            (a,b)=>{
-
-                const scoreA =
-                Math.abs(
-                    a.distance-34
-                );
-
-                const scoreB =
-                Math.abs(
-                    b.distance-34
-                );
-
-                return scoreA-scoreB;
-            }
-        );
-
-        const topCount =
-        Math.min(
-            candidates.length,
-            12
-        );
-
-        const selected =
-        candidates[
-            Math.floor(
-                Math.random()*topCount
-            )
-        ];
-
-        return selected.position;
-    }
-
-    /*
-        Fallback:
-        choose the farthest reachable cell.
+       Prefer locations roughly 15-24 units away.
     */
 
-    let best=null;
-    let bestDistance=-1;
-
-    for(
-        const cell of walkable
-    ){
-
-        const p =
-        cellToWorld(
-            cell.x,
-            cell.y
-        );
-
-        const distance =
-        Math.hypot(
-            p.x-origin.x,
-            p.z-origin.z
-        );
-
-        if(distance>bestDistance){
-
-            bestDistance=distance;
-            best=p;
-        }
-    }
-
-    return best || origin;
-}
-
-/* =========================================================
-   ENTITY SPAWN RESET
-========================================================= */
-
-function randomizeEntitySpawn(){
-
-    const spawn =
-    findRandomEntitySpawn(
-        player.position,
-        true
+    const preferred=
+    candidates.filter(
+        c=>
+        c.distance>=15&&
+        c.distance<=24
     );
 
-    if(!spawn)
-        return;
+    const list=
+    preferred.length?
+    preferred:
+    candidates;
 
-    entitySpawn={
-        x:spawn.x,
-        z:spawn.z
-    };
+    const chosen=
+    list[
+        Math.floor(
+            Math.random()*list.length
+        )
+    ];
 
-    console.log(
-        "ENTITY SPAWN:",
-        entitySpawn.x,
-        entitySpawn.z
+    return cellToWorld(
+        chosen.cell.x,
+        chosen.cell.y
     );
 }
 
@@ -1651,17 +1421,12 @@ function createWallGeometry(){
     const s=TILE/2;
     const h=WALL_HEIGHT;
 
-    function face(
-        a,b,c,d,normal
-    ){
+    function face(a,b,c,d,normal){
 
         const base=p.length/3;
 
         p.push(
-            ...a,
-            ...b,
-            ...c,
-            ...d
+            ...a,...b,...c,...d
         );
 
         n.push(
@@ -1720,28 +1485,22 @@ function createWallGeometry(){
         [0,0,-1]
     );
 
-    const g =
+    const g=
     new THREE.BufferGeometry();
 
     g.setAttribute(
         "position",
-        new THREE.Float32BufferAttribute(
-            p,3
-        )
+        new THREE.Float32BufferAttribute(p,3)
     );
 
     g.setAttribute(
         "normal",
-        new THREE.Float32BufferAttribute(
-            n,3
-        )
+        new THREE.Float32BufferAttribute(n,3)
     );
 
     g.setAttribute(
         "uv",
-        new THREE.Float32BufferAttribute(
-            u,2
-        )
+        new THREE.Float32BufferAttribute(u,2)
     );
 
     g.setIndex(i);
@@ -1749,37 +1508,24 @@ function createWallGeometry(){
     return g;
 }
 
-const wallGeometry =
+const wallGeometry=
 createWallGeometry();
 
 function buildWalls(){
 
     wallColliders=[];
 
-    for(
-        let y=0;
-        y<mapHeight;
-        y++
-    ){
+    for(let y=0;y<mapHeight;y++){
 
-        for(
-            let x=0;
-            x<mapWidth;
-            x++
-        ){
+        for(let x=0;x<mapWidth;x++){
 
-            if(
-                map[y][x]!=="wall"
-            )
+            if(map[y][x]!=="wall")
                 continue;
 
-            const p =
-            cellToWorld(
-                x,
-                y
-            );
+            const p=
+            cellToWorld(x,y);
 
-            const mesh =
+            const mesh=
             new THREE.Mesh(
                 wallGeometry,
                 wallMaterial
@@ -1794,37 +1540,23 @@ function buildWalls(){
             world.add(mesh);
 
             wallColliders.push({
-
-                minX:
-                p.x-TILE/2,
-
-                maxX:
-                p.x+TILE/2,
-
-                minZ:
-                p.z-TILE/2,
-
-                maxZ:
-                p.z+TILE/2
+                minX:p.x-TILE/2,
+                maxX:p.x+TILE/2,
+                minZ:p.z-TILE/2,
+                maxZ:p.z+TILE/2
             });
         }
     }
 }
 
-function collides(
-    x,
-    z,
-    r=.42
-){
+function collides(x,z,r=.42){
 
-    for(
-        const wall of wallColliders
-    ){
+    for(const wall of wallColliders){
 
         if(
-            x+r>wall.minX &&
-            x-r<wall.maxX &&
-            z+r>wall.minZ &&
+            x+r>wall.minX&&
+            x-r<wall.maxX&&
+            z+r>wall.minZ&&
             z-r<wall.maxZ
         )
             return true;
@@ -1845,39 +1577,21 @@ function buildOptimizedFloor(){
     const i=[];
 
     let vertices=0;
-
     const h=TILE/2;
 
-    for(
-        let y=0;
-        y<mapHeight;
-        y++
-    ){
+    for(let y=0;y<mapHeight;y++){
 
-        for(
-            let x=0;
-            x<mapWidth;
-            x++
-        ){
+        for(let x=0;x<mapWidth;x++){
 
             if(
-                map[y][x]==="hole"
-            )
-                continue;
-
-            if(
+                map[y][x]==="hole"||
                 map[y][x]==="wall"
-            )
-                continue;
+            )continue;
 
-            const c =
-            cellToWorld(
-                x,
-                y
-            );
+            const c=
+            cellToWorld(x,y);
 
             p.push(
-
                 c.x-h,0,c.z-h,
                 c.x+h,0,c.z-h,
                 c.x+h,0,c.z+h,
@@ -1902,7 +1616,6 @@ function buildOptimizedFloor(){
                 vertices,
                 vertices+1,
                 vertices+2,
-
                 vertices,
                 vertices+2,
                 vertices+3
@@ -1912,41 +1625,34 @@ function buildOptimizedFloor(){
         }
     }
 
-    const g =
+    const g=
     new THREE.BufferGeometry();
 
     g.setAttribute(
         "position",
-        new THREE.Float32BufferAttribute(
-            p,3
-        )
+        new THREE.Float32BufferAttribute(p,3)
     );
 
     g.setAttribute(
         "normal",
-        new THREE.Float32BufferAttribute(
-            n,3
-        )
+        new THREE.Float32BufferAttribute(n,3)
     );
 
     g.setAttribute(
         "uv",
-        new THREE.Float32BufferAttribute(
-            u,2
-        )
+        new THREE.Float32BufferAttribute(u,2)
     );
 
     g.setIndex(i);
 
     g.computeBoundingSphere();
 
-    const floor =
-    new THREE.Mesh(
-        g,
-        floorMaterial
+    world.add(
+        new THREE.Mesh(
+            g,
+            floorMaterial
+        )
     );
-
-    world.add(floor);
 }
 
 /* =========================================================
@@ -1961,49 +1667,23 @@ function buildOptimizedCeiling(){
     const i=[];
 
     let vertices=0;
-
     const h=TILE/2;
 
-    for(
-        let y=0;
-        y<mapHeight;
-        y++
-    ){
+    for(let y=0;y<mapHeight;y++){
 
-        for(
-            let x=0;
-            x<mapWidth;
-            x++
-        ){
+        for(let x=0;x<mapWidth;x++){
 
-            if(
-                map[y][x]==="wall"
-            )
+            if(map[y][x]==="wall")
                 continue;
 
-            const c =
-            cellToWorld(
-                x,
-                y
-            );
+            const c=
+            cellToWorld(x,y);
 
             p.push(
-
-                c.x-h,
-                WALL_HEIGHT,
-                c.z-h,
-
-                c.x+h,
-                WALL_HEIGHT,
-                c.z-h,
-
-                c.x+h,
-                WALL_HEIGHT,
-                c.z+h,
-
-                c.x-h,
-                WALL_HEIGHT,
-                c.z+h
+                c.x-h,WALL_HEIGHT,c.z-h,
+                c.x+h,WALL_HEIGHT,c.z-h,
+                c.x+h,WALL_HEIGHT,c.z+h,
+                c.x-h,WALL_HEIGHT,c.z+h
             );
 
             n.push(
@@ -2024,7 +1704,6 @@ function buildOptimizedCeiling(){
                 vertices,
                 vertices+2,
                 vertices+1,
-
                 vertices,
                 vertices+3,
                 vertices+2
@@ -2034,41 +1713,34 @@ function buildOptimizedCeiling(){
         }
     }
 
-    const g =
+    const g=
     new THREE.BufferGeometry();
 
     g.setAttribute(
         "position",
-        new THREE.Float32BufferAttribute(
-            p,3
-        )
+        new THREE.Float32BufferAttribute(p,3)
     );
 
     g.setAttribute(
         "normal",
-        new THREE.Float32BufferAttribute(
-            n,3
-        )
+        new THREE.Float32BufferAttribute(n,3)
     );
 
     g.setAttribute(
         "uv",
-        new THREE.Float32BufferAttribute(
-            u,2
-        )
+        new THREE.Float32BufferAttribute(u,2)
     );
 
     g.setIndex(i);
 
     g.computeBoundingSphere();
 
-    const ceiling =
-    new THREE.Mesh(
-        g,
-        ceilingMaterial
+    world.add(
+        new THREE.Mesh(
+            g,
+            ceilingMaterial
+        )
     );
-
-    world.add(ceiling);
 }
 
 /* =========================================================
@@ -2077,23 +1749,21 @@ function buildOptimizedCeiling(){
 
 function buildHoles(){
 
-    const material =
+    const material=
     new THREE.MeshBasicMaterial({
         color:0x000000,
         side:THREE.BackSide
     });
 
-    for(
-        const cell of holeCells
-    ){
+    for(const cell of holeCells){
 
-        const p =
+        const p=
         cellToWorld(
             cell.x,
             cell.y
         );
 
-        const hole =
+        const hole=
         new THREE.Mesh(
             new THREE.BoxGeometry(
                 TILE,
@@ -2119,36 +1789,21 @@ function buildHoles(){
 
 function buildLights(){
 
-    for(
-        let y=2;
-        y<mapHeight;
-        y+=6
-    ){
+    for(let y=2;y<mapHeight;y+=6){
 
-        for(
-            let x=2;
-            x<mapWidth;
-            x+=6
-        ){
+        for(let x=2;x<mapWidth;x+=6){
 
             if(
-                !map[y] ||
-                !map[y][x] ||
-                map[y][x]==="wall" ||
+                !map[y]||
+                !map[y][x]||
+                map[y][x]==="wall"||
                 map[y][x]==="hole"
-            )
-                continue;
+            )continue;
 
-            const p =
-            cellToWorld(
-                x,
-                y
-            );
+            const p=
+            cellToWorld(x,y);
 
-            /*
-                EXACTLY ONE TILE.
-            */
-            const fixture =
+            const fixture=
             new THREE.Mesh(
                 new THREE.BoxGeometry(
                     TILE,
@@ -2168,7 +1823,7 @@ function buildLights(){
 
             world.add(fixture);
 
-            const light =
+            const light=
             new THREE.PointLight(
                 0xffdca0,
                 .27,
@@ -2203,10 +1858,9 @@ function buildHideSpots(){
         i++
     ){
 
-        const cell =
-        hideCells[i];
+        const cell=hideCells[i];
 
-        const p =
+        const p=
         cellToWorld(
             cell.x,
             cell.y
@@ -2228,7 +1882,7 @@ function createExit(){
     if(!exitPosition)
         return;
 
-    const group =
+    const group=
     new THREE.Group();
 
     group.position.set(
@@ -2237,24 +1891,18 @@ function createExit(){
         exitPosition.z
     );
 
-    const dx =
-    -exitPosition.x;
+    const dx=-exitPosition.x;
+    const dz=-exitPosition.z;
 
-    const dz =
-    -exitPosition.z;
+    group.rotation.y=
+    Math.atan2(dx,dz);
 
-    group.rotation.y =
-    Math.atan2(
-        dx,
-        dz
-    );
-
-    const darkMetal =
+    const darkMetal=
     new THREE.MeshBasicMaterial({
         color:0x11120f
     });
 
-    const brightGreen =
+    const brightGreen=
     new THREE.MeshBasicMaterial({
         color:0x63ff82
     });
@@ -2262,7 +1910,7 @@ function createExit(){
     const postWidth=.28;
     const postDepth=.35;
 
-    const left =
+    const left=
     new THREE.Mesh(
         new THREE.BoxGeometry(
             postWidth,
@@ -2280,25 +1928,14 @@ function createExit(){
 
     group.add(left);
 
-    const right =
-    new THREE.Mesh(
-        new THREE.BoxGeometry(
-            postWidth,
-            EXIT_HEIGHT,
-            postDepth
-        ),
-        darkMetal
-    );
+    const right=left.clone();
 
-    right.position.set(
-        EXIT_WIDTH/2,
-        EXIT_HEIGHT/2,
-        0
-    );
+    right.position.x=
+    EXIT_WIDTH/2;
 
     group.add(right);
 
-    const top =
+    const top=
     new THREE.Mesh(
         new THREE.BoxGeometry(
             EXIT_WIDTH+postWidth,
@@ -2316,7 +1953,7 @@ function createExit(){
 
     group.add(top);
 
-    const leftLight =
+    const leftLight=
     new THREE.Mesh(
         new THREE.BoxGeometry(
             .12,
@@ -2334,15 +1971,14 @@ function createExit(){
 
     group.add(leftLight);
 
-    const rightLight =
-    leftLight.clone();
+    const rightLight=leftLight.clone();
 
-    rightLight.position.x =
+    rightLight.position.x=
     EXIT_WIDTH/2+.17;
 
     group.add(rightLight);
 
-    const topLight =
+    const topLight=
     new THREE.Mesh(
         new THREE.BoxGeometry(
             EXIT_WIDTH+.55,
@@ -2360,7 +1996,7 @@ function createExit(){
 
     group.add(topLight);
 
-    const glowMaterial =
+    const glowMaterial=
     new THREE.MeshBasicMaterial({
         color:0x21ff52,
         transparent:true,
@@ -2369,7 +2005,7 @@ function createExit(){
         depthWrite:false
     });
 
-    const glow =
+    const glowMesh=
     new THREE.Mesh(
         new THREE.PlaneGeometry(
             EXIT_WIDTH,
@@ -2378,15 +2014,15 @@ function createExit(){
         glowMaterial
     );
 
-    glow.position.set(
+    glowMesh.position.set(
         0,
         EXIT_HEIGHT/2,
         .04
     );
 
-    group.add(glow);
+    group.add(glowMesh);
 
-    const light =
+    const light=
     new THREE.PointLight(
         0x25ff55,
         2.4,
@@ -2401,32 +2037,21 @@ function createExit(){
 
     group.add(light);
 
-    const canvas =
+    const canvas=
     document.createElement("canvas");
 
     canvas.width=512;
     canvas.height=128;
 
-    const ctx =
+    const ctx=
     canvas.getContext("2d");
 
     ctx.fillStyle="#063d12";
-    ctx.fillRect(
-        0,
-        0,
-        512,
-        128
-    );
+    ctx.fillRect(0,0,512,128);
 
     ctx.strokeStyle="#54ff75";
     ctx.lineWidth=8;
-
-    ctx.strokeRect(
-        4,
-        4,
-        504,
-        120
-    );
+    ctx.strokeRect(4,4,504,120);
 
     ctx.fillStyle="#8aff9c";
     ctx.font="bold 70px Arial";
@@ -2439,20 +2064,15 @@ function createExit(){
         64
     );
 
-    const signTexture =
-    new THREE.CanvasTexture(
-        canvas
-    );
+    const signTexture=
+    new THREE.CanvasTexture(canvas);
 
-    signTexture.colorSpace =
+    signTexture.colorSpace=
     THREE.SRGBColorSpace;
 
-    const sign =
+    const sign=
     new THREE.Mesh(
-        new THREE.PlaneGeometry(
-            1.7,
-            .42
-        ),
+        new THREE.PlaneGeometry(1.7,.42),
         new THREE.MeshBasicMaterial({
             map:signTexture,
             transparent:true
@@ -2467,7 +2087,7 @@ function createExit(){
 
     group.add(sign);
 
-    const floorGlow =
+    const floorGlow=
     new THREE.Mesh(
         new THREE.CircleGeometry(
             2.2,
@@ -2482,9 +2102,7 @@ function createExit(){
         })
     );
 
-    floorGlow.rotation.x =
-    -Math.PI/2;
-
+    floorGlow.rotation.x=-Math.PI/2;
     floorGlow.position.y=.025;
 
     group.add(floorGlow);
@@ -2496,12 +2114,6 @@ function createExit(){
         light,
         glow:floorGlow
     };
-
-    console.log(
-        "GREEN EXIT CREATED AT:",
-        exitPosition.x,
-        exitPosition.z
-    );
 }
 
 /* =========================================================
@@ -2513,13 +2125,13 @@ function createEntity(){
     if(!entityTexture)
         return;
 
-    const geometry =
+    const geometry=
     new THREE.PlaneGeometry(
         entityWidth,
         ENTITY_HEIGHT
     );
 
-    const material =
+    const material=
     new THREE.MeshBasicMaterial({
         map:entityTexture,
         transparent:true,
@@ -2527,7 +2139,7 @@ function createEntity(){
         side:THREE.DoubleSide
     });
 
-    entity =
+    entity=
     new THREE.Mesh(
         geometry,
         material
@@ -2540,17 +2152,6 @@ function createEntity(){
     );
 
     world.add(entity);
-
-    entityPath=[];
-    entityPathIndex=0;
-    entityPathTimer=0;
-
-    entityPathGoal=null;
-
-    lastEntityTargetCell={
-        x:-999999,
-        y:-999999
-    };
 }
 
 function updateEntityFacing(){
@@ -2558,682 +2159,145 @@ function updateEntityFacing(){
     if(!entity)
         return;
 
-    /*
-        Billboard the PNG toward the player.
-
-        This keeps the PNG square/unaltered rather than
-        squishing it sideways.
-    */
-    const dx =
+    const dx=
     player.position.x-
     entity.position.x;
 
-    const dz =
+    const dz=
     player.position.z-
     entity.position.z;
 
-    entity.rotation.y =
-    Math.atan2(
-        dx,
-        dz
-    );
+    entity.rotation.y=
+    Math.atan2(dx,dz);
 }
 
 /* =========================================================
-   A* PATHFINDING
+   ENTITY PATHFINDING
 ========================================================= */
 
-function cellKey(x,y){
+function findPath(start,end){
 
-    return (
-        x+
-        ","+
-        y
-    );
-}
+    if(
+        !inside(start.x,start.y)||
+        !inside(end.x,end.y)
+    )
+        return [];
 
-function heuristic(
-    ax,
-    ay,
-    bx,
-    by
-){
+    const queue=[];
+    const visited=new Set();
+    const parent=new Map();
 
-    /*
-        Manhattan distance is good for the four-direction
-        movement used by the entity.
-    */
-    return Math.abs(
-        ax-bx
-    )+
-    Math.abs(
-        ay-by
-    );
-}
+    const key=(x,y)=>x+","+y;
 
-function getPathNeighbors(
-    x,
-    y
-){
+    const startKey=
+    key(start.x,start.y);
+
+    const endKey=
+    key(end.x,end.y);
+
+    queue.push(start);
+    visited.add(startKey);
+
+    const dirs=[
+        {x:1,y:0},
+        {x:-1,y:0},
+        {x:0,y:1},
+        {x:0,y:-1}
+    ];
+
+    while(queue.length){
+
+        const current=
+        queue.shift();
+
+        const currentKey=
+        key(current.x,current.y);
+
+        if(currentKey===endKey)
+            break;
+
+        for(const d of dirs){
+
+            const nx=
+            current.x+d.x;
+
+            const ny=
+            current.y+d.y;
+
+            const k=key(nx,ny);
+
+            if(
+                visited.has(k)||
+                !isWalkable(nx,ny)
+            )
+                continue;
+
+            visited.add(k);
+
+            parent.set(
+                k,
+                currentKey
+            );
+
+            queue.push({
+                x:nx,
+                y:ny
+            });
+        }
+    }
+
+    if(!visited.has(endKey))
+        return [];
 
     const result=[];
 
-    /*
-        The entity moves through the center of tiles.
-        Four-direction movement makes it much less likely
-        to cut through corners/walls.
-    */
-    const dirs=[
-        [1,0],
-        [-1,0],
-        [0,1],
-        [0,-1]
-    ];
+    let current=endKey;
 
-    for(
-        const d of dirs
-    ){
+    while(current!==startKey){
 
-        const nx =
-        x+d[0];
+        const parts=
+        current.split(",").map(Number);
 
-        const ny =
-        y+d[1];
-
-        if(
-            !isWalkable(nx,ny)
-        )
-            continue;
-
-        /*
-            Prevent corner-hugging through extremely
-            tight spaces.
-
-            At least one adjacent perpendicular cell
-            must also be open when moving around a corner.
-        */
-        if(
-            d[0]!==0
-        ){
-
-            const up =
-            isWalkable(
-                x,
-                y-1
-            );
-
-            const down =
-            isWalkable(
-                x,
-                y+1
-            );
-
-            if(
-                !up &&
-                !down
-            )
-                continue;
-        }
-
-        if(
-            d[1]!==0
-        ){
-
-            const left =
-            isWalkable(
-                x-1,
-                y
-            );
-
-            const right =
-            isWalkable(
-                x+1,
-                y
-            );
-
-            if(
-                !left &&
-                !right
-            )
-                continue;
-        }
-
-        result.push({
-            x:nx,
-            y:ny
+        result.unshift({
+            x:parts[0],
+            y:parts[1]
         });
+
+        current=
+        parent.get(current);
+
+        if(!current)
+            return [];
     }
 
     return result;
 }
 
-function findEntityPath(
-    startCell,
-    targetCell
-){
-
-    if(
-        !isWalkable(
-            startCell.x,
-            startCell.y
-        )
-    )
-        return [];
-
-    if(
-        !isWalkable(
-            targetCell.x,
-            targetCell.y
-        )
-    )
-        return [];
-
-    if(
-        startCell.x===targetCell.x &&
-        startCell.y===targetCell.y
-    )
-        return [startCell];
-
-    const open=[];
-
-    const closed=
-    new Set();
-
-    const gScore=
-    new Map();
-
-    const fScore=
-    new Map();
-
-    const cameFrom=
-    new Map();
-
-    const startKey=
-    cellKey(
-        startCell.x,
-        startCell.y
-    );
-
-    gScore.set(
-        startKey,
-        0
-    );
-
-    fScore.set(
-        startKey,
-        heuristic(
-            startCell.x,
-            startCell.y,
-            targetCell.x,
-            targetCell.y
-        )
-    );
-
-    open.push({
-        x:startCell.x,
-        y:startCell.y,
-        f:fScore.get(startKey)
-    });
-
-    let iterations=0;
-
-    while(
-        open.length &&
-        iterations<
-        ENTITY_PATH_MAX_NODES
-    ){
-
-        iterations++;
-
-        /*
-            Find the lowest f-score.
-        */
-        let bestIndex=0;
-
-        for(
-            let i=1;
-            i<open.length;
-            i++
-        ){
-
-            if(
-                open[i].f<
-                open[bestIndex].f
-            )
-                bestIndex=i;
-        }
-
-        const current=
-        open[
-            bestIndex
-        ];
-
-        open.splice(
-            bestIndex,
-            1
-        );
-
-        const currentKey=
-        cellKey(
-            current.x,
-            current.y
-        );
-
-        if(
-            current.x===
-            targetCell.x &&
-            current.y===
-            targetCell.y
-        ){
-
-            const path=[];
-
-            let key=currentKey;
-
-            let safety=0;
-
-            while(
-                key &&
-                safety<
-                ENTITY_PATH_MAX_NODES
-            ){
-
-                safety++;
-
-                const comma=
-                key.indexOf(",");
-
-                const x=
-                Number(
-                    key.slice(
-                        0,
-                        comma
-                    )
-                );
-
-                const y=
-                Number(
-                    key.slice(
-                        comma+1
-                    )
-                );
-
-                path.push({
-                    x,
-                    y
-                });
-
-                key=
-                cameFrom.get(key);
-            }
-
-            path.reverse();
-
-            return path;
-        }
-
-        closed.add(currentKey);
-
-        const neighbors=
-        getPathNeighbors(
-            current.x,
-            current.y
-        );
-
-        for(
-            const neighbor of neighbors
-        ){
-
-            const neighborKey=
-            cellKey(
-                neighbor.x,
-                neighbor.y
-            );
-
-            if(
-                closed.has(neighborKey)
-            )
-                continue;
-
-            const tentativeG=
-            (
-                gScore.get(
-                    currentKey
-                ) ?? Infinity
-            )+1;
-
-            const oldG=
-            gScore.get(
-                neighborKey
-            ) ?? Infinity;
-
-            if(
-                tentativeG<
-                oldG
-            ){
-
-                cameFrom.set(
-                    neighborKey,
-                    currentKey
-                );
-
-                gScore.set(
-                    neighborKey,
-                    tentativeG
-                );
-
-                const f=
-                tentativeG+
-                heuristic(
-                    neighbor.x,
-                    neighbor.y,
-                    targetCell.x,
-                    targetCell.y
-                );
-
-                fScore.set(
-                    neighborKey,
-                    f
-                );
-
-                /*
-                    Avoid adding the same node repeatedly
-                    when it is already waiting in open.
-                */
-                let alreadyOpen=false;
-
-                for(
-                    const item of open
-                ){
-
-                    if(
-                        item.x===
-                        neighbor.x &&
-                        item.y===
-                        neighbor.y
-                    ){
-
-                        alreadyOpen=true;
-
-                        if(f<item.f)
-                            item.f=f;
-
-                        break;
-                    }
-                }
-
-                if(!alreadyOpen){
-
-                    open.push({
-                        x:neighbor.x,
-                        y:neighbor.y,
-                        f
-                    });
-                }
-            }
-        }
-    }
-
-    /*
-        No path found.
-    */
-    return [];
-}
-
-/* =========================================================
-   ENTITY PATH UPDATE
-========================================================= */
-
-function shouldRecalculateEntityPath(){
-
-    if(!entity)
-        return false;
-
-    const targetCell=
-    worldToCell(
-        player.position.x,
-        player.position.z
-    );
-
-    const currentCell=
-    worldToCell(
-        entity.position.x,
-        entity.position.z
-    );
-
-    if(
-        !entityPath.length
-    )
-        return true;
-
-    if(
-        entityPathIndex>=
-        entityPath.length
-    )
-        return true;
-
-    if(
-        entityPathTimer>=
-        ENTITY_PATH_RECALCULATE
-    )
-        return true;
-
-    if(
-        Math.abs(
-            targetCell.x-
-            lastEntityTargetCell.x
-        )+
-        Math.abs(
-            targetCell.y-
-            lastEntityTargetCell.y
-        )>=1
-    ){
-
-        /*
-            Only force an immediate recalculation when
-            the player has moved a couple tiles away from
-            the previous path goal.
-        */
-        const targetWorld=
-        cellToWorld(
-            lastEntityTargetCell.x,
-            lastEntityTargetCell.y
-        );
-
-        const targetMovement=
-        Math.hypot(
-            targetWorld.x-
-            player.position.x,
-
-            targetWorld.z-
-            player.position.z
-        );
-
-        if(
-            targetMovement>
-            ENTITY_PATH_TARGET_CHANGE
-        )
-            return true;
-    }
-
-    /*
-        If entity somehow leaves the current path,
-        calculate again.
-    */
-    const currentPathCell=
-    entityPath[
-        Math.min(
-            entityPathIndex,
-            entityPath.length-1
-        )
-    ];
-
-    if(
-        currentPathCell
-    ){
-
-        const currentPathWorld=
-        cellToWorld(
-            currentPathCell.x,
-            currentPathCell.y
-        );
-
-        const distanceFromPath=
-        Math.hypot(
-            entity.position.x-
-            currentPathWorld.x,
-
-            entity.position.z-
-            currentPathWorld.z
-        );
-
-        if(
-            distanceFromPath>
-            TILE*1.6
-        )
-            return true;
-    }
-
-    return false;
-}
-
-function recalculateEntityPath(){
+function updateEntityPath(){
 
     if(!entity)
         return;
 
-    const startCell=
+    const start=
     worldToCell(
         entity.position.x,
         entity.position.z
     );
 
-    let targetCell=
+    const end=
     worldToCell(
         player.position.x,
         player.position.z
     );
 
-    /*
-        If the player is inside a hole or another invalid
-        cell, search nearby for the closest valid target.
-    */
-    if(
-        !isWalkable(
-            targetCell.x,
-            targetCell.y
-        )
-    ){
-
-        let best=null;
-        let bestDistance=Infinity;
-
-        for(
-            let radius=1;
-            radius<=5;
-            radius++
-        ){
-
-            for(
-                let yy=-radius;
-                yy<=radius;
-                yy++
-            ){
-
-                for(
-                    let xx=-radius;
-                    xx<=radius;
-                    xx++
-                ){
-
-                    const cx=
-                    targetCell.x+xx;
-
-                    const cy=
-                    targetCell.y+yy;
-
-                    if(
-                        !isWalkable(
-                            cx,
-                            cy
-                        )
-                    )
-                        continue;
-
-                    const d=
-                    Math.abs(xx)+
-                    Math.abs(yy);
-
-                    if(
-                        d<bestDistance
-                    ){
-
-                        bestDistance=d;
-
-                        best={
-                            x:cx,
-                            y:cy
-                        };
-                    }
-                }
-            }
-
-            if(best)
-                break;
-        }
-
-        if(best)
-            targetCell=best;
-    }
-
-    const path=
-    findEntityPath(
-        startCell,
-        targetCell
-    );
-
-    if(path.length){
-
-        entityPath=path;
-
-        /*
-            Skip the tile the entity is already standing on.
-        */
-        entityPathIndex=
-        path.length>1
-        ? 1
-        : 0;
-
-        lastEntityTargetCell={
-            x:targetCell.x,
-            y:targetCell.y
-        };
-
-        entityPathGoal={
-            x:targetCell.x,
-            y:targetCell.y
-        };
-
-    }else{
-
-        /*
-            Don't erase a good old path if a single
-            recalculation happens to fail.
-        */
-        if(
-            !entityPath.length
-        ){
-
-            entityPath=[];
-            entityPathIndex=0;
-        }
-    }
+    entityPath=
+    findPath(start,end);
 
     entityPathTimer=0;
 }
 
 /* =========================================================
-   ENTITY MOVEMENT
+   ENTITY AI
 ========================================================= */
 
 function getEntitySpeed(){
@@ -3250,124 +2314,13 @@ function getEntitySpeed(){
     return 6.7;
 }
 
-function moveEntityAlongPath(dt){
-
-    if(
-        !entity ||
-        !entityPath.length
-    )
-        return;
-
-    if(
-        entityPathIndex>=
-        entityPath.length
-    )
-        return;
-
-    const targetCell=
-    entityPath[
-        entityPathIndex
-    ];
-
-    const target=
-    cellToWorld(
-        targetCell.x,
-        targetCell.y
-    );
-
-    const dx=
-    target.x-
-    entity.position.x;
-
-    const dz=
-    target.z-
-    entity.position.z;
-
-    const distance=
-    Math.hypot(
-        dx,
-        dz
-    );
-
-    const speed=
-    getEntitySpeed();
-
-    if(
-        distance<.12
-    ){
-
-        entity.position.x=
-        target.x;
-
-        entity.position.z=
-        target.z;
-
-        entityPathIndex++;
-
-        return;
-    }
-
-    const step=
-    Math.min(
-        distance,
-        speed*dt
-    );
-
-    const nx=
-    entity.position.x+
-    (dx/distance)*step;
-
-    const nz=
-    entity.position.z+
-    (dz/distance)*step;
-
-    /*
-        Extra physical collision check.
-
-        A* should already keep the entity out of walls,
-        but this is a second safety layer.
-    */
-    if(
-        !collides(
-            nx,
-            entity.position.z,
-            .35
-        )
-    ){
-
-        entity.position.x=
-        nx;
-    }
-
-    if(
-        !collides(
-            entity.position.x,
-            nz,
-            .35
-        )
-    ){
-
-        entity.position.z=
-        nz;
-    }
-
-    /*
-        If it gets stuck against something, force a new
-        path next update.
-    */
-}
-
-/* =========================================================
-   ENTITY AI
-========================================================= */
-
 function updateEntity(dt){
 
     if(
-        !started ||
-        paused ||
-        dead ||
-        falling ||
+        !started||
+        paused||
+        dead||
+        falling||
         !entity
     )
         return;
@@ -3387,40 +2340,152 @@ function updateEntity(dt){
         if(difficulty==="nightmare")
             delay=12;
 
-        if(
-            entityTimer>=delay
-        ){
+        if(entityTimer>=delay){
 
             entityActive=true;
-
-            entityPath=[];
-            entityPathIndex=0;
-            entityPathTimer=999;
 
             showMessage(
                 "SOMETHING IS HERE."
             );
 
-            /*
-                Immediately make sure the audio starts
-                when the entity becomes active.
-            */
-            unlockEntityAudio();
+            updateEntityPath();
         }
 
         return;
     }
 
+    if(!entityAI)
+        return;
+
     entityPathTimer+=dt;
 
+    /*
+       Recalculate periodically so the entity
+       keeps updating its route as the player moves.
+    */
+
     if(
-        shouldRecalculateEntityPath()
+        entityPathTimer>.65||
+        !entityPath.length
     ){
 
-        recalculateEntityPath();
+        updateEntityPath();
     }
 
-    moveEntityAlongPath(dt);
+    if(!entityPath.length){
+
+        /*
+           Emergency direct movement if pathfinding
+           cannot find a route.
+        */
+
+        const dx=
+        player.position.x-
+        entity.position.x;
+
+        const dz=
+        player.position.z-
+        entity.position.z;
+
+        const distance=
+        Math.hypot(dx,dz);
+
+        if(distance>.5){
+
+            const speed=
+            getEntitySpeed()*dt;
+
+            const nx=
+            entity.position.x+
+            dx/distance*speed;
+
+            const nz=
+            entity.position.z+
+            dz/distance*speed;
+
+            if(
+                !collides(
+                    nx,
+                    entity.position.z,
+                    .35
+                )
+            )
+                entity.position.x=nx;
+
+            if(
+                !collides(
+                    entity.position.x,
+                    nz,
+                    .35
+                )
+            )
+                entity.position.z=nz;
+        }
+
+    }else{
+
+        const next=
+        entityPath[0];
+
+        const target=
+        cellToWorld(
+            next.x,
+            next.y
+        );
+
+        const dx=
+        target.x-
+        entity.position.x;
+
+        const dz=
+        target.z-
+        entity.position.z;
+
+        const distance=
+        Math.hypot(dx,dz);
+
+        const speed=
+        getEntitySpeed();
+
+        if(distance<.25){
+
+            entityPath.shift();
+
+        }else{
+
+            const step=
+            Math.min(
+                distance,
+                speed*dt
+            );
+
+            const nx=
+            entity.position.x+
+            dx/distance*step;
+
+            const nz=
+            entity.position.z+
+            dz/distance*step;
+
+            if(
+                !collides(
+                    nx,
+                    entity.position.z,
+                    .35
+                )
+            )
+                entity.position.x=nx;
+
+            if(
+                !collides(
+                    entity.position.x,
+                    nz,
+                    .35
+                )
+            )
+                entity.position.z=nz;
+        }
+    }
 
     updateEntityFacing();
 
@@ -3428,16 +2493,12 @@ function updateEntity(dt){
     Math.hypot(
         player.position.x-
         entity.position.x,
-
         player.position.z-
         entity.position.z
     );
 
-    /*
-        Very close = caught.
-    */
     if(
-        distance<1.15 &&
+        distance<1.15&&
         !hidden
     ){
 
@@ -3451,10 +2512,7 @@ function updateEntity(dt){
    MOVEMENT
 ========================================================= */
 
-function movePlayer(
-    dx,
-    dz
-){
+function movePlayer(dx,dz){
 
     const nx=
     player.position.x+dx;
@@ -3477,6 +2535,64 @@ function movePlayer(
         )
     )
         player.position.z=nz;
+}
+
+/* =========================================================
+   FLY MODE
+========================================================= */
+
+function updateFly(dt){
+
+    if(!flyMode)
+        return;
+
+    let forward=0;
+    let strafe=0;
+    let vertical=0;
+
+    if(keys.w)forward++;
+    if(keys.s)forward--;
+
+    if(keys.d)strafe++;
+    if(keys.a)strafe--;
+
+    if(keys.space)vertical++;
+    if(keys.shift)vertical--;
+
+    const len=
+    Math.hypot(
+        forward,
+        strafe,
+        vertical
+    );
+
+    if(!len)
+        return;
+
+    forward/=len;
+    strafe/=len;
+    vertical/=len;
+
+    const speed=
+    FLY_SPEED*dt;
+
+    const sin=Math.sin(yaw);
+    const cos=Math.cos(yaw);
+
+    player.position.x+=
+    (
+        strafe*cos-
+        forward*sin
+    )*speed;
+
+    player.position.z+=
+    (
+        -forward*cos-
+        strafe*sin
+    )*speed;
+
+    player.position.y+=
+    vertical*speed;
 }
 
 /* =========================================================
@@ -3506,23 +2622,16 @@ function playerOverHole(){
 
 function startFalling(){
 
-    if(
-        falling ||
-        dead
-    )
+    if(falling||dead||flyMode)
         return;
 
     falling=true;
-
     fallTime=0;
-
     velocityY=0;
 
     showMessage(
         "THE FLOOR GIVES WAY..."
     );
-
-    stopEntityAudio();
 }
 
 function updateFalling(dt){
@@ -3532,9 +2641,7 @@ function updateFalling(dt){
 
     fallTime+=dt;
 
-    if(
-        fallTime>=.18
-    ){
+    if(fallTime>=.18){
 
         const t=
         Math.min(
@@ -3550,8 +2657,7 @@ function updateFalling(dt){
         t*1.35;
 
         camera.rotation.x=
-        pitch+
-        t*.48;
+        pitch+t*.48;
 
         camera.rotation.z=
         Math.sin(
@@ -3559,9 +2665,7 @@ function updateFalling(dt){
         )*.045*t;
     }
 
-    if(
-        fallTime>=1.3
-    ){
+    if(fallTime>=1.3){
 
         die(
             "THE FLOOR TOOK YOU."
@@ -3578,9 +2682,7 @@ function updateHiding(){
     let closest=null;
     let closestDistance=Infinity;
 
-    for(
-        const spot of hideSpots
-    ){
+    for(const spot of hideSpots){
 
         const d=
         Math.hypot(
@@ -3588,9 +2690,7 @@ function updateHiding(){
             player.position.z-spot.z
         );
 
-        if(
-            d<closestDistance
-        ){
+        if(d<closestDistance){
 
             closestDistance=d;
             closest=spot;
@@ -3608,8 +2708,8 @@ function updateHiding(){
     );
 
     if(
-        closest &&
-        closestDistance<2.4 &&
+        closest&&
+        closestDistance<2.4&&
         !crouching
     )
         hideText.style.opacity="1";
@@ -3617,19 +2717,17 @@ function updateHiding(){
         hideText.style.opacity="0";
 
     if(
-        closest &&
-        closestDistance<1.5 &&
+        closest&&
+        closestDistance<1.5&&
         crouching
     ){
 
         hidden=true;
-
         hiddenText.style.opacity="1";
 
     }else{
 
         hidden=false;
-
         hiddenText.style.opacity="0";
     }
 }
@@ -3641,8 +2739,8 @@ function updateHiding(){
 function checkExit(){
 
     if(
-        !exitObject ||
-        dead ||
+        !exitObject||
+        dead||
         falling
     )
         return;
@@ -3653,13 +2751,9 @@ function checkExit(){
     const local=
     new THREE.Vector3();
 
-    local.copy(
-        player.position
-    );
+    local.copy(player.position);
 
-    exit.worldToLocal(
-        local
-    );
+    exit.worldToLocal(local);
 
     const insideDoor=
     Math.abs(local.x)<
@@ -3674,13 +2768,11 @@ function checkExit(){
     1.15;
 
     if(
-        insideDoor &&
-        correctHeight &&
+        insideDoor&&
+        correctHeight&&
         throughDoor
-    ){
-
+    )
         winGame();
-    }
 }
 
 function winGame(){
@@ -3690,17 +2782,18 @@ function winGame(){
 
     dead=true;
 
-    stopEntityAudio();
+    entityAudio.pause();
+    entityAudio.volume=0;
+
+    ambientAudio.pause();
 
     document.querySelector(
         "#death .deathTitle"
-    ).textContent=
-    "ESCAPED";
+    ).textContent="ESCAPED";
 
     document.querySelector(
         "#death .deathTitle"
-    ).style.color=
-    "#39ff62";
+    ).style.color="#39ff62";
 
     document.getElementById(
         "deathReason"
@@ -3709,12 +2802,9 @@ function winGame(){
 
     document.getElementById(
         "death"
-    ).style.display=
-    "flex";
+    ).style.display="flex";
 
-    if(
-        document.pointerLockElement
-    )
+    if(document.pointerLockElement)
         document.exitPointerLock();
 }
 
@@ -3725,36 +2815,34 @@ function winGame(){
 function updatePlayer(dt){
 
     if(
-        !started ||
-        paused ||
+        !started||
+        paused||
         dead
     )
         return;
 
+    if(flyMode){
+
+        updateFly(dt);
+        return;
+    }
+
     if(falling){
 
         updateFalling(dt);
-
         return;
     }
 
     let forward=0;
     let strafe=0;
 
-    if(keys.w)
-        forward++;
-
-    if(keys.s)
-        forward--;
-
-    if(keys.d)
-        strafe++;
-
-    if(keys.a)
-        strafe--;
+    if(keys.w)forward++;
+    if(keys.s)forward--;
+    if(keys.d)strafe++;
+    if(keys.a)strafe--;
 
     if(
-        forward!==0 ||
+        forward!==0||
         strafe!==0
     ){
 
@@ -3768,18 +2856,15 @@ function updatePlayer(dt){
         strafe/=length;
 
         let speed=
-        keys.shift
-        ? SPRINT_SPEED
-        : WALK_SPEED;
+        keys.shift?
+        SPRINT_SPEED:
+        WALK_SPEED;
 
         if(crouching)
             speed*=.55;
 
-        const sin=
-        Math.sin(yaw);
-
-        const cos=
-        Math.cos(yaw);
+        const sin=Math.sin(yaw);
+        const cos=Math.cos(yaw);
 
         const dx=
         (
@@ -3797,14 +2882,10 @@ function updatePlayer(dt){
         speed*
         dt;
 
-        movePlayer(
-            dx,
-            dz
-        );
+        movePlayer(dx,dz);
     }
 
-    velocityY-=
-    GRAVITY*dt;
+    velocityY-=GRAVITY*dt;
 
     player.position.y+=
     velocityY*dt;
@@ -3814,9 +2895,7 @@ function updatePlayer(dt){
     ){
 
         player.position.y=0;
-
         velocityY=0;
-
         grounded=true;
 
     }else{
@@ -3825,13 +2904,12 @@ function updatePlayer(dt){
     }
 
     if(
-        keys.spacePressed &&
-        grounded &&
+        keys.spacePressed&&
+        grounded&&
         !crouching
     ){
 
-        velocityY=
-        JUMP_POWER;
+        velocityY=JUMP_POWER;
 
         grounded=false;
 
@@ -3839,9 +2917,9 @@ function updatePlayer(dt){
     }
 
     const targetHeight=
-    crouching
-    ? CROUCH_HEIGHT
-    : PLAYER_HEIGHT;
+    crouching?
+    CROUCH_HEIGHT:
+    PLAYER_HEIGHT;
 
     camera.position.y=
     THREE.MathUtils.lerp(
@@ -3856,7 +2934,7 @@ function updatePlayer(dt){
     updateHiding();
 
     if(
-        grounded &&
+        grounded&&
         playerOverHole()
     )
         startFalling();
@@ -3884,9 +2962,7 @@ function updateMessage(dt){
 
     messageTimer-=dt;
 
-    if(
-        messageTimer<=0
-    ){
+    if(messageTimer<=0){
 
         document.getElementById(
             "message"
@@ -3905,7 +2981,8 @@ function die(reason){
 
     dead=true;
 
-    stopEntityAudio();
+    entityAudio.pause();
+    entityAudio.volume=0;
 
     document.getElementById(
         "deathReason"
@@ -3913,23 +2990,67 @@ function die(reason){
 
     document.querySelector(
         "#death .deathTitle"
-    ).textContent=
-    "YOU DIED";
+    ).textContent="YOU DIED";
 
     document.querySelector(
         "#death .deathTitle"
-    ).style.color=
-    "#850000";
+    ).style.color="#850000";
 
     document.getElementById(
         "death"
-    ).style.display=
-    "flex";
+    ).style.display="flex";
 
-    if(
-        document.pointerLockElement
-    )
+    if(document.pointerLockElement)
         document.exitPointerLock();
+}
+
+/* =========================================================
+   ENTITY RESET / SPAWN
+========================================================= */
+
+function removeEntity(){
+
+    if(!entity)
+        return;
+
+    world.remove(entity);
+
+    entity.geometry.dispose();
+
+    entity.material.dispose();
+
+    entity=null;
+
+    entityAudio.pause();
+    entityAudio.currentTime=0;
+    entityAudio.volume=0;
+}
+
+function spawnEntityNearPlayer(){
+
+    removeEntity();
+
+    entitySpawn=
+    findGoodEntitySpawn();
+
+    createEntity();
+
+    entityTimer=0;
+    entityActive=true;
+    entityAI=true;
+
+    updateEntityPath();
+
+    showMessage(
+        "ENTITY SPAWNED."
+    );
+
+    devStatus(
+        "ENTITY SPAWNED AT "+
+        entitySpawn.x.toFixed(1)+
+        ", "+
+        entitySpawn.z.toFixed(1)
+    );
 }
 
 /* =========================================================
@@ -3944,11 +3065,7 @@ function resetGame(){
         playerSpawn.z
     );
 
-    player.rotation.set(
-        0,
-        0,
-        0
-    );
+    player.rotation.set(0,0,0);
 
     camera.position.set(
         0,
@@ -3956,11 +3073,7 @@ function resetGame(){
         0
     );
 
-    camera.rotation.set(
-        0,
-        0,
-        0
-    );
+    camera.rotation.set(0,0,0);
 
     yaw=0;
     pitch=0;
@@ -3979,45 +3092,33 @@ function resetGame(){
     entityTimer=0;
     entityActive=false;
 
+    flyMode=false;
+
+    document.getElementById(
+        "flyIndicator"
+    ).style.display="none";
+
+    removeEntity();
+
     /*
-        NEW:
-        Randomize the entity every time the player
-        starts/restarts.
+       Randomize every normal game restart.
     */
-    randomizeEntitySpawn();
 
-    if(entity){
-
-        world.remove(entity);
-
-        entity.geometry.dispose();
-
-        entity.material.dispose();
-
-        entity=null;
-    }
-
-    entityPath=[];
-    entityPathIndex=0;
-    entityPathTimer=0;
-
-    entityPathGoal=null;
-
-    lastEntityTargetCell={
-        x:-999999,
-        y:-999999
-    };
+    entitySpawn=
+    findGoodEntitySpawn();
 
     createEntity();
 
-    stopEntityAudio();
+    ambientAudio.volume=.75;
+
+    startAudio();
 }
 
 /* =========================================================
-   GAME START
+   START / PAUSE
 ========================================================= */
 
-async function startGame(){
+function startGame(){
 
     document.getElementById(
         "menu"
@@ -4035,16 +3136,17 @@ async function startGame(){
         "controls"
     ).style.display="none";
 
+    document.getElementById(
+        "devTools"
+    ).style.display="none";
+
     started=true;
     paused=false;
     dead=false;
 
-    resetGame();
+    startAudio();
 
-    /*
-        Unlock audio from the button click.
-    */
-    await unlockEntityAudio();
+    resetGame();
 
     renderer.domElement
     .requestPointerLock()
@@ -4057,7 +3159,12 @@ function goMainMenu(){
     paused=false;
     dead=false;
 
-    stopEntityAudio();
+    flyMode=false;
+
+    entityAudio.pause();
+    entityAudio.volume=0;
+
+    ambientAudio.pause();
 
     document.getElementById(
         "pause"
@@ -4072,37 +3179,316 @@ function goMainMenu(){
     ).style.display="none";
 
     document.getElementById(
+        "devTools"
+    ).style.display="none";
+
+    document.getElementById(
+        "mapViewer"
+    ).style.display="none";
+
+    document.getElementById(
         "menu"
     ).style.display="block";
 
-    if(
-        document.pointerLockElement
-    )
+    if(document.pointerLockElement)
         document.exitPointerLock();
 }
 
 function pauseGame(){
 
     if(
-        !started ||
-        dead ||
+        !started||
+        dead||
         falling
     )
         return;
 
     paused=true;
 
-    if(entityAudio)
-        entityAudio.volume=0;
-
     document.getElementById(
         "pause"
     ).style.display="flex";
 
-    if(
-        document.pointerLockElement
-    )
+    if(document.pointerLockElement)
         document.exitPointerLock();
+}
+
+/* =========================================================
+   DEV TOOLS
+========================================================= */
+
+const devTools=
+document.getElementById(
+    "devTools"
+);
+
+const devStatusBox=
+document.getElementById(
+    "devStatus"
+);
+
+function devStatus(text){
+
+    devStatusBox.textContent=
+    text;
+}
+
+function toggleDevTools(){
+
+    if(!started)
+        return;
+
+    const open=
+    devTools.style.display==="flex";
+
+    if(open){
+
+        devTools.style.display="none";
+
+        if(!flyMode&&!dead)
+            renderer.domElement
+            .requestPointerLock()
+            .catch(()=>{});
+
+    }else{
+
+        devTools.style.display="flex";
+
+        if(document.pointerLockElement)
+            document.exitPointerLock();
+
+        devStatus(
+            "PLAYER "+
+            player.position.x.toFixed(1)+
+            ", "+
+            player.position.y.toFixed(1)+
+            ", "+
+            player.position.z.toFixed(1)
+        );
+    }
+}
+
+function toggleFly(){
+
+    flyMode=!flyMode;
+
+    document.getElementById(
+        "flyIndicator"
+    ).style.display=
+    flyMode?"block":"none";
+
+    devStatus(
+        flyMode?
+        "FLY / NOCLIP ENABLED":
+        "FLY / NOCLIP DISABLED"
+    );
+
+    if(flyMode){
+
+        velocityY=0;
+
+        camera.position.y=
+        PLAYER_HEIGHT;
+    }
+}
+
+function teleportEntityToPlayer(){
+
+    if(!entity)
+        createEntity();
+
+    entity.position.set(
+        player.position.x+1,
+        ENTITY_HEIGHT/2,
+        player.position.z+1
+    );
+
+    entityActive=true;
+
+    updateEntityPath();
+
+    devStatus(
+        "ENTITY TELEPORTED NEAR PLAYER"
+    );
+}
+
+function resetEntityDev(){
+
+    entityActive=false;
+    entityTimer=0;
+
+    removeEntity();
+
+    entitySpawn=
+    findGoodEntitySpawn();
+
+    createEntity();
+
+    devStatus(
+        "ENTITY RESET AND RANDOMIZED"
+    );
+}
+
+/* =========================================================
+   MAP VIEWER
+========================================================= */
+
+function openMap(){
+
+    const viewer=
+    document.getElementById(
+        "mapViewer"
+    );
+
+    viewer.style.display="flex";
+
+    const canvas=
+    document.getElementById(
+        "mapCanvas"
+    );
+
+    const ctx=
+    canvas.getContext("2d");
+
+    const img=
+    new Image();
+
+    img.onload=()=>{
+
+        const maxW=canvas.clientWidth;
+        const maxH=canvas.clientHeight;
+
+        const scale=
+        Math.min(
+            maxW/img.width,
+            maxH/img.height
+        );
+
+        canvas.width=
+        Math.max(
+            1,
+            Math.floor(
+                img.width*scale
+            )
+        );
+
+        canvas.height=
+        Math.max(
+            1,
+            Math.floor(
+                img.height*scale
+            )
+        );
+
+        ctx.imageSmoothingEnabled=false;
+
+        ctx.drawImage(
+            img,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        /*
+           Draw player marker.
+        */
+
+        const pc=
+        worldToCell(
+            player.position.x,
+            player.position.z
+        );
+
+        const px=
+        (pc.x/mapWidth)*
+        canvas.width;
+
+        const py=
+        (pc.y/mapHeight)*
+        canvas.height;
+
+        ctx.fillStyle="#00ff55";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            px,
+            py,
+            5,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        /*
+           Draw entity marker.
+        */
+
+        if(entity){
+
+            const ec=
+            worldToCell(
+                entity.position.x,
+                entity.position.z
+            );
+
+            const ex=
+            (ec.x/mapWidth)*
+            canvas.width;
+
+            const ey=
+            (ec.y/mapHeight)*
+            canvas.height;
+
+            ctx.fillStyle="#ff2222";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                ex,
+                ey,
+                5,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+        }
+
+        /*
+           Draw exit marker.
+        */
+
+        if(exitPosition){
+
+            const xc=
+            worldToCell(
+                exitPosition.x,
+                exitPosition.z
+            );
+
+            const xx=
+            (xc.x/mapWidth)*
+            canvas.width;
+
+            const xy=
+            (xc.y/mapHeight)*
+            canvas.height;
+
+            ctx.fillStyle="#39ff62";
+
+            ctx.fillRect(
+                xx-4,
+                xy-4,
+                8,
+                8
+            );
+        }
+    };
+
+    img.src="./textures/map1.png";
 }
 
 /* =========================================================
@@ -4115,6 +3501,27 @@ window.addEventListener(
 
         const key=
         e.key.toLowerCase();
+
+        if(key==="backspace"){
+
+            e.preventDefault();
+
+            toggleDevTools();
+
+            return;
+        }
+
+        if(
+            devTools.style.display==="flex"
+        )
+            return;
+
+        if(
+            document.getElementById(
+                "mapViewer"
+            ).style.display==="flex"
+        )
+            return;
 
         if(key==="escape"){
 
@@ -4132,8 +3539,8 @@ window.addEventListener(
             }
 
             if(
-                started &&
-                !dead &&
+                started&&
+                !dead&&
                 !paused
             )
                 pauseGame();
@@ -4184,15 +3591,14 @@ document.addEventListener(
     e=>{
 
         if(
-            !started ||
-            paused ||
-            dead ||
-            falling
+            !started||
+            paused||
+            dead
         )
             return;
 
         if(
-            document.pointerLockElement !==
+            document.pointerLockElement!==
             renderer.domElement
         )
             return;
@@ -4210,11 +3616,9 @@ document.addEventListener(
             1.45
         );
 
-        player.rotation.y=
-        yaw;
+        player.rotation.y=yaw;
 
-        camera.rotation.x=
-        pitch;
+        camera.rotation.x=pitch;
     }
 );
 
@@ -4236,11 +3640,7 @@ document.getElementById(
         "pause"
     ).style.display="none";
 
-    /*
-        Audio is allowed to resume from the button
-        interaction.
-    */
-    unlockEntityAudio();
+    startAudio();
 
     renderer.domElement
     .requestPointerLock()
@@ -4290,22 +3690,74 @@ document.getElementById(
     ).style.display="none";
 };
 
+/* DEV BUTTONS */
+
+document.getElementById(
+    "devSpawn"
+).onclick=()=>{
+
+    spawnEntityNearPlayer();
+};
+
+document.getElementById(
+    "devTeleportEntity"
+).onclick=()=>{
+
+    teleportEntityToPlayer();
+};
+
+document.getElementById(
+    "devMap"
+).onclick=()=>{
+
+    openMap();
+};
+
+document.getElementById(
+    "devFly"
+).onclick=()=>{
+
+    toggleFly();
+};
+
+document.getElementById(
+    "devEntityAI"
+).onclick=()=>{
+
+    entityAI=!entityAI;
+
+    devStatus(
+        entityAI?
+        "ENTITY AI ENABLED":
+        "ENTITY AI DISABLED"
+    );
+};
+
+document.getElementById(
+    "devResetEntity"
+).onclick=()=>{
+
+    resetEntityDev();
+};
+
+document.getElementById(
+    "mapClose"
+).onclick=()=>{
+
+    document.getElementById(
+        "mapViewer"
+    ).style.display="none";
+};
+
 /* =========================================================
    DIFFICULTY
 ========================================================= */
 
 const difficultyButtons={
-    easy:
-    document.getElementById("easy"),
-
-    normal:
-    document.getElementById("normal"),
-
-    hard:
-    document.getElementById("hard"),
-
-    nightmare:
-    document.getElementById("nightmare")
+    easy:document.getElementById("easy"),
+    normal:document.getElementById("normal"),
+    hard:document.getElementById("hard"),
+    nightmare:document.getElementById("nightmare")
 };
 
 function chooseDifficulty(value){
@@ -4335,10 +3787,7 @@ for(
 
     difficultyButtons[name].onclick=
     ()=>{
-
-        chooseDifficulty(
-            name
-        );
+        chooseDifficulty(name);
     };
 }
 
@@ -4356,9 +3805,7 @@ let menuIndex=0;
 setInterval(
     ()=>{
 
-        if(
-            !menuImages.length
-        )
+        if(!menuImages.length)
             return;
 
         menuImages[
@@ -4390,14 +3837,10 @@ setInterval(
 function updateHUD(){
 
     const total=
-    Math.floor(
-        elapsed
-    );
+    Math.floor(elapsed);
 
     const hours=
-    Math.floor(
-        total/3600
-    );
+    Math.floor(total/3600);
 
     const minutes=
     Math.floor(
@@ -4470,11 +3913,6 @@ async function init(){
 
     try{
 
-        /*
-            Set up entity audio first.
-        */
-        setupEntityAudio();
-
         wallTexture=
         await loadTexture(
             "./textures/wall.png"
@@ -4522,30 +3960,27 @@ async function init(){
 
         createExit();
 
+        /*
+           Initial randomized entity spawn.
+        */
+
+        entitySpawn=
+        findGoodEntitySpawn();
+
+        createEntity();
+
         console.log(
             "BACKROOMS READY"
         );
 
         console.log(
-            "MAP:",
-            mapWidth,
-            "x",
-            mapHeight
-        );
-
-        console.log(
-            "PLAYER SPAWN:",
-            playerSpawn
-        );
-
-        console.log(
-            "ENTITY INITIAL SPAWN:",
-            entitySpawn
-        );
-
-        console.log(
-            "EXIT:",
+            "Exit:",
             exitPosition
+        );
+
+        console.log(
+            "Entity spawn:",
+            entitySpawn
         );
 
     }catch(error){
@@ -4576,8 +4011,8 @@ function animate(now){
     last=now;
 
     if(
-        started &&
-        !paused &&
+        started&&
+        !paused&&
         !dead
     )
         elapsed+=dt;
@@ -4586,31 +4021,24 @@ function animate(now){
 
     updateEntity(dt);
 
-    updateEntityAudio();
+    updateAudio();
 
     updateMessage(dt);
 
     updateHUD();
 
-    /*
-        Slowly pulse exit.
-    */
     if(exitObject){
 
         const pulse=
         1+
-        Math.sin(
-            now*.004
-        )*.16;
+        Math.sin(now*.004)*.16;
 
         exitObject.light.intensity=
         2.4*pulse;
 
         exitObject.glow.material.opacity=
         .12+
-        Math.sin(
-            now*.003
-        )*.035;
+        Math.sin(now*.003)*.035;
     }
 
     renderer.render(
@@ -4619,14 +4047,10 @@ function animate(now){
     );
 }
 
-/* =========================================================
-   START
-========================================================= */
-
 init();
 
 requestAnimationFrame(
-    animate
+animate
 );
 
 </script>
